@@ -5,6 +5,10 @@
  * how a project wakes up to a suspended API key. The counter lives in Postgres
  * (not memory) because serverless instances do not share state.
  */
+// Reads provider API keys / the service-role key. The "server-only" import
+// makes importing this from a client component a BUILD error rather than a
+// silent leak of those keys into the browser bundle.
+import "server-only";
 import { supabaseAdmin } from "./supabase-server";
 
 export interface RateResult {

@@ -16,6 +16,10 @@
  *    MEMORY.md calls this memory poisoning; the fence in prompt.ts is the
  *    defence.
  */
+// Reads provider API keys / the service-role key. The "server-only" import
+// makes importing this from a client component a BUILD error rather than a
+// silent leak of those keys into the browser bundle.
+import "server-only";
 import { completeChat, parseJsonBlock } from "./providers";
 
 type Admin = { from: (t: string) => any };
