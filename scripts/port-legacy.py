@@ -531,7 +531,81 @@ DASHBOARD_ASK = """function askMoeAI() {
 
     """
 
+
+QUIZ_ANSWER_ANCHOR = """  if(right){state.correctCount++; state.streak++}else{state.streak=0}"""
+
+QUIZ_ANSWER_PATCHED = """  if(right){state.correctCount++; state.streak++}else{state.streak=0}
+  // ── PORT PATCH (scripts/port-legacy.py) ──────────────────────────────
+  // The page only counted how many were right. Which ones were WRONG is the
+  // cleanest misconception signal the product gets — a specific observed gap,
+  // not something inferred from chat — so they are collected here and sent up
+  // when the quiz ends.
+  if(!right){
+    (state.missed || (state.missed = [])).push({
+      question: EDUMOE_PLAIN(q.q).slice(0, 220),
+      correct: EDUMOE_PLAIN(q.choices && q.choices[q.correct]).slice(0, 180),
+      // `concept` is per question ("Increment", "I/O") and makes a far more
+      // useful memory key than the subject the quiz belonged to.
+      topic: q.concept || A.subject || ''
+    });
+  }"""
+
+# Question text carries markup (<code>, <pre>, &lt;). Stored notes are read
+# back into MoeAI's prompt, so they should be prose, not HTML.
+QUIZ_PLAIN_FN = """
+function EDUMOE_PLAIN(html){
+  if(!html) return '';
+  var el = document.createElement('div');
+  el.innerHTML = String(html);
+  return (el.textContent || '').replace(/\\s+/g, ' ').trim();
+}
+"""
+
+QUIZ_FINISH_ANCHOR = """  history.push({subject:A.subject,score:pct,passed:passed,date:new Date().toLocaleDateString('en-GB')+' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),correct:state.correctCount,total:A.shuffled.length,time:elapsed});
+  saveState();"""
+
+QUIZ_FINISH_PATCHED = """  history.push({subject:A.subject,score:pct,passed:passed,date:new Date().toLocaleDateString('en-GB')+' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),correct:state.correctCount,total:A.shuffled.length,time:elapsed});
+  saveState();
+  EDUMOE_QUIZ_REPORT(A, pct, elapsed);"""
+
+QUIZ_REPORT_FN = """
+// ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────────
+// Send the attempt to the account so it shows on the dashboard, and hand the
+// wrong answers to MoeAI's memory of this student so they come back later.
+// Fire and forget: a failed report must never block the results screen.
+function EDUMOE_QUIZ_REPORT(A, pct, elapsed){
+  var missed = state.missed || [];
+  state.missed = [];
+  try{
+    fetch('/api/quiz/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: A.subject || A.title || 'Quiz',
+        score: pct,
+        correct: state.correctCount,
+        total: A.shuffled.length,
+        seconds: elapsed,
+        missed: missed
+      })
+    });
+  }catch(e){}
+}
+"""
+
 SCRIPT_PATCHES = {
+    "quizzes": [
+        (
+            "collect which questions were missed, not just how many",
+            re.compile(re.escape(QUIZ_ANSWER_ANCHOR)),
+            QUIZ_ANSWER_PATCHED,
+        ),
+        (
+            "report attempts to the account and feed wrong answers to MoeAI's memory",
+            re.compile(re.escape(QUIZ_FINISH_ANCHOR)),
+            QUIZ_FINISH_PATCHED + QUIZ_REPORT_FN + QUIZ_PLAIN_FN,
+        ),
+    ],
     "ranked": [(
         "report results to the shared leaderboard and merge real students into it",
         re.compile(re.escape(RANKED_SAVE_ANCHOR)),

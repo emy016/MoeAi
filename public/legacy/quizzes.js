@@ -624,6 +624,20 @@ function answer(i){
   const opts = document.querySelectorAll('#opts .option');
   const right = i===q.correct;
   if(right){state.correctCount++; state.streak++}else{state.streak=0}
+  // ── PORT PATCH (scripts/port-legacy.py) ──────────────────────────────
+  // The page only counted how many were right. Which ones were WRONG is the
+  // cleanest misconception signal the product gets — a specific observed gap,
+  // not something inferred from chat — so they are collected here and sent up
+  // when the quiz ends.
+  if(!right){
+    (state.missed || (state.missed = [])).push({
+      question: EDUMOE_PLAIN(q.q).slice(0, 220),
+      correct: EDUMOE_PLAIN(q.choices && q.choices[q.correct]).slice(0, 180),
+      // `concept` is per question ("Increment", "I/O") and makes a far more
+      // useful memory key than the subject the quiz belonged to.
+      topic: q.concept || A.subject || ''
+    });
+  }
   if(state.streak>state.bestStreak){state.bestStreak=state.streak; saveState()}
   opts.forEach((o,idx)=>{o.disabled=true; if(idx===q.correct)o.classList.add('correct'); else if(idx===i)o.classList.add('wrong')});
   const fb = document.getElementById('fb');
@@ -656,6 +670,37 @@ function finish(){
   }
   history.push({subject:A.subject,score:pct,passed:passed,date:new Date().toLocaleDateString('en-GB')+' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),correct:state.correctCount,total:A.shuffled.length,time:elapsed});
   saveState();
+  EDUMOE_QUIZ_REPORT(A, pct, elapsed);
+// ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────────
+// Send the attempt to the account so it shows on the dashboard, and hand the
+// wrong answers to MoeAI's memory of this student so they come back later.
+// Fire and forget: a failed report must never block the results screen.
+function EDUMOE_QUIZ_REPORT(A, pct, elapsed){
+  var missed = state.missed || [];
+  state.missed = [];
+  try{
+    fetch('/api/quiz/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: A.subject || A.title || 'Quiz',
+        score: pct,
+        correct: state.correctCount,
+        total: A.shuffled.length,
+        seconds: elapsed,
+        missed: missed
+      })
+    });
+  }catch(e){}
+}
+
+function EDUMOE_PLAIN(html){
+  if(!html) return '';
+  var el = document.createElement('div');
+  el.innerHTML = String(html);
+  return (el.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
   state.finished = true;
   state.lastPct = pct;
   state.lastPassed = passed;

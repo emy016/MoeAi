@@ -360,48 +360,59 @@ create trigger on_auth_user_created
 -- ============================================================================
 create or replace function public.search_material(
   q           text,
-  scope       text default null,   -- a course code, or null for everything
+  scope       text default null,
   max_results int  default 5
 )
-returns table (
-  source  text,     -- 'curriculum' | 'library'
-  ref     text,     -- course code, or document title
-  title   text,
-  content text,
-  rank    real
-)
-language sql
-stable
-as $$
-  with query as (
-    select websearch_to_tsquery('english', q) as en,
-           websearch_to_tsquery('simple',  q) as si
-  )
-  (
-    select 'curriculum'::text,
-           c.code,
-           l.title,
+returns table (source text, ref text, title text, content text, rank real)
+language sql stable set search_path = public as $$
+  -- Students do not type the syllabus's words. They ask about "karnaugh maps"
+  -- when the lecture is called "K-Maps", or pile on context: "kirchhoff law
+  -- circuits exam tomorrow". websearch_to_tsquery ANDs every term, so one word
+  -- the curriculum never uses returns nothing at all — and MoeAI then correctly
+  -- but uselessly says it has no material.
+  --
+  -- Try the strict AND first, because when it matches it is the most precise
+  -- answer available. Only if it finds nothing, retry with the terms ORed.
+  -- ts_rank still orders by overlap, so the best match stays on top.
+  with parsed as (
+    select
+      websearch_to_tsquery('english', q) || websearch_to_tsquery('simple', q) as strict_q,
+      nullif(replace(
+        (websearch_to_tsquery('english', q) || websearch_to_tsquery('simple', q))::text,
+        '&', '|'), '')::tsquery as loose_q
+  ),
+  hits as (
+    select 'curriculum'::text as s, c.code as rf, l.title as ti,
+           left(coalesce(l.content, l.summary, ''), 1500) as co,
+           ts_rank(l.search_tsv, parsed.strict_q) as rk, true as strict
+    from public.lessons l join public.courses c on c.id = l.course_id
+    cross join parsed
+    where l.search_tsv @@ parsed.strict_q and (scope is null or c.code = scope)
+    union all
+    select 'library'::text, d.title, d.title || ' (part ' || (ch.idx + 1) || ')',
+           left(ch.content, 1500), ts_rank(ch.search_tsv, parsed.strict_q), true
+    from public.chunks ch join public.documents d on d.id = ch.document_id
+    cross join parsed
+    where ch.search_tsv @@ parsed.strict_q
+    union all
+    select 'curriculum'::text, c.code, l.title,
            left(coalesce(l.content, l.summary, ''), 1500),
-           ts_rank(l.search_tsv, query.en || query.si)
-    from public.lessons l
-    join public.courses c on c.id = l.course_id
-    cross join query
-    where l.search_tsv @@ (query.en || query.si)
+           ts_rank(l.search_tsv, parsed.loose_q), false
+    from public.lessons l join public.courses c on c.id = l.course_id
+    cross join parsed
+    where parsed.loose_q is not null and l.search_tsv @@ parsed.loose_q
       and (scope is null or c.code = scope)
+    union all
+    select 'library'::text, d.title, d.title || ' (part ' || (ch.idx + 1) || ')',
+           left(ch.content, 1500), ts_rank(ch.search_tsv, parsed.loose_q), false
+    from public.chunks ch join public.documents d on d.id = ch.document_id
+    cross join parsed
+    where parsed.loose_q is not null and ch.search_tsv @@ parsed.loose_q
   )
-  union all
-  (
-    select 'library'::text,
-           d.title,
-           d.title || ' (part ' || (ch.idx + 1) || ')',
-           left(ch.content, 1500),
-           ts_rank(ch.search_tsv, query.en || query.si)
-    from public.chunks ch
-    join public.documents d on d.id = ch.document_id
-    cross join query
-    where ch.search_tsv @@ (query.en || query.si)
-  )
-  order by rank desc
+  select h.s, h.rf, h.ti, h.co, h.rk
+  from hits h
+  where h.strict or not exists (select 1 from hits x where x.strict)
+  order by h.rk desc
   limit greatest(1, least(max_results, 12));
 $$;
 
