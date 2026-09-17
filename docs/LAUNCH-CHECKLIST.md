@@ -1,0 +1,65 @@
+# Launch checklist
+
+The three lists you sent, deduplicated into one, with what this codebase
+already does. Tick the rest before `moe-ai.vercel.app` goes public.
+
+## Done in the spine
+
+- [x] Rate limiting — `lib/ratelimit.ts`, per-user hourly cap in Postgres
+- [x] API limits — `MOEAI_MAX_OUTPUT_TOKENS`, 4000-char message cap, 30s timeout
+- [x] Spending caps — the hourly cap *is* the spend cap on free tiers
+- [x] Error handling — every route returns a plain message, logs the real one
+- [x] Loading states — streaming skeleton in the chat
+- [x] Empty states — starter prompts when a chat has no turns
+- [x] Handle failed requests — provider chain, then a 503 the student can read
+- [x] Handle API timeouts — `AbortController`, 30s
+- [x] DB indexes — every foreign key and sort path in `schema.sql`
+- [x] Error logging — `ai_logs` records provider, latency, status, error
+- [x] Secrets off the frontend — keys read only in `app/api/*`
+- [x] Force HTTPS — HSTS header in `next.config.ts`
+- [x] Meta titles + descriptions — per-page `metadata`, no duplicates
+- [x] Social preview image — `openGraph.images` wired (asset still to add)
+- [x] Canonical tags — `alternates.canonical` per page
+- [x] `llms.txt` — `public/llms.txt`
+- [x] `robots.txt` + `sitemap.xml` — `app/robots.ts`, `app/sitemap.ts`
+- [x] AI crawlers allowed — not blocked in robots
+- [x] `lang` attribute — `<html lang="en">`, `dir="auto"` on user content
+- [x] Custom 404 — `app/not-found.tsx`
+- [x] Source maps off — `productionBrowserSourceMaps: false`
+- [x] One H1 per page — audited
+- [x] Mobile friendly — bottom bar, safe-area insets, fluid type
+- [x] Privacy policy + terms + cookies — `app/legal/page.tsx`
+- [x] Cookie consent — only a strictly-necessary session cookie, so none needed
+- [x] Form validation — chat input, login email
+- [x] Spam protection — auth required, then rate limited
+
+## Before going public
+
+- [ ] **Rotate every leaked key.** A Gemini key is hardcoded in the old
+      `moeai.html`, and the old `.env` carries a Telegram bot token plus Gemini
+      and Groq keys. All of it is in shared archives. Revoke, do not just replace.
+- [ ] Favicon and app icons — `/icon-192.png`, `/icon-512.png`, `/favicon.ico`
+- [ ] `og.png` — 1200×630 social preview
+- [ ] Custom domain — a `vercel.app` URL is the single loudest giveaway
+- [ ] Structured data — `Course` / `EducationalOrganization` JSON-LD
+- [ ] Alt text — every image, once images exist
+- [ ] Colour contrast — verify the muted text against the glass backgrounds
+- [ ] Compress images — WebP/AVIF, `next/image`
+- [ ] Check page load speed — Lighthouse on a throttled mobile profile
+- [ ] Bundle size — keep it well under 1.4MB; the 3D book must be lazy-loaded
+- [ ] Cache repeat requests — identical question within a session
+- [ ] Paginate long results — courses, lessons, conversation history
+- [ ] Limit upload size — once Library Mode accepts PDFs
+- [ ] Prevent duplicate submissions — disable send while streaming (done),
+      then idempotency keys once anything is paid for
+- [ ] Uptime monitoring — a free pinger on `/` and `/api/moeai`
+- [ ] Test simultaneous users — 20 classmates at once before 230
+- [ ] Test backup restore — take a Supabase backup and actually restore it
+- [ ] Fix broken links — crawl before the pitch
+- [ ] Console errors — zero on every page
+- [ ] `viewsource` not empty — server-rendered pages already satisfy this
+
+## Not applicable
+
+- Duplicate subscriptions / duplicate payments — nothing is paid yet. Revisit
+  the moment an institutional pilot has a contract.
