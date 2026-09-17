@@ -128,7 +128,7 @@ const STARTER_FILES = [{"code": "CS101", "title": "How a computer represents a n
 const STORAGE_KEY='moeai-workspace-v2';
 const API_KEY_LS='moeai-api-key';
 const API_PROVIDER_LS='moeai-api-provider';
-const DEFAULT_API_KEY="AIzaSyBq63n5Ue1RATwJVD9zELiqBU8EEzj_m4s";
+const DEFAULT_API_KEY="";
 try{ if(!localStorage.getItem(API_KEY_LS) && DEFAULT_API_KEY) localStorage.setItem(API_KEY_LS, DEFAULT_API_KEY); }catch(e){}
 const DEFAULTS={name:'',language:'Auto \u00b7 match me',detail:'Balanced',memory:'',proactive:true,theme:'ruby'};
 function emptyWorkspace(){return{chats:[],files:[],events:[],settings:{...DEFAULTS},notebook:'',dismissed:[]};}

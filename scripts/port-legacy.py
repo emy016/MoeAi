@@ -225,6 +225,32 @@ class ToJSX(HTMLParser):
         self.out.append(f"{self.pad()}{{/*{safe}*/}}")
 
 
+# Credential shapes that must never reach public/ or the browser bundle.
+# The original moeai.html carried a live Gemini key in a `DEFAULT_API_KEY`
+# constant; copying the script verbatim published it. Keys belong in
+# app/api/moeai/route.ts, which is the only place they are ever read.
+SECRET_PATTERNS = [
+    re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),          # Google
+    re.compile(r"sk-[A-Za-z0-9]{20,}"),               # OpenAI-style
+    re.compile(r"gsk_[A-Za-z0-9]{20,}"),              # Groq
+    re.compile(r"sk-or-v1-[A-Za-z0-9]{20,}"),         # OpenRouter
+    re.compile(r"\b[0-9]{9,10}:AA[A-Za-z0-9_\-]{30,}"),  # Telegram bot token
+    re.compile(r"eyJ[A-Za-z0-9_\-]{20,}\.[A-Za-z0-9_\-]{20,}\.[A-Za-z0-9_\-]{20,}"),  # JWT
+]
+
+
+def strip_secrets(text: str, where: str):
+    """Blank out any credential literal, and say how many were found."""
+    found = 0
+    for pattern in SECRET_PATTERNS:
+        text, n = pattern.subn("", text)
+        found += n
+    if found:
+        print(f"  !! {where}: removed {found} credential literal(s) — "
+              f"rotate them, they were public")
+    return text
+
+
 def split_document(source: str):
     """Pull the page apart into head links, CSS, script and body markup."""
     css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", source, re.S))
@@ -417,7 +443,7 @@ def emit(name: str):
     js_dir = os.path.join(ROOT, "public", "legacy")
     os.makedirs(js_dir, exist_ok=True)
     with open(os.path.join(js_dir, f"{name}.js"), "w", encoding="utf-8") as fh:
-        fh.write(doc["script"].strip() + "\n")
+        fh.write(strip_secrets(doc["script"].strip(), f"public/legacy/{name}.js") + "\n")
 
     return dict(name=name, jsx=len(parser.out), css=len(doc["css"].splitlines()),
                 js=len(doc["script"].splitlines()), handlers=parser.handlers,
