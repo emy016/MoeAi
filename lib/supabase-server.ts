@@ -4,8 +4,10 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { SUPABASE_URL, SUPABASE_ANON, isConfigured, PLACEHOLDER_URL, PLACEHOLDER_KEY } from "./env";
+
+const URL = isConfigured ? SUPABASE_URL : PLACEHOLDER_URL;
+const ANON = isConfigured ? SUPABASE_ANON : PLACEHOLDER_KEY;
 
 /**
  * Bound to the caller's session cookie and subject to RLS. Use this for
@@ -32,7 +34,7 @@ export async function supabaseServer() {
  * which students must not be able to write themselves.
  */
 export function supabaseAdmin() {
-  return createClient(URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  return createClient(URL, process.env.SUPABASE_SERVICE_ROLE_KEY ?? PLACEHOLDER_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

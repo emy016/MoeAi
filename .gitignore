@@ -147,3 +147,4 @@ vite.config.ts.timestamp-*
 next-env.d.ts
 out/
 .vercel
+.env.local

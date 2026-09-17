@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// MoeAI and the library come first: the tutor is the product, EduMoe is the
+// environment around it.
 const LINKS = [
-  { href: "/courses", label: "Courses" },
+  { href: "/moeai", label: "MoeAI" },
+  { href: "/library", label: "Library" },
   { href: "/quizzes", label: "Quizzes" },
+  { href: "/courses", label: "Courses" },
   { href: "/simulators", label: "Simulators" },
   { href: "/ranked", label: "Ranked" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/moeai", label: "MoeAI" },
   { href: "/about", label: "About" },
 ];
 
@@ -61,10 +64,10 @@ export default function Nav() {
         ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
         li :global(a) {
           display: block;
-          padding: 8px 14px;
+          padding: 8px 12px;
           border-radius: 999px;
           color: var(--text-muted);
-          font-size: 0.92rem;
+          font-size: 0.88rem;
           transition: color 0.15s ease, background 0.15s ease;
         }
         li :global(a:hover) { color: var(--text); background: var(--surface); }

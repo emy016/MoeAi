@@ -3,6 +3,7 @@
 import type { Metadata, Viewport } from "next";
 import Nav from "@/components/Nav";
 import BottomBar from "@/components/BottomBar";
+import SetupNotice from "@/components/SetupNotice";
 import "./globals.css";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://moe-ai.vercel.app";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <SetupNotice />
         <Nav />
         <main className="container">{children}</main>
         <BottomBar />

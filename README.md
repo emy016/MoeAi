@@ -47,30 +47,36 @@ see `docs/ARCHITECTURE.md`.
 
 ```
 app/
-  layout.tsx            shell, metadata defaults
   page.tsx              homepage
-  moeai/page.tsx        the tutor chat (streaming)
-  login/page.tsx        magic-link sign-in
-  legal/page.tsx        terms, privacy (Law 151/2020), cookies
-  courses|quizzes|simulators|ranked|dashboard|about/
-  not-found.tsx         custom 404
-  robots.ts sitemap.ts manifest.ts
+  moeai/                the tutor chat — streaming, sidebar, source chips
+  library/              Library Mode: upload your own material
+  quizzes/              questions generated from your material
+  dashboard/            real stats, nudges, everything MoeAI remembers
+  courses/              DB-backed course list with YouTube embeds
+  login/ legal/ about/ ranked/ simulators/
+  not-found.tsx  robots.ts  sitemap.ts  manifest.ts
   api/
-    moeai/route.ts      the tutor endpoint — the ONLY place API keys are read
-    memory/route.ts     read / write / delete the student model
-    cron/route.ts       daily proactive job
-components/             Nav, BottomBar
+    moeai/              the tutor endpoint — the ONLY place API keys are read
+    library/            upload, list, delete documents
+    quiz/               generate; quiz/attempt/ to take and grade
+    conversations/      chat list and history
+    memory/             read / write / delete the student model
+    cron/               daily proactive nudges
+components/             Nav, BottomBar, SetupNotice
 lib/
+  env.ts                config, tolerant of missing vars
   supabase-browser.ts   browser client (RLS)
   supabase-server.ts    server + service-role clients (server-only)
   language.ts           Arabic + Franco detection, directive, output validation
+  chunk.ts              paragraph-aligned chunking, PDF/subtitle extraction
   prompt.ts             prompt assembly under a token budget
   providers.ts          provider chain, multi-key rotation, streaming
+  memory.ts             durable-note extraction, on a cadence
   ratelimit.ts          per-user hourly cap
 prompts/                RUNTIME, AI_POLICY, SECURITY, TUTORING, MEMORY,
                         PERSONALITY, TOOLS  — MoeAI's actual behaviour
 supabase/schema.sql     every table, every RLS policy, one file
-docs/                   ARCHITECTURE, PITCH, LAUNCH-CHECKLIST
+docs/                   ARCHITECTURE, DEPLOY, PITCH, LAUNCH-CHECKLIST
 ```
 
 `prompts/` is the most valuable directory here. It was tuned against real
@@ -111,12 +117,14 @@ GEMINI_API_KEYS=key1,key2,key3
    request body.
 3. `checkRateLimit` enforces the hourly cap in Postgres.
 4. `detectLanguage` picks the reply language from *this* message.
-5. `search_lessons()` retrieves up to four passages from the student's syllabus.
+5. `search_material()` retrieves up to five passages from the shared curriculum
+   *and* the student's own library, in one RLS-scoped query.
 6. `buildSystemPrompt` stacks the prompt files by authority under a token
    budget. The runtime contract and the language directive are never shed.
 7. `streamChat` returns the first healthy provider's stream.
-8. On close: both turns are persisted, `validateOutput` checks for language
-   drift, and the call is written to `ai_logs`.
+8. On close: both turns are persisted with their sources, `validateOutput`
+   checks for language drift, the call is written to `ai_logs`, and every
+   fourth substantial exchange is mined for durable notes about the student.
 
 ---
 
@@ -132,10 +140,26 @@ GEMINI_API_KEYS=key1,key2,key3
 
 ## Status
 
-Working: auth, streaming chat, language detection, curriculum retrieval,
-student memory, rate limiting, AI logging, legal pages, SEO surface.
+**Live database.** Supabase project `MoeAi` has the full schema, RLS on every
+table, the signup trigger, retrieval and stats functions, and eight first-year
+courses seeded. Verified against the live project: retrieval returns the right
+row for both `pointers memory address` and `المؤشر الميموري`, and signing up
+creates a profile plus a default library.
 
-Not built yet: real course content, quizzes, simulators, ranked, dashboard
-data, the rotating 3D book, proactive delivery, the Expo mobile client.
+**Working:** magic-link auth, streaming chat with conversation history and
+source attribution, per-message language detection, Library Mode ingestion
+(paste / PDF / subtitles), retrieval across curriculum and library, quiz
+generation and grading, student memory with deletion, proactive nudges, rate
+limiting, AI logging, legal pages, SEO surface.
 
-See `docs/LAUNCH-CHECKLIST.md` for what stands between here and public.
+**Untested end to end:** everything downstream of a real model call. This
+session had no provider API keys, so the chat, quiz-generation and
+memory-extraction paths are verified only as far as the provider request is
+made. Add one key and walk step 5 of `docs/DEPLOY.md`.
+
+**Not built:** shared lecture content (waiting on the YouTube migration),
+simulators, ranked matchmaking, the rotating 3D book, push delivery for
+nudges, the Expo mobile client.
+
+See `docs/LAUNCH-CHECKLIST.md` for what stands between here and public, and
+`docs/DEPLOY.md` for the environment variables only you can supply.

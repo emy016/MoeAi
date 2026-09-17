@@ -20,6 +20,7 @@ import { detectLanguage, validateOutput, type Target } from "@/lib/language";
 import { buildSystemPrompt } from "@/lib/prompt";
 import { streamChat, type ChatMessage } from "@/lib/providers";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { extractMemory, shouldExtract } from "@/lib/memory";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -94,16 +95,21 @@ export async function POST(req: NextRequest) {
   const previous = history.findLast((m) => m.role === "assistant")?.language as Target | null;
   const language = detectLanguage(message, previous ?? null);
 
-  // 4. Curriculum retrieval. Failure here is not fatal — the prompt says so.
-  let retrieved: { courseCode: string; title: string; content: string }[] = [];
+  // 4. Retrieval across shared curriculum AND the caller's own library.
+  //    RLS inside search_material decides which chunks are visible, so one
+  //    student can never retrieve another's uploaded material.
+  //    Failure here is not fatal — the prompt tells MoeAI to say it has no
+  //    material rather than invent a syllabus.
+  let retrieved: { source: string; ref: string; title: string; content: string }[] = [];
   try {
-    const { data } = await sb.rpc("search_lessons", {
+    const { data } = await sb.rpc("search_material", {
       q: message,
-      course_code: body.courseCode ?? null,
-      max_results: 4,
+      scope: body.courseCode ?? null,
+      max_results: 5,
     });
     retrieved = (data ?? []).map((r: any) => ({
-      courseCode: r.course_code,
+      source: r.source,
+      ref: r.ref,
       title: r.title,
       content: r.content,
     }));
@@ -151,7 +157,14 @@ export async function POST(req: NextRequest) {
           role: "assistant",
           content: full,
           language: language.target,
+          sources: retrieved.map((r) => ({ source: r.source, ref: r.ref, title: r.title })),
         });
+
+        // Mine the exchange for durable notes, on a cadence rather than every
+        // turn — each extraction is a second model call.
+        if (shouldExtract(history.length, message)) {
+          await extractMemory(admin, user.id, message, full);
+        }
         await admin.from("conversations")
           .update({ updated_at: new Date().toISOString() })
           .eq("id", convId);
@@ -175,6 +188,9 @@ export async function POST(req: NextRequest) {
         "cache-control": "no-store",
         "x-conversation-id": convId,
         "x-provider": result.provider,
+        "x-sources": encodeURIComponent(
+          JSON.stringify(retrieved.map((r) => ({ source: r.source, ref: r.ref, title: r.title }))),
+        ),
         "x-language": language.target,
         "x-ratelimit-remaining": String(rate.remaining),
       },
