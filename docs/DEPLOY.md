@@ -1,6 +1,37 @@
 # Deploying
 
-The database is already live. What is left is the part only you can do: the
+## The live URL
+
+The project is **not** at `moe-ai.vercel.app`. That subdomain is taken globally,
+and the project lives under the Vercel team `edu-moe-ai`, so Vercel assigned:
+
+- **https://moe-ai-sable.vercel.app** ← the production URL
+- https://moe-ai-edu-moe-ai.vercel.app
+- https://moe-ai-git-main-edu-moe-ai.vercel.app (tracks `main`)
+
+Project `moe-ai` (`prj_CCm1E8d5BJWpH8ZEBoKbbkoGCvIv`), team `edu-moe-ai`,
+linked to `emy016/MoeAi`, production branch `main`.
+
+If you want a nicer address, add a custom domain in Project Settings → Domains,
+or rename the project. Do not keep chasing `moe-ai.vercel.app`; it is not yours.
+
+## Deployment protection — the reason it looked broken
+
+Vercel team projects enable **Vercel Authentication** by default, for every
+`.vercel.app` URL. Builds succeed, the deployment reads READY, and every
+visitor who is not signed into your Vercel account gets a login wall instead of
+the site.
+
+This has been turned off, so the URLs above are publicly reachable. If you ever
+need it back: Project Settings → Deployment Protection → Vercel Authentication.
+
+Check **Framework Preset** is `Next.js` while you are in there — the project
+record shows it as unset. `vercel.json` declares it at build time, so builds
+work either way, but the setting should match.
+
+## What is left
+
+The database is already live. What remains is the part only you can do: the
 secrets.
 
 ## 1. Supabase — done
