@@ -1,0 +1,121 @@
+/* EduMoe design tokens. One source of truth for colour, glass, and spacing. */
+:root {
+  --bg: #07070c;
+  --bg-2: #0e0e17;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.10);
+  --text: #f2f2f7;
+  --text-muted: rgba(242, 242, 247, 0.62);
+
+  /* The logo gradient: cyan -> magenta -> amber. */
+  --accent-1: #38bdf8;
+  --accent-2: #e5379a;
+  --accent-3: #fbbf24;
+  --accent: var(--accent-2);
+  --gradient: linear-gradient(110deg, var(--accent-1), var(--accent-2), var(--accent-3));
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --nav-h: 60px;
+  --bar-h: 64px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(900px 500px at 12% -8%, rgba(56, 189, 248, 0.10), transparent 60%),
+    radial-gradient(800px 500px at 88% 4%, rgba(229, 55, 154, 0.10), transparent 60%);
+  background-attachment: fixed;
+}
+
+a { color: inherit; text-decoration: none; }
+img, svg, video { max-width: 100%; height: auto; display: block; }
+button, input, textarea { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Arabic and Franco sit side by side. Isolate so mixed runs render correctly. */
+[dir="rtl"], .rtl { direction: rtl; text-align: right; }
+.bidi { unicode-bidi: isolate; }
+
+.container {
+  width: min(1100px, 100% - 32px);
+  margin-inline: auto;
+  padding-block: 32px;
+  padding-bottom: calc(var(--bar-h) + 32px);
+}
+@media (min-width: 768px) {
+  .container { padding-bottom: 32px; }
+}
+
+/* Liquid glass surface. */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn:hover { background: rgba(255, 255, 255, 0.12); }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--gradient); border-color: transparent; color: #0b0b12; font-weight: 600; }
+
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.3rem, 3vw, 1.9rem); margin: 0 0 10px; letter-spacing: -0.01em; }
+p  { color: var(--text-muted); line-height: 1.65; margin: 0 0 14px; }
+
+.gradient-text {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.muted { color: var(--text-muted); }
+.stack { display: grid; gap: 16px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

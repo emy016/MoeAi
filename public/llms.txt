@@ -1,0 +1,26 @@
+# EduMoe
+
+> A free educational platform for Egyptian university students, built around
+> MoeAI: a curriculum-aware AI tutor that answers in Egyptian Arabic,
+> Franco-Arabic, or English, grounded in the student's actual syllabus.
+
+EduMoe began as a Telegram channel (t.me/CS_Epic_Save) serving roughly 230
+first-year Computer Science students at Future University in Egypt — about half
+that cohort. It is now a web platform with a mobile client.
+
+MoeAI is the tutoring layer. It differs from a general assistant in three ways:
+it retrieves the student's own lecture material before answering, it detects and
+mirrors the student's language per message rather than defaulting to English,
+and it keeps a per-student model of misconceptions and progress across sessions.
+
+## Pages
+
+- /: overview and entry point
+- /moeai: the tutor chat
+- /courses: first-year Computer Science lectures and notes
+- /quizzes: practice questions generated from lecture material
+- /simulators: interactive C++ and logic-design simulators
+- /ranked: live competitive quiz matches
+- /dashboard: personal progress and what MoeAI suggests revising
+- /about: team and background
+- /legal: terms, privacy (Egypt Law 151/2020), and cookies
