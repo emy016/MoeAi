@@ -4,10 +4,11 @@
 // Kept in its own module because anything importing `next/headers` cannot be
 // bundled for the browser.
 import { createBrowserClient } from "@supabase/ssr";
+import { SUPABASE_URL, SUPABASE_ANON, isConfigured, PLACEHOLDER_URL, PLACEHOLDER_KEY } from "./env";
 
 export function supabaseBrowser() {
   return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    isConfigured ? SUPABASE_URL : PLACEHOLDER_URL,
+    isConfigured ? SUPABASE_ANON : PLACEHOLDER_KEY,
   );
 }
