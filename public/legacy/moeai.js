@@ -214,21 +214,54 @@ function demoReply(txt,ctx){
   return `Demo reply for “${txt.slice(0,120)}”\n\nI'm in demo mode. Add your Gemini/Groq key in Settings for streaming AI. Try Library sources or Tools (calculator/graph/code).`;
 }
 async function callProvider(msgs,ctx){
-  const key=(localStorage.getItem(API_KEY_LS)||DEFAULT_API_KEY||'').trim(); if(!key) return null;
-  const pref=localStorage.getItem(API_PROVIDER_LS)||'auto';
-  const sys=`You are MoeAI. Student:${data.settings.name||'student'} Mode:${ctx.mode} Memory:${data.settings.memory.slice(0,600)} Sources:${JSON.stringify(ctx.sources).slice(0,3000)}`;
-  const payload={model:'',messages:[{role:'system',content:sys},...msgs],stream:true};
-  const list=[];
-  if(pref==='gemini'||pref==='auto')list.push({url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',model:'gemini-2.5-flash'});
-  if(pref==='groq'||pref==='auto')list.push({url:'https://api.groq.com/openai/v1/chat/completions',model:'openai/gpt-oss-120b'});
-  for(const p of list){
-    try{
-      const r=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({...payload,model:p.model}),signal:aborter?.signal});
-      if(r.ok&&r.body)return r;
-    }catch{}
+  // ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────────
+  // The original called Gemini and Groq straight from the browser using a key
+  // held in localStorage, with one hardcoded as a fallback. Keys never reach
+  // the browser now. This posts to /api/moeai, which identifies the student
+  // from their session, enforces their hourly cap, retrieves their own
+  // curriculum and library, assembles the real MoeAI prompt, and streams the
+  // answer back as plain text.
+  //
+  // That plain text is re-wrapped into the line-delimited JSON this UI already
+  // parses ({"delta":"..."}), so nothing downstream of here had to change.
+  let res;
+  try{
+    res=await fetch('/api/moeai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:(msgs[msgs.length-1]&&msgs[msgs.length-1].content)||'',
+        conversationId:MOEAI_SERVER_CHATS[active]||null
+      }),
+      signal:aborter?aborter.signal:undefined
+    });
+  }catch(e){ return null; }
+
+  if(!res.ok||!res.body){
+    let msg='MoeAI is unavailable right now.';
+    try{ const j=await res.json(); if(j&&j.error) msg=j.error; }catch(e){}
+    toast(msg);
+    return null;
   }
-  return null;
+
+  const cid=res.headers.get('x-conversation-id');
+  if(cid) MOEAI_SERVER_CHATS[active]=cid;
+
+  const upstream=res.body.getReader();
+  const enc=new TextEncoder(), dec=new TextDecoder();
+  return { body: new ReadableStream({
+    async pull(controller){
+      const {done,value}=await upstream.read();
+      if(done){ controller.enqueue(enc.encode('data: [DONE]\n')); controller.close(); return; }
+      const text=dec.decode(value,{stream:true});
+      if(text) controller.enqueue(enc.encode(JSON.stringify({delta:text})+'\n'));
+    }
+  })};
 }
+
+// Maps this UI's client-side chat ids to the conversation rows the server
+// creates, so reopening a chat continues the same server-side thread.
+const MOEAI_SERVER_CHATS={};
 async function send(text,isRetry=false){
   if(sending||!text||!text.trim())return;
   if(text.trim().length>6000){toast('Keep under 6000');return;}

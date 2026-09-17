@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "check:language": "node --experimental-strip-types scripts/check-language.ts",
     "port:legacy": "python3 scripts/port-legacy.py",
-    "check:port": "python3 scripts/check-port-fidelity.py http://localhost:3000"
+    "check:port": "python3 scripts/check-port-fidelity.py http://localhost:3000",
+    "check:legacy": "for f in public/legacy/*.js; do node --check \"$f\" || exit 1; done && echo \"all legacy scripts parse\"",
+    "verify": "npm run check:language && npm run check:legacy && npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

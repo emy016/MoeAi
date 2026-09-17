@@ -273,6 +273,91 @@ def split_document(source: str):
     }
 
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Behaviour patches
+#
+# The port keeps every page's script byte-identical EXCEPT where it did
+# something the new architecture must not do. Each patch is anchored on exact
+# source text, so if the original ever changes the converter fails loudly
+# instead of silently skipping.
+# ─────────────────────────────────────────────────────────────────────────────
+
+MOEAI_CALL_PROVIDER = """async function callProvider(msgs,ctx){
+  // ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────────
+  // The original called Gemini and Groq straight from the browser using a key
+  // held in localStorage, with one hardcoded as a fallback. Keys never reach
+  // the browser now. This posts to /api/moeai, which identifies the student
+  // from their session, enforces their hourly cap, retrieves their own
+  // curriculum and library, assembles the real MoeAI prompt, and streams the
+  // answer back as plain text.
+  //
+  // That plain text is re-wrapped into the line-delimited JSON this UI already
+  // parses ({"delta":"..."}), so nothing downstream of here had to change.
+  let res;
+  try{
+    res=await fetch('/api/moeai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:(msgs[msgs.length-1]&&msgs[msgs.length-1].content)||'',
+        conversationId:MOEAI_SERVER_CHATS[active]||null
+      }),
+      signal:aborter?aborter.signal:undefined
+    });
+  }catch(e){ return null; }
+
+  if(!res.ok||!res.body){
+    let msg='MoeAI is unavailable right now.';
+    try{ const j=await res.json(); if(j&&j.error) msg=j.error; }catch(e){}
+    toast(msg);
+    return null;
+  }
+
+  const cid=res.headers.get('x-conversation-id');
+  if(cid) MOEAI_SERVER_CHATS[active]=cid;
+
+  const upstream=res.body.getReader();
+  const enc=new TextEncoder(), dec=new TextDecoder();
+  return { body: new ReadableStream({
+    async pull(controller){
+      const {done,value}=await upstream.read();
+      if(done){ controller.enqueue(enc.encode('data: [DONE]\\n')); controller.close(); return; }
+      const text=dec.decode(value,{stream:true});
+      if(text) controller.enqueue(enc.encode(JSON.stringify({delta:text})+'\\n'));
+    }
+  })};
+}
+
+// Maps this UI's client-side chat ids to the conversation rows the server
+// creates, so reopening a chat continues the same server-side thread.
+const MOEAI_SERVER_CHATS={};
+"""
+
+SCRIPT_PATCHES = {
+    "moeai": [(
+        "route the chat through /api/moeai instead of calling providers from the browser",
+        re.compile(r"async function callProvider\(msgs,ctx\)\{.*?\n\}\n(?=async function send)", re.S),
+        MOEAI_CALL_PROVIDER,
+    )],
+}
+
+
+def apply_patches(name: str, script: str) -> str:
+    for description, pattern, replacement in SCRIPT_PATCHES.get(name, []):
+        # A plain string replacement would have its backslash escapes processed
+        # by re, turning the JavaScript "\\n" inside it into a real newline and
+        # breaking the string literal. A function replacement is inserted as-is.
+        script, n = pattern.subn(lambda _m: replacement, script, count=1)
+        if n == 0:
+            raise SystemExit(
+                f"port-legacy: patch target not found in {name}.js "
+                f"({description}). The original changed; update the anchor."
+            )
+        print(f"  patched {name}.js: {description}")
+    return script
+
+
 def convert(name: str):
     src_path = os.path.join(LEGACY, f"{name}.html")
     with open(src_path, encoding="utf-8") as fh:
@@ -434,16 +519,21 @@ def emit(name: str):
             scripts=json.dumps(js, indent=2),
         ))
 
+    # The homepage keeps the original document's exact <title>; the layout's
+    # "%s · EduMoe" template would otherwise append the brand to it twice.
+    title = (json.dumps(info["title"]) if info["route"]
+             else "{ absolute: " + json.dumps(info["title"]) + " }")
+
     with open(os.path.join(route_dir, "page.tsx"), "w", encoding="utf-8") as fh:
         fh.write(PAGE_TSX.format(
             component=info["component"], route=info["route"],
-            title=json.dumps(info["title"]), desc=json.dumps(info["desc"]),
+            title=title, desc=json.dumps(info["desc"]),
         ))
 
     js_dir = os.path.join(ROOT, "public", "legacy")
     os.makedirs(js_dir, exist_ok=True)
     with open(os.path.join(js_dir, f"{name}.js"), "w", encoding="utf-8") as fh:
-        fh.write(strip_secrets(doc["script"].strip(), f"public/legacy/{name}.js") + "\n")
+        fh.write(apply_patches(name, strip_secrets(doc["script"].strip(), f"public/legacy/{name}.js")) + "\n")
 
     return dict(name=name, jsx=len(parser.out), css=len(doc["css"].splitlines()),
                 js=len(doc["script"].splitlines()), handlers=parser.handlers,
