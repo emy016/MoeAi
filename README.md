@@ -1,86 +1,60 @@
-# MoeAi
+# EduMoe · MoeAI
 
-**EduMoe** is a free educational platform for Egyptian university students.
+**EduMoe** is a free learning platform for Egyptian university students.
 **MoeAI** is its tutor: curriculum-aware, multilingual, and persistent.
 
-One repository. One deployment. One database. MoeAI is a surface inside EduMoe,
-not a second product.
-
-- Live: `moe-ai.vercel.app`
+- Live: https://moe-ai-sable.vercel.app
 - Users today: ~230 first-year CS students at FUE, via `t.me/CS_Epic_Save`
 
 ---
 
-## Why this is not a ChatGPT wrapper
+## How it is put together
 
-Three layers, in the order they matter:
+Two halves, deliberately built differently, because they are different things.
 
-| Layer | What it is | Where it lives |
-|---|---|---|
-| **Student model** | Misconceptions, preferences, goals, progress | `student_memory`, `progress` |
-| **Curriculum** | The student's actual lectures, retrieved per question | `lessons` + `search_lessons()` |
-| **Language** | Per-message Arabic / Franco / English detection, enforced | `lib/language.ts` |
+**The EduMoe pages are plain HTML.** `public/*.html` — no React, no hydration,
+no framework on the page at all. They load instantly and the liquid-glass blur
+stays smooth because nothing is fighting the compositor for the main thread.
+Each page carries its own `<style>` and `<script>`. That is the point; do not
+"modernise" them into components.
 
-The model underneath is replaceable. These three are the product.
+**MoeAI is a React app.** `/moeai` is a real workspace: conversations, a
+library you can drop PDFs into, a study planner, a tool panel, modes, and
+per-device settings. It needs state, so it gets a framework.
 
----
-
-## Stack
-
-| Concern | Choice | Why not the alternative |
-|---|---|---|
-| Framework | Next.js 15 App Router | One repo for pages and API. No separate server to run. |
-| Language | TypeScript, `strict: true` | The build fails before students do. |
-| Styling | Plain CSS + `styled-jsx` | Tailwind would mean rewriting the existing glass design. |
-| Database / Auth / Storage | Supabase | Postgres with RLS. No backend to operate. |
-| Retrieval | Postgres full-text search | pgvector only once FTS demonstrably fails. |
-| Models | Gemini → Groq → OpenRouter, direct `fetch` | No AI SDK. Three fetch calls, two share a shape. |
-| Hosting | Vercel | Static, serverless, and cron in one place. |
-
-Explicitly **not** installed: Tailwind, shadcn, Zod, Prisma, Drizzle, React Query,
-LangChain, any AI SDK, any vector database. Each was considered and rejected;
-see `docs/ARCHITECTURE.md`.
+Next.js hosts both. Clean URLs for the HTML are declared in `next.config.ts`
+rather than left to Vercel's `cleanUrls`, so `npm run start` behaves exactly
+like production and `/` resolves without an `app/page.tsx`.
 
 ---
 
-## Structure
+## Where things live
 
 ```
-app/
-  page.tsx              homepage
-  moeai/                the tutor chat — streaming, sidebar, source chips
-  library/              Library Mode: upload your own material
-  quizzes/              questions generated from your material
-  dashboard/            real stats, nudges, everything MoeAI remembers
-  courses/              DB-backed course list with YouTube embeds
-  login/ legal/ about/ ranked/ simulators/
-  not-found.tsx  robots.ts  sitemap.ts  manifest.ts
-  api/
-    moeai/              the tutor endpoint — the ONLY place API keys are read
-    library/            upload, list, delete documents
-    quiz/               generate; quiz/attempt/ to take and grade
-    conversations/      chat list and history
-    memory/             read / write / delete the student model
-    cron/               daily proactive nudges
-components/             Nav, BottomBar, SetupNotice
+public/*.html            The EduMoe pages. The design. Edit these directly.
+public/vendor/           pdf.js worker, for library imports
+app/moeai/               The MoeAI workspace route
+components/moeai/        Its UI: workspace, library, planner, tools, markdown
+lib/moeai/
+  personality.md         MoeAI's voice — 36 sections, tuned on real students
+  brain.ts               Prompt assembly, provider fallback, streaming
+  context.ts             Modes and the user-controlled context block
+  workspace.ts           Client-side workspace types and storage
 lib/
-  env.ts                config, tolerant of missing vars
-  supabase-browser.ts   browser client (RLS)
-  supabase-server.ts    server + service-role clients (server-only)
-  language.ts           Arabic + Franco detection, directive, output validation
-  chunk.ts              paragraph-aligned chunking, PDF/subtitle extraction
-  prompt.ts             prompt assembly under a token budget
-  providers.ts          provider chain, multi-key rotation, streaming
-  memory.ts             durable-note extraction, on a cadence
-  ratelimit.ts          per-user hourly cap
-prompts/                RUNTIME, AI_POLICY, SECURITY, TUTORING, MEMORY,
-                        PERSONALITY, TOOLS  — MoeAI's actual behaviour
-supabase/schema.sql     every table, every RLS policy, one file
-docs/                   ARCHITECTURE, DEPLOY, PITCH, LAUNCH-CHECKLIST
+  language.ts            Arabic / Franco / English detection, per message
+  chunk.ts               Paragraph-aligned chunking, PDF + subtitle extraction
+  memory.ts              Durable notes about a student, on a cadence
+  providers.ts           Non-streaming provider chain, key rotation
+  ratelimit.ts           Per-user hourly cap, in Postgres
+  supabase-browser.ts    Browser client (RLS)
+  supabase-server.ts     Server + service-role clients (server-only)
+prompts/                 Behaviour specs. SECURITY.md is loaded at runtime.
+app/api/                 moeai, library, quiz, memory, state, ranked,
+                         dashboard, auth, conversations, cron
+supabase/schema.sql      Every table, every RLS policy, one file
+scripts/                 relink-nav, extract-lessons, check-language
+docs/                    ARCHITECTURE, DEPLOY, PITCH, LAUNCH-CHECKLIST
 ```
-
-`prompts/` is the most valuable directory here. It was tuned against real
-students. Edit it carefully.
 
 ---
 
@@ -92,74 +66,55 @@ cp .env.example .env.local     # fill in the values
 npm run dev
 ```
 
-Two checks worth running before you push:
+Checks worth running before you push:
 
 ```bash
-npm run build            # strict TypeScript; catches most AI-generated slips
+npm run build            # strict TypeScript
 npm run check:language   # the language detector's regression cases
-```
-
-Then paste `supabase/schema.sql` into the Supabase SQL editor and run it once.
-
-Each provider variable takes a **comma-separated list** of keys. The runtime
-rotates through them and benches any key that returns 429 for a minute:
-
-```
-GEMINI_API_KEYS=key1,key2,key3
 ```
 
 ---
 
 ## How a question is answered
 
-1. `proxy.ts` refreshes the session cookie on every request.
-2. `POST /api/moeai` identifies the student from that cookie — never from the
-   request body.
-3. `checkRateLimit` enforces the hourly cap in Postgres.
-4. `detectLanguage` picks the reply language from *this* message.
-5. `search_material()` retrieves up to five passages from the shared curriculum
-   *and* the student's own library, in one RLS-scoped query.
-6. `buildSystemPrompt` stacks the prompt files by authority under a token
-   budget. The runtime contract and the language directive are never shed.
-7. `streamChat` returns the first healthy provider's stream.
-8. On close: both turns are persisted with their sources, `validateOutput`
-   checks for language drift, the call is written to `ai_logs`, and every
-   fourth substantial exchange is mined for durable notes about the student.
+1. `POST /api/moeai` — same-origin only, since this endpoint spends money.
+2. Signing in is **optional**. The workspace is designed to work on one device
+   with nothing stored server-side. Signing in adds what needs an account.
+3. Limits: an hourly counter in Postgres when signed in, a per-IP bucket when
+   not.
+4. `search_material()` retrieves from the shared curriculum *and* the student's
+   own library, in one RLS-scoped query. Their workspace uploads already
+   arrived in the request.
+5. `student_memory` — what past work showed, above all the misconceptions
+   quizzes recorded.
+6. `detectLanguage` picks the reply language from *this* message.
+7. `streamReply` walks the providers, never concatenating two of their answers,
+   and streams NDJSON the workspace parses.
+8. On close: the call is logged, and every fourth substantial exchange is mined
+   for durable notes.
 
 ---
 
 ## Security posture
 
 - RLS on every table. A student cannot read another student's anything.
-- Service-role key is read in API routes only, never shipped to the browser.
+- Provider keys are read only inside `app/api/`, never shipped to the browser.
 - Retrieved material and stored memory are fenced in the prompt as *data*.
-- No secret is ever printed, even when one appears in context.
-- Per-user hourly cap is the spend cap.
+- `prompts/SECURITY.md` is loaded into the system prompt at runtime.
+- Same-origin check, per-user and per-IP limits.
 
 ---
 
 ## Status
 
-**Live database.** Supabase project `MoeAi` has the full schema, RLS on every
-table, the signup trigger, retrieval and stats functions, and eight first-year
-courses seeded. Verified against the live project: retrieval returns the right
-row for both `pointers memory address` and `المؤشر الميموري`, and signing up
-creates a profile plus a default library.
+**Working:** the HTML platform, the MoeAI workspace, streaming answers with
+curriculum grounding, Library Mode, quizzes that feed misconceptions back,
+cross-device state, a shared ranked ladder, auth, legal pages, SEO surface.
 
-**Working:** magic-link auth, streaming chat with conversation history and
-source attribution, per-message language detection, Library Mode ingestion
-(paste / PDF / subtitles), retrieval across curriculum and library, quiz
-generation and grading, student memory with deletion, proactive nudges, rate
-limiting, AI logging, legal pages, SEO surface.
+**Untested end to end:** everything downstream of a live model call and every
+signed-in HTTP path — the development sandbox blocks outbound calls to both the
+AI providers and `*.supabase.co`. Walk step 5 of `docs/DEPLOY.md` after
+deploying.
 
-**Untested end to end:** everything downstream of a real model call. This
-session had no provider API keys, so the chat, quiz-generation and
-memory-extraction paths are verified only as far as the provider request is
-made. Add one key and walk step 5 of `docs/DEPLOY.md`.
-
-**Not built:** shared lecture content (waiting on the YouTube migration),
-simulators, ranked matchmaking, the rotating 3D book, push delivery for
-nudges, the Expo mobile client.
-
-See `docs/LAUNCH-CHECKLIST.md` for what stands between here and public, and
-`docs/DEPLOY.md` for the environment variables only you can supply.
+**Not built:** lecture videos (the courses page has no player yet), simulators,
+the rotating 3D book, the mobile client.

@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EDUMOE · Ultimate Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* =============================================================
+       EDUMOE V2 – ULTIMATE ADMIN PANEL (DEMO MODE)
+       Full glass UI, theme system, responsive, no login
+       ============================================================= */
+
+    /* ─── THEMES ──────────────────────────────────────────────────── */
+    :root {
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a2a;
+      --accent: #e11d48;
+      --accent2: #f43f5e;
+      --accent3: #fb7185;
+      --accent-glow: rgba(225, 29, 72, 0.35);
+      --glow: rgba(225, 29, 72, 0.28);
+      --glow2: rgba(225, 29, 72, 0.12);
+      --glass-border: rgba(225, 29, 72, 0.18);
+      --glass-border2: rgba(225, 29, 72, 0.32);
+      --txt1: #fff0f5;
+      --txt2: rgba(255, 192, 208, 0.75);
+      --txt3: rgba(192, 128, 144, 0.50);
+      --tint: rgba(225, 29, 72, 0.05);
+      --tint2: rgba(225, 29, 72, 0.10);
+      --tint3: rgba(225, 29, 72, 0.18);
+      --c-glass: #c8a0a8;
+      --c-light: #ffe0e8;
+      --c-dark: #300010;
+      --reflex-l: 0.45;
+      --reflex-d: 1.7;
+      --sat: 190%;
+      --glass-blur: 14px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      --ok: #4fff8f;
+      --okbg: rgba(79, 255, 143, 0.12);
+      --okbd: rgba(79, 255, 143, 0.35);
+      --warn: #ffb347;
+      --warnbg: rgba(255, 179, 71, 0.10);
+      --no: #ff6b6b;
+      --nobg: rgba(255, 107, 107, 0.10);
+      --nobd: rgba(255, 107, 107, 0.35);
+    }
+
+    [data-theme="lava"] { --bg1: #0c0c0e; --bg2: #161618; --bg3: #202024; --accent: #ff5a1f; --accent2: #ff8c42; --accent3: #ffb347; --accent-glow: rgba(255,90,31,0.35); --glow: rgba(255,90,31,0.28); --glow2: rgba(255,90,31,0.12); --glass-border: rgba(255,90,31,0.18); --glass-border2: rgba(255,90,31,0.32); --txt1: #fff; --txt2: rgba(255,255,255,0.70); --txt3: rgba(255,255,255,0.40); --tint: rgba(255,255,255,0.05); --tint2: rgba(255,255,255,0.10); --tint3: rgba(255,255,255,0.18); --c-glass: #c8c8c9; --c-light: #fff; --c-dark: #000; --reflex-l:0.35; --reflex-d:1.8; --sat:180%; }
+    [data-theme="space"] { --bg1: #000; --bg2: #0a0a14; --bg3: #141428; --accent: #7c3aed; --accent2: #a855f7; --accent3: #c084fc; --accent-glow: rgba(124,58,237,0.35); --glow: rgba(124,58,237,0.28); --glow2: rgba(124,58,237,0.12); --glass-border: rgba(124,58,237,0.18); --glass-border2: rgba(124,58,237,0.32); --txt1: #f0e8ff; --txt2: #c8b0ff; --txt3: #a080e0; --tint: rgba(124,58,237,0.05); --tint2: rgba(124,58,237,0.10); --tint3: rgba(124,58,237,0.18); --c-glass: #b0a0d0; --c-light: #e8d8ff; --c-dark: #1a0030; --reflex-l:0.50; --reflex-d:1.6; --sat:200%; }
+    [data-theme="oxford"] { --bg1: #000510; --bg2: #020a18; --bg3: #081530; --accent: #00d4ff; --accent2: #00f0ff; --accent3: #80f8ff; --accent-glow: rgba(0,212,255,0.35); --glow: rgba(0,212,255,0.28); --glow2: rgba(0,212,255,0.12); --glass-border: rgba(0,212,255,0.18); --glass-border2: rgba(0,212,255,0.32); --txt1: #e0fcff; --txt2: #80d8f0; --txt3: #40b0d0; --tint: rgba(0,212,255,0.05); --tint2: rgba(0,212,255,0.10); --tint3: rgba(0,212,255,0.18); --c-glass: #80e8f8; --c-light: #e0fcff; --c-dark: #000810; --reflex-l:0.55; --reflex-d:1.5; --sat:200%; }
+    [data-theme="gray"] { --bg1: #0f0f12; --bg2: #18181b; --bg3: #22222a; --accent: #6b7280; --accent2: #9ca3af; --accent3: #d1d5db; --accent-glow: rgba(107,114,128,0.35); --glow: rgba(107,114,128,0.28); --glow2: rgba(107,114,128,0.12); --glass-border: rgba(107,114,128,0.18); --glass-border2: rgba(107,114,128,0.32); --txt1: #f3f4f6; --txt2: #9ca3af; --txt3: #6b7280; --tint: rgba(107,114,128,0.05); --tint2: rgba(107,114,128,0.10); --tint3: rgba(107,114,128,0.18); --c-glass: #c8c8c9; --c-light: #fff; --c-dark: #000; --reflex-l:0.35; --reflex-d:1.8; --sat:120%; }
+    [data-theme="light"] { --bg1: #fff; --bg2: #f4f4f6; --bg3: #e8e8ec; --accent: #111; --accent2: #333; --accent3: #555; --accent-glow: rgba(0,0,0,0.12); --glow: rgba(0,0,0,0.12); --glow2: rgba(0,0,0,0.06); --glass-border: rgba(0,0,0,0.10); --glass-border2: rgba(0,0,0,0.20); --txt1: #1a1a1a; --txt2: #555; --txt3: #888; --tint: rgba(0,0,0,0.03); --tint2: rgba(0,0,0,0.06); --tint3: rgba(0,0,0,0.12); --c-glass: #000; --c-light: #fff; --c-dark: #000; --reflex-l:0.06; --reflex-d:0.6; --sat:100%; }
+    [data-theme="custom"] { --bg1: #0a0a0f; --bg2: #111118; --bg3: #1a1a2a; --accent: var(--custom-accent,#e11d48); --accent2: var(--custom-accent2,#f43f5e); --accent3: var(--custom-accent3,#fb7185); --accent-glow: var(--custom-glow,rgba(225,29,72,0.35)); --glow: var(--custom-glow,rgba(225,29,72,0.28)); --glow2: var(--custom-glow2,rgba(225,29,72,0.12)); --glass-border: var(--custom-border,rgba(225,29,72,0.18)); --glass-border2: var(--custom-border2,rgba(225,29,72,0.32)); --txt1:#fff0f5; --txt2:#ffc0d0; --txt3:#c08090; --tint: var(--custom-tint,rgba(225,29,72,0.05)); --tint2: var(--custom-tint2,rgba(225,29,72,0.10)); --tint3: var(--custom-tint3,rgba(225,29,72,0.18)); --c-glass:#c8a0a8; --c-light:#ffe0e8; --c-dark:#300010; --reflex-l:0.45; --reflex-d:1.7; --sat:190%; }
+
+    [data-theme="terminal"] {
+      --bg1: #050a05; --bg2: #071007; --bg3: #0a180a; --accent: #4fff8f; --accent2: #6effa0; --accent3: #9dffc0;
+      --accent-glow: rgba(79,255,143,0.35); --glow: rgba(79,255,143,0.28); --glow2: rgba(79,255,143,0.10);
+      --glass-border: rgba(79,255,143,0.18); --glass-border2: rgba(79,255,143,0.32);
+      --txt1: #b8ffcf; --txt2: #4fff8f; --txt3: #2f8f57;
+      --tint: rgba(79,255,143,0.04); --tint2: rgba(79,255,143,0.08); --tint3: rgba(79,255,143,0.14);
+      --c-glass: #4fff8f; --c-light: #b8ffcf; --c-dark: #001a08; --reflex-l:0.20; --reflex-d:1.2; --sat:130%; --glass-blur:8px; --shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    [data-theme="terminal"] body,
+    [data-theme="terminal"] .brand,
+    [data-theme="terminal"] .admin-nav-item {
+      font-family: 'Fira Code', monospace !important;
+      letter-spacing: 0 !important;
+    }
+    [data-theme="terminal"] .brand-mark { background: var(--accent) !important; color: #000 !important; }
+
+    .crt-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 3px);
+      mix-blend-mode: multiply;
+    }
+    [data-theme="terminal"] .crt-overlay { display: block; }
+    [data-theme="terminal"]:not(.no-crt) body { animation: crt-flicker 4s infinite; }
+    @keyframes crt-flicker { 0%,95%,100%{opacity:1} 96%{opacity:0.94} 98%{opacity:0.98} }
+    html.no-crt .crt-overlay { display: none !important; }
+    html.no-crt [data-theme="terminal"] body { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) { [data-theme="terminal"] body { animation: none !important; } .crt-overlay { background: none; } }
+
+    /* ─── BASE ───────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg1);
+      color: var(--txt1);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.4s ease;
+      padding-bottom: 72px;
+    }
+
+    .ic {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1em; height: 1em;
+      vertical-align: -0.125em;
+    }
+    .ic svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ic.fill svg { fill: currentColor; stroke: none; }
+
+    .lg {
+      position: relative;
+      isolation: isolate;
+    }
+    .lg-effect {
+      position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+      backdrop-filter: blur(var(--glass-blur, 14px)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--glass-blur, 14px)) saturate(var(--sat));
+      overflow: hidden;
+    }
+    .lg-tint {
+      position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+      background: var(--tint);
+      transition: background 0.4s ease;
+    }
+    .lg-shine {
+      position: absolute; inset: 0; z-index: 2; border-radius: inherit;
+      overflow: hidden;
+      box-shadow:
+        inset 2px 3px 0px -1.5px color-mix(in srgb, var(--c-light) calc(var(--reflex-l)*90%), transparent),
+        inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--reflex-l)*12%), transparent),
+        inset -2px -2px 0px -1px color-mix(in srgb, var(--c-light) calc(var(--reflex-l)*70%), transparent),
+        inset -2px -7px 1px -5px color-mix(in srgb, var(--c-light) calc(var(--reflex-l)*55%), transparent),
+        inset 0 -1px 4px 0px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*10%), transparent),
+        inset -1.5px 2.5px 0px -2px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*18%), transparent),
+        inset 0px 3px 5px -2px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*16%), transparent),
+        inset 2px -6px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*8%), transparent),
+        0px 1px 6px 0px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*10%), transparent),
+        0px 8px 20px 0px color-mix(in srgb, var(--c-dark) calc(var(--reflex-d)*8%), transparent),
+        0px 0px 40px -10px var(--glow2);
+    }
+    .lg > *:not(.lg-effect):not(.lg-tint):not(.lg-shine) { position: relative; z-index: 3; }
+    .lg-pill { border-radius: 999px; }
+    .lg-card { border-radius: var(--radius-lg); }
+    .lg-panel { border-radius: var(--radius-xl); }
+
+    /* ─── TOP BAR ────────────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--bg2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+      color: var(--txt1);
+      font-size: 18px;
+    }
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid; place-items: center; color: #fff; font-size: 14px;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .brand small { color: var(--txt3); font-weight: 500; font-size: 12px; }
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 6px;
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      background: var(--tint);
+      flex-wrap: wrap;
+    }
+    .theme-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .theme-dot:hover { transform: scale(1.25); }
+    .theme-dot.active { border-color: var(--txt1); transform: scale(1.1); }
+    .td-ruby { background: #e11d48; }
+    .td-lava { background: #ff5a1f; }
+    .td-space { background: #7c3aed; }
+    .td-oxford { background: #00d4ff; }
+    .td-gray { background: #6b7280; }
+    .td-light { background: #ddd; border: 1px solid #aaa; }
+    .td-terminal { background: #4fff8f; box-shadow: 0 0 8px rgba(79,255,143,0.6); }
+    .custom-color-wrap {
+      position: relative; width: 20px; height: 20px; border-radius: 50%;
+      overflow: hidden; border: 2px solid var(--glass-border);
+      cursor: pointer; flex-shrink: 0; background: var(--accent);
+    }
+    .custom-color-wrap input[type="color"] {
+      position: absolute; top: -4px; left: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+      border: none; padding: 0; cursor: pointer; background: none;
+    }
+    .custom-color-wrap input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .custom-color-wrap input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+    .crt-toggle {
+      display: none; width: 28px; height: 28px; border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: var(--tint2); color: var(--txt2);
+      cursor: pointer; font-size: 12px;
+      align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .crt-toggle:hover { color: var(--txt1); border-color: var(--accent2); }
+    [data-theme="terminal"] .crt-toggle { display: inline-flex; }
+    .crt-toggle.off { opacity: 0.4; }
+    .btn-back {
+      padding: 7px 14px; border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: var(--tint); color: var(--txt2);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-back:hover { background: var(--tint2); color: var(--txt1); border-color: var(--accent2); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--glass-border);
+      background: var(--tint);
+      color: var(--txt1);
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: none;
+      transition: all 0.16s;
+    }
+    .btn:hover { border-color: var(--accent2); background: var(--tint2); transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 24px var(--accent-glow); transform: translateY(-2px); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-danger { border-color: var(--nobd); color: var(--no); }
+    .btn-danger:hover { background: var(--nobg); }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* ─── ADMIN LAYOUT ───────────────────────────────────────────── */
+    .admin-page {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 28px 24px 80px;
+    }
+    .admin-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      min-height: calc(100vh - 180px);
+    }
+
+    /* ─── SIDEBAR ────────────────────────────────────────────────── */
+    .asidebar {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+      border-radius: var(--radius-lg);
+      background: var(--tint);
+      border: 1px solid var(--glass-border);
+    }
+    .aside-lbl {
+      padding: 4px 10px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--txt3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .admin-nav-item {
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--txt2);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s;
+      width: 100%;
+    }
+    .admin-nav-item:hover { background: var(--tint2); color: var(--txt1); }
+    .admin-nav-item.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+    }
+    .admin-nav-item i { width: 14px; text-align: center; font-size: 12px; }
+
+    /* ─── CONTENT ────────────────────────────────────────────────── */
+    .acontent { min-width: 0; }
+    .asec { display: none; }
+    .asec.active { display: block; }
+
+    .asec-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .asec-head h3 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      flex: 1;
+    }
+
+    /* ─── STATS ──────────────────────────────────────────────────── */
+    .astat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .astat {
+      padding: 18px;
+      text-align: center;
+      border-radius: var(--radius-md);
+      background: var(--tint);
+      border: 1px solid var(--glass-border);
+    }
+    .astat-n {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent2);
+      letter-spacing: -0.04em;
+    }
+    .astat-sub {
+      font-size: 11px;
+      color: var(--ok);
+      margin-top: 2px;
+    }
+    .astat-l {
+      font-size: 11px;
+      color: var(--txt3);
+      margin-top: 4px;
+    }
+
+    /* ─── NOTICE ─────────────────────────────────────────────────── */
+    .anotice {
+      padding: 11px 14px;
+      border-radius: 11px;
+      font-size: 13px;
+      background: var(--tint2);
+      border: 1px solid var(--glass-border);
+      color: var(--txt2);
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+    .anotice i { color: var(--accent2); margin-top: 2px; flex-shrink: 0; }
+    .anotice.warn { background: var(--warnbg); border-color: var(--warn); }
+    .anotice.warn i { color: var(--warn); }
+
+    /* ─── ITEMS ──────────────────────────────────────────────────── */
+    .aitem {
+      padding: 14px 16px;
+      border-radius: 13px;
+      margin-bottom: 9px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--tint);
+      transition: border-color 0.2s;
+    }
+    .aitem:hover { border-color: var(--glass-border2); }
+    .aitem-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 15px;
+    }
+    .aitem-body { flex: 1; min-width: 0; }
+    .aitem-title { font-size: 14px; font-weight: 600; color: var(--txt1); margin-bottom: 2px; }
+    .aitem-sub { font-size: 12px; color: var(--txt3); }
+    .aitem-acts { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+
+    /* ─── BUTTONS ────────────────────────────────────────────────── */
+    .abtn {
+      padding: 7px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--glass-border2);
+      background: var(--tint);
+      color: var(--txt1);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .abtn:hover { background: var(--tint2); border-color: var(--accent2); }
+    .abtn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: #fff;
+    }
+    .abtn.primary:hover { opacity: 0.88; }
+    .abtn.danger { border-color: var(--nobd); color: var(--no); }
+    .abtn.danger:hover { background: var(--nobg); }
+
+    /* ─── FORMS ──────────────────────────────────────────────────── */
+    .ainput {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--glass-border2);
+      background: var(--bg2);
+      color: var(--txt1);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .ainput:focus { border-color: var(--accent2); }
+    .ainput-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--txt3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .aform-field { margin-bottom: 12px; }
+    .aform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ─── TABLE ──────────────────────────────────────────────────── */
+    .atbl-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+    }
+    .atbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .atbl th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--txt3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--tint);
+    }
+    .atbl td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--glass-border);
+      color: var(--txt1);
+      vertical-align: middle;
+    }
+    .atbl tr:last-child td { border-bottom: none; }
+    .atbl tr:hover td { background: var(--tint); }
+
+    /* ─── BADGES ─────────────────────────────────────────────────── */
+    .badg {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badg-ok { background: var(--okbg); color: var(--ok); }
+    .badg-warn { background: var(--warnbg); color: var(--warn); }
+    .badg-err { background: var(--nobg); color: var(--no); }
+
+    /* ─── CHARTS ─────────────────────────────────────────────────── */
+    .chart-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-box {
+      background: var(--tint);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .chart-box h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--txt2);
+      margin-bottom: 8px;
+    }
+    .chart-box canvas { width: 100% !important; height: 200px !important; }
+
+    /* ─── EMPTY STATE ───────────────────────────────────────────── */
+    .aempty {
+      padding: 40px;
+      text-align: center;
+      color: var(--txt3);
+    }
+    .aempty i {
+      font-size: 32px;
+      opacity: 0.25;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    /* ─── TOAST ──────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 80px; right: 24px; z-index: 9000;
+      padding: 12px 24px; border-radius: 999px;
+      background: var(--tint2); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border2);
+      transform: translateX(120%); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.2,0.9,0.4,1.1), opacity 0.3s;
+      font-size: 13px; font-weight: 500;
+    }
+    .toast.show { transform: translateX(0); opacity: 1; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .admin-wrap { grid-template-columns: 1fr; }
+      .asidebar {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 8px;
+      }
+      .aside-lbl { display: none; }
+      .admin-nav-item { font-size: 12px; padding: 6px 10px; }
+      .astat-row { grid-template-columns: 1fr 1fr; }
+      .chart-row { grid-template-columns: 1fr; }
+      .aform-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 450px) {
+      .topbar { padding: 8px 10px; }
+      .brand { font-size: 15px; }
+      .brand-mark { width: 28px; height: 28px; font-size: 12px; }
+      .btn-back span { display: none; }
+      .theme-switcher { gap: 2px; padding: 2px 3px; }
+      .theme-dot { width: 10px; height: 10px; }
+      .custom-color-wrap { width: 14px; height: 14px; }
+      .astat-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay" id="crtOverlay"></div>
+
+  <!-- ─── TOP BAR ───────────────────────────────────────────────── -->
+  <div class="topbar" id="adminTopbar">
+    <a class="brand" href="#">
+      <div class="brand-mark"><i class="ic" data-ic="shield"></i></div>
+      EDUMOE <small>· Admin</small>
+    </a>
+    <div class="topbar-right">
+      <div class="theme-switcher">
+        <button class="theme-dot td-ruby active" id="td-ruby" onclick="setTheme('ruby', this)"></button>
+        <button class="theme-dot td-lava" id="td-lava" onclick="setTheme('lava', this)"></button>
+        <button class="theme-dot td-space" id="td-space" onclick="setTheme('space', this)"></button>
+        <button class="theme-dot td-oxford" id="td-oxford" onclick="setTheme('oxford', this)"></button>
+        <button class="theme-dot td-gray" id="td-gray" onclick="setTheme('gray', this)"></button>
+        <button class="theme-dot td-light" id="td-light" onclick="setTheme('light', this)"></button>
+        <div class="custom-color-wrap" id="customColorWrap">
+          <input type="color" id="customColorPicker" value="#e11d48" />
+        </div>
+        <button class="theme-dot td-terminal" id="td-terminal" onclick="setTheme('terminal', this)"></button>
+      </div>
+      <button class="crt-toggle" id="crtToggle" onclick="toggleCRT()"><i class="ic" data-ic="tv"></i></button>
+      <span class="atb-user">
+        <i class="ic" data-ic="user"></i>
+        <span id="atbEmail">Admin · Demo Mode</span>
+        <a href="index.html" class="btn btn-sm" style="margin-left:8px;border-color:var(--glass-border);">
+          <i class="ic" data-ic="arrow-left"></i> <span>Back</span>
+        </a>
+      </span>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN DASHBOARD ───────────────────────────────────────── -->
+  <div id="adminDash">
+    <div class="admin-page">
+      <div class="admin-wrap">
+        <!-- Sidebar -->
+        <div class="asidebar lg lg-panel">
+          <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+          <div class="aside-lbl">OVERVIEW</div>
+          <button class="admin-nav-item active" onclick="showSection('dashboard', this)"><i class="ic" data-ic="chart-line"></i> Dashboard</button>
+          <div class="aside-lbl">CONTENT</div>
+          <button class="admin-nav-item" onclick="showSection('courses', this)"><i class="ic" data-ic="book"></i> Courses</button>
+          <button class="admin-nav-item" onclick="showSection('lectures', this)"><i class="ic" data-ic="video"></i> Lectures</button>
+          <button class="admin-nav-item" onclick="showSection('quiz', this)"><i class="ic" data-ic="question"></i> Quiz</button>
+          <button class="admin-nav-item" onclick="showSection('flashcards', this)"><i class="ic" data-ic="layer-group"></i> Flashcards</button>
+          <div class="aside-lbl">PEOPLE</div>
+          <button class="admin-nav-item" onclick="showSection('users', this)"><i class="ic" data-ic="users"></i> Users</button>
+          <button class="admin-nav-item" onclick="showSection('admins', this)"><i class="ic" data-ic="shield"></i> Admins</button>
+          <div class="aside-lbl">SYSTEM</div>
+          <button class="admin-nav-item" onclick="showSection('analytics', this)"><i class="ic" data-ic="chart-bar"></i> Analytics</button>
+          <button class="admin-nav-item" onclick="showSection('logs', this)"><i class="ic" data-ic="clock"></i> Audit Logs</button>
+          <button class="admin-nav-item" onclick="showSection('settings', this)"><i class="ic" data-ic="cog"></i> Settings</button>
+        </div>
+
+        <!-- Content -->
+        <div class="acontent">
+
+          <!-- DASHBOARD -->
+          <div class="asec active" id="sec-dashboard">
+            <div class="asec-head">
+              <h3>Dashboard</h3>
+              <button class="abtn" onclick="refreshAll()"><i class="ic" data-ic="refresh"></i> Refresh</button>
+              <button class="abtn" onclick="exportData()"><i class="ic" data-ic="download"></i> Export</button>
+            </div>
+            <div class="astat-row">
+              <div class="astat"><div class="astat-n" id="statUsers">247</div><div class="astat-sub">+12 this week</div><div class="astat-l">Total Users</div></div>
+              <div class="astat"><div class="astat-n" id="statCourses">8</div><div class="astat-sub">All active</div><div class="astat-l">Courses</div></div>
+              <div class="astat"><div class="astat-n" id="statLectures">64</div><div class="astat-sub">+3 this month</div><div class="astat-l">Lectures</div></div>
+              <div class="astat"><div class="astat-n" id="statQuestions">312</div><div class="astat-sub">+45 this month</div><div class="astat-l">Quiz Questions</div></div>
+            </div>
+            <div class="astat-row">
+              <div class="astat"><div class="astat-n" id="statFlashcards">1,247</div><div class="astat-sub">92% avg retention</div><div class="astat-l">Flashcards</div></div>
+              <div class="astat"><div class="astat-n" id="statSimulators">6</div><div class="astat-sub">All operational</div><div class="astat-l">Simulators</div></div>
+              <div class="astat"><div class="astat-n" id="statMatches">1,892</div><div class="astat-sub">+89 this week</div><div class="astat-l">Ranked Matches</div></div>
+              <div class="astat"><div class="astat-n" id="statAI">4,203</div><div class="astat-sub">+324 this week</div><div class="astat-l">AI Queries</div></div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-box"><h4>User Growth (30 days)</h4><canvas id="userGrowthChart"></canvas></div>
+              <div class="chart-box"><h4>Quiz Performance by Subject</h4><canvas id="quizPerfChart"></canvas></div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-box"><h4>Course Popularity</h4><canvas id="coursePopChart"></canvas></div>
+              <div class="chart-box"><h4>Platform Activity (7 days)</h4><canvas id="activityChart"></canvas></div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-box"><h4>Simulator Usage</h4><canvas id="simUsageChart"></canvas></div>
+              <div class="chart-box"><h4>AI Query Types</h4><canvas id="aiTypesChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- COURSES -->
+          <div class="asec" id="sec-courses">
+            <div class="asec-head">
+              <h3>Courses <span class="badg badg-ok" id="courseCount">8</span></h3>
+              <button class="abtn primary" onclick="openCourseForm()"><i class="ic" data-ic="plus"></i> Add Course</button>
+            </div>
+            <div class="lg lg-panel" id="courseForm" style="padding:22px;margin-bottom:16px;display:none;">
+              <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;" id="courseFormTitle">Add Course</h4>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Title *</div><input class="ainput" id="cfTitle" placeholder="e.g. Structured Programming" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Subject</div><input class="ainput" id="cfSubject" placeholder="e.g. Computer Science" /></div>
+              </div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Level</div><input class="ainput" id="cfLevel" placeholder="Beginner / Intermediate / Advanced" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Duration</div><input class="ainput" id="cfDuration" placeholder="e.g. 10 weeks" /></div>
+              </div>
+              <div class="aform-field"><div class="ainput-lbl">Description</div><textarea class="ainput" id="cfDesc" style="height:70px;resize:vertical;" placeholder="Course description..."></textarea></div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Icon (emoji)</div><input class="ainput" id="cfIcon" placeholder="📚" value="📚" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Color</div><input class="ainput" id="cfColor" type="color" value="#e11d48" style="padding:2px;height:40px;" /></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:4px;">
+                <button class="abtn primary" onclick="saveCourse()"><i class="ic" data-ic="save"></i> Save</button>
+                <button class="abtn" onclick="closeCourseForm()"><i class="ic" data-ic="times"></i> Cancel</button>
+              </div>
+            </div>
+            <div id="coursesList"></div>
+          </div>
+
+          <!-- LECTURES -->
+          <div class="asec" id="sec-lectures">
+            <div class="asec-head">
+              <h3>Lectures <span class="badg badg-ok" id="lectureCount">64</span></h3>
+              <button class="abtn primary" onclick="openLectureForm()"><i class="ic" data-ic="plus"></i> Add Lecture</button>
+            </div>
+            <div class="lg lg-panel" id="lectureForm" style="padding:22px;margin-bottom:16px;display:none;">
+              <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Add Lecture</h4>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Title *</div><input class="ainput" id="lfTitle" placeholder="Lecture title" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Course</div>
+                  <select class="ainput" id="lfCourse"><option value="Structured Programming">Structured Programming</option><option value="Logic Design">Logic Design</option><option value="Differential Equations">Differential Equations</option><option value="Probability & Statistics">Probability & Statistics</option><option value="Calculus">Calculus</option><option value="Physics">Physics</option><option value="Discrete Mathematics">Discrete Mathematics</option><option value="Computing Fundamentals">Computing Fundamentals</option></select>
+                </div>
+              </div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Unit</div><input class="ainput" id="lfUnit" placeholder="Unit 1" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Duration</div><input class="ainput" id="lfDuration" placeholder="e.g. 15:30" /></div>
+              </div>
+              <div class="aform-field"><div class="ainput-lbl">Video URL</div><input class="ainput" id="lfVideo" placeholder="YouTube URL or embed code" /></div>
+              <div class="aform-field"><div class="ainput-lbl">Notes (HTML)</div><textarea class="ainput" id="lfNotes" style="height:80px;resize:vertical;" placeholder="Lecture notes in HTML..."></textarea></div>
+              <div style="display:flex;gap:8px;margin-top:4px;">
+                <button class="abtn primary" onclick="saveLecture()"><i class="ic" data-ic="save"></i> Save</button>
+                <button class="abtn" onclick="closeLectureForm()"><i class="ic" data-ic="times"></i> Cancel</button>
+              </div>
+            </div>
+            <div id="lecturesList"></div>
+          </div>
+
+          <!-- QUIZ -->
+          <div class="asec" id="sec-quiz">
+            <div class="asec-head">
+              <h3>Quiz Questions <span class="badg badg-ok" id="quizCount">312</span></h3>
+              <button class="abtn primary" onclick="openQuestionForm()"><i class="ic" data-ic="plus"></i> Add Question</button>
+              <button class="abtn" onclick="bulkImportQuestions()"><i class="ic" data-ic="upload"></i> Bulk Import</button>
+            </div>
+            <div class="lg lg-panel" id="questionForm" style="padding:22px;margin-bottom:16px;display:none;">
+              <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Add Question</h4>
+              <div class="aform-field"><div class="ainput-lbl">Question *</div><textarea class="ainput" id="qfQ" style="height:60px;resize:vertical;" placeholder="Question text..."></textarea></div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Option A</div><input class="ainput" id="qfA" placeholder="Option A" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Option B</div><input class="ainput" id="qfB" placeholder="Option B" /></div>
+              </div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Option C</div><input class="ainput" id="qfC" placeholder="Option C" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Option D</div><input class="ainput" id="qfD" placeholder="Option D" /></div>
+              </div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Correct Answer</div>
+                  <select class="ainput" id="qfAns"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
+                </div>
+                <div class="aform-field"><div class="ainput-lbl">Subject</div>
+                  <select class="ainput" id="qfSubject"><option value="cpp">C++</option><option value="logic">Logic Design</option><option value="calculus">Calculus</option><option value="prob">Probability</option><option value="de">Differential Equations</option><option value="physics">Physics</option><option value="discrete">Discrete Math</option><option value="cf">Computing Fundamentals</option></select>
+                </div>
+              </div>
+              <div class="aform-field"><div class="ainput-lbl">Difficulty</div>
+                <select class="ainput" id="qfDiff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+              </div>
+              <div class="aform-field"><div class="ainput-lbl">Explanation</div><textarea class="ainput" id="qfExp" style="height:60px;resize:vertical;" placeholder="Explanation..."></textarea></div>
+              <div style="display:flex;gap:8px;">
+                <button class="abtn primary" onclick="saveQuestion()"><i class="ic" data-ic="save"></i> Save</button>
+                <button class="abtn" onclick="closeQuestionForm()"><i class="ic" data-ic="times"></i> Cancel</button>
+              </div>
+            </div>
+            <div id="questionsList"></div>
+          </div>
+
+          <!-- FLASHCARDS -->
+          <div class="asec" id="sec-flashcards">
+            <div class="asec-head">
+              <h3>Flashcards <span class="badg badg-ok" id="flashcardCount">1,247</span></h3>
+              <button class="abtn primary" onclick="openFlashcardForm()"><i class="ic" data-ic="plus"></i> Add Card</button>
+              <button class="abtn" onclick="generateFlashcards()"><i class="ic" data-ic="brain"></i> AI Generate</button>
+            </div>
+            <div class="lg lg-panel" id="flashcardForm" style="padding:22px;margin-bottom:16px;display:none;">
+              <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Add Flashcard</h4>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Front (Term)</div><input class="ainput" id="ffFront" placeholder="Term or question" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Back (Definition)</div><input class="ainput" id="ffBack" placeholder="Definition or answer" /></div>
+              </div>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Category</div><input class="ainput" id="ffCategory" placeholder="e.g. C++" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Subject</div>
+                  <select class="ainput" id="ffSubject"><option value="cpp">C++</option><option value="logic">Logic Design</option><option value="calculus">Calculus</option><option value="prob">Probability</option><option value="de">Differential Equations</option><option value="physics">Physics</option><option value="discrete">Discrete Math</option><option value="cf">Computing Fundamentals</option></select>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="abtn primary" onclick="saveFlashcard()"><i class="ic" data-ic="save"></i> Save</button>
+                <button class="abtn" onclick="closeFlashcardForm()"><i class="ic" data-ic="times"></i> Cancel</button>
+              </div>
+            </div>
+            <div id="flashcardsList"></div>
+          </div>
+
+          <!-- USERS -->
+          <div class="asec" id="sec-users">
+            <div class="asec-head">
+              <h3>Users <span class="badg badg-ok" id="userCount">247</span></h3>
+              <input class="ainput" id="userSearch" placeholder="Search users..." style="max-width:200px;" oninput="filterUsers(this.value)" />
+              <button class="abtn" onclick="exportUsers()"><i class="ic" data-ic="download"></i> Export CSV</button>
+            </div>
+            <div class="atbl-wrap">
+              <table class="atbl">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="usersTbody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+              <button class="abtn btn-sm" onclick="loadUsers('all')">All</button>
+              <button class="abtn btn-sm" onclick="loadUsers('active')">Active</button>
+              <button class="abtn btn-sm" onclick="loadUsers('inactive')">Inactive</button>
+              <button class="abtn btn-sm" onclick="loadUsers('admin')">Admins</button>
+              <span style="margin-left:auto;color:var(--txt3);font-size:12px;" id="userFilterInfo">Showing all 247 users</span>
+            </div>
+          </div>
+
+          <!-- ADMINS -->
+          <div class="asec" id="sec-admins">
+            <div class="asec-head">
+              <h3>Admins <span class="badg badg-warn" id="adminCount">3</span></h3>
+              <button class="abtn primary" onclick="openAdminForm()"><i class="ic" data-ic="plus"></i> Add Admin</button>
+            </div>
+            <div class="lg lg-panel" id="adminForm" style="padding:22px;margin-bottom:16px;display:none;">
+              <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Add Admin</h4>
+              <div class="aform-row">
+                <div class="aform-field"><div class="ainput-lbl">Email</div><input class="ainput" id="afEmail" placeholder="admin@edumoe.com" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Name</div><input class="ainput" id="afName" placeholder="Admin Name" /></div>
+              </div>
+              <div class="aform-field"><div class="ainput-lbl">Role</div>
+                <select class="ainput" id="afRole"><option value="super">Super Admin</option><option value="content">Content Manager</option><option value="moderator">Moderator</option></select>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="abtn primary" onclick="saveAdmin()"><i class="ic" data-ic="save"></i> Add</button>
+                <button class="abtn" onclick="closeAdminForm()"><i class="ic" data-ic="times"></i> Cancel</button>
+              </div>
+            </div>
+            <div id="adminsList"></div>
+          </div>
+
+          <!-- ANALYTICS -->
+          <div class="asec" id="sec-analytics">
+            <div class="asec-head">
+              <h3>Analytics</h3>
+              <select class="ainput" id="analyticsPeriod" style="max-width:150px;" onchange="refreshAnalytics()">
+                <option value="7d">Last 7 days</option>
+                <option value="30d" selected>Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="all">All time</option>
+              </select>
+              <button class="abtn" onclick="exportAnalytics()"><i class="ic" data-ic="download"></i> Export Report</button>
+            </div>
+            <div class="chart-row">
+              <div class="chart-box"><h4>Daily Active Users</h4><canvas id="dauChart"></canvas></div>
+              <div class="chart-box"><h4>Quiz Attempts</h4><canvas id="quizAttemptsChart"></canvas></div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-box"><h4>Subject Performance</h4><canvas id="subjectPerfChart"></canvas></div>
+              <div class="chart-box"><h4>AI Usage by Feature</h4><canvas id="aiFeatureChart"></canvas></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px;">
+              <div class="astat"><div class="astat-n" id="analyticsUsers">247</div><div class="astat-l">Total Users</div></div>
+              <div class="astat"><div class="astat-n" id="analyticsRetention">68%</div><div class="astat-l">30-Day Retention</div></div>
+              <div class="astat"><div class="astat-n" id="analyticsAvgScore">72%</div><div class="astat-l">Avg Quiz Score</div></div>
+            </div>
+          </div>
+
+          <!-- LOGS -->
+          <div class="asec" id="sec-logs">
+            <div class="asec-head">
+              <h3>Audit Logs</h3>
+              <button class="abtn" onclick="refreshLogs()"><i class="ic" data-ic="refresh"></i> Refresh</button>
+              <button class="abtn" onclick="clearLogs()"><i class="ic" data-ic="trash"></i> Clear</button>
+            </div>
+            <div class="atbl-wrap">
+              <table class="atbl">
+                <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+                <tbody id="logsTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="asec" id="sec-settings">
+            <div class="asec-head"><h3>Settings</h3></div>
+            <div style="display:grid;gap:18px;max-width:620px;">
+              <!-- General -->
+              <div class="lg lg-panel" style="padding:22px;">
+                <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+                <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">General</h4>
+                <div class="aform-field"><div class="ainput-lbl">Platform Name</div><input class="ainput" id="stName" value="EDUMOE" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Tagline</div><input class="ainput" id="stTagline" value="Learn CS Your Way" /></div>
+                <div class="aform-field"><div class="ainput-lbl">Default Theme</div>
+                  <select class="ainput" id="stTheme"><option value="ruby">Ruby</option><option value="lava">Lava</option><option value="space">Space</option><option value="oxford">Oxford</option><option value="gray">Gray</option><option value="light">Light</option></select>
+                </div>
+                <button class="abtn primary" onclick="saveSettings()"><i class="ic" data-ic="save"></i> Save Settings</button>
+              </div>
+
+              <!-- Social -->
+              <div class="lg lg-panel" style="padding:22px;">
+                <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+                <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Social & Community</h4>
+                <div class="aform-field"><div class="ainput-lbl">Telegram Channel</div><input class="ainput" id="stTg" value="https://t.me/CS_Epic_Save" /></div>
+                <div class="aform-field"><div class="ainput-lbl">YouTube Channel</div><input class="ainput" id="stYt" value="https://youtube.com/@edumoe" /></div>
+                <div class="aform-field"><div class="ainput-lbl">GitHub Repo</div><input class="ainput" id="stGh" value="https://github.com/edumoe" /></div>
+              </div>
+
+              <!-- Features -->
+              <div class="lg lg-panel" style="padding:22px;">
+                <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+                <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;">Features</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureSimulators" checked /> Simulators</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureQuizzes" checked /> Quizzes</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureFlashcards" checked /> Flashcards</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureRanked" checked /> Ranked</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureAI" checked /> MoeAI</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt2);"><input type="checkbox" id="stFeatureCommunity" checked /> Community</label>
+                </div>
+                <button class="abtn primary" onclick="saveSettings()" style="margin-top:12px;"><i class="ic" data-ic="save"></i> Save Settings</button>
+              </div>
+
+              <!-- Maintenance -->
+              <div class="lg lg-panel" style="padding:22px;border-color:var(--nobd);">
+                <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
+                <h4 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--no);">Maintenance</h4>
+                <div class="aform-field"><div class="ainput-lbl">Maintenance Mode</div>
+                  <select class="ainput" id="stMaintenance"><option value="false">Off</option><option value="true">On</option></select>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="abtn danger" onclick="clearCache()"><i class="ic" data-ic="trash"></i> Clear Cache</button>
+                  <button class="abtn danger" onclick="resetAll()"><i class="ic" data-ic="trash"></i> Reset All Data</button>
+                  <button class="abtn" onclick="backupData()"><i class="ic" data-ic="download"></i> Backup Database</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+  <script>
+    // ============================================================
+    //  ICONS
+    // ============================================================
+    const ICONS = {
+      'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      'user': '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>',
+      'tv': '<rect x="2" y="5" width="20" height="13" rx="2"/><polyline points="8 21 12 18 16 21"/>',
+      'chart-line': '<polyline points="3 3 3 21 21 21"/><polyline points="7 15 11 10 14 13 20 6"/>',
+      'chart-bar': '<rect x="4" y="10" width="4" height="8"/><rect x="10" y="6" width="4" height="12"/><rect x="16" y="2" width="4" height="16"/><line x1="3" y1="20" x2="21" y2="20"/>',
+      'book': '<path d="M4 4a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2V4z"/><line x1="8" y1="7" x2="15" y2="7"/>',
+      'video': '<rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 10 15 12 10 14 10 10" fill="currentColor" stroke="none"/>',
+      'question': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7"/><circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="none"/>',
+      'layer-group': '<polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><polyline points="2 15.5 12 22 22 15.5"/>',
+      'users': '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+      'cog': '<circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>',
+      'clock': '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/>',
+      'plus': '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+      'save': '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+      'times': '<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+      'info-circle': '<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/>',
+      'refresh': '<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',
+      'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      'upload': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+      'trash': '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+      'edit': '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+      'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+      'brain': '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V15a3 3 0 0 0 4 2.8A2.5 2.5 0 0 0 12 20V5a2.5 2.5 0 0 0-3-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5.8V15a3 3 0 0 1-4 2.8A2.5 2.5 0 0 1 12 20"/>',
+    };
+
+    function injectIcons(root) {
+      (root || document).querySelectorAll('i.ic[data-ic]').forEach(el => {
+        if (el.dataset.done) return;
+        const p = ICONS[el.dataset.ic];
+        if (p) { el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>'; el.dataset.done = '1'; }
+      });
+    }
+
+    // ============================================================
+    //  THEME SYSTEM (simplified)
+    // ============================================================
+    function clearCustomInlineStyles() {
+      const root = document.documentElement;
+      ['--custom-accent','--custom-accent2','--custom-accent3','--custom-glow','--custom-glow2','--custom-border','--custom-border2','--custom-tint','--custom-tint2','--custom-tint3'].forEach(v => root.style.removeProperty(v));
+      document.querySelectorAll('.theme-dot').forEach(el => { el.style.removeProperty('background'); el.style.removeProperty('box-shadow'); });
+      document.getElementById('customColorWrap')?.style.removeProperty('box-shadow');
+    }
+
+    function setTheme(theme, el) {
+      clearCustomInlineStyles();
+      if (theme === 'terminal') {
+        document.documentElement.setAttribute('data-theme', 'terminal');
+        localStorage.setItem('edumoe-theme', 'terminal');
+        localStorage.removeItem('edumoe-custom-color');
+        showToast('$ mode --terminal');
+        document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+        if (el) el.classList.add('active');
+        updateCRTButton();
+        return;
+      }
+      if (theme === 'ruby') {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('customColorPicker').value = '#e11d48';
+        document.getElementById('customColorWrap').style.background = '#e11d48';
+        localStorage.removeItem('edumoe-custom-color');
+        localStorage.setItem('edumoe-theme', 'ruby');
+        showToast('Theme: Ruby');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('edumoe-theme', theme);
+        localStorage.removeItem('edumoe-custom-color');
+        const cm = { lava: '#ff5a1f', space: '#7c3aed', oxford: '#00d4ff', gray: '#6b7280', light: '#111111' };
+        if (cm[theme]) { document.getElementById('customColorPicker').value = cm[theme]; document.getElementById('customColorWrap').style.background = cm[theme]; }
+        showToast('Theme: ' + theme.charAt(0).toUpperCase() + theme.slice(1));
+      }
+      document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+      if (el) el.classList.add('active');
+      updateCRTButton();
+    }
+
+    function setCustomTheme(color) {
+      clearCustomInlineStyles();
+      const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+      document.documentElement.setAttribute('data-theme', 'custom');
+      const root = document.documentElement;
+      root.style.setProperty('--custom-accent', color);
+      root.style.setProperty('--custom-accent2', `rgb(${Math.min(r+40,255)}, ${Math.min(g+40,255)}, ${Math.min(b+40,255)})`);
+      root.style.setProperty('--custom-accent3', `rgb(${Math.min(r+80,255)}, ${Math.min(g+80,255)}, ${Math.min(b+80,255)})`);
+      root.style.setProperty('--custom-glow', `rgba(${r},${g},${b},0.35)`);
+      root.style.setProperty('--custom-glow2', `rgba(${r},${g},${b},0.14)`);
+      root.style.setProperty('--custom-border', `rgba(${r},${g},${b},0.18)`);
+      root.style.setProperty('--custom-border2', `rgba(${r},${g},${b},0.32)`);
+      root.style.setProperty('--custom-tint', `rgba(${r},${g},${b},0.05)`);
+      root.style.setProperty('--custom-tint2', `rgba(${r},${g},${b},0.10)`);
+      root.style.setProperty('--custom-tint3', `rgba(${r},${g},${b},0.16)`);
+      document.getElementById('customColorWrap').style.background = color;
+      document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+      localStorage.setItem('edumoe-theme', 'custom');
+      localStorage.setItem('edumoe-custom-color', color);
+      updateCRTButton();
+      showToast('🎨 Custom color');
+    }
+
+    function toggleCRT() {
+      const html = document.documentElement, btn = document.getElementById('crtToggle');
+      const off = html.classList.toggle('no-crt');
+      localStorage.setItem('edumoe-crt', off ? 'off' : 'on');
+      if (btn) btn.classList.toggle('off', off);
+      showToast(off ? '$ crt --off' : '$ crt --on');
+    }
+
+    function updateCRTButton() {
+      const btn = document.getElementById('crtToggle');
+      if (!btn) return;
+      const isTerminal = document.documentElement.getAttribute('data-theme') === 'terminal';
+      btn.style.display = isTerminal ? 'inline-flex' : 'none';
+      btn.classList.toggle('off', document.documentElement.classList.contains('no-crt'));
+    }
+
+    const savedTheme = localStorage.getItem('edumoe-theme') || 'ruby';
+    const savedColor = localStorage.getItem('edumoe-custom-color');
+    if (savedTheme === 'custom' && savedColor) { setCustomTheme(savedColor); document.getElementById('customColorPicker').value = savedColor; }
+    else if (savedTheme !== 'ruby' && savedTheme !== 'custom') { document.documentElement.setAttribute('data-theme', savedTheme); }
+    const crtPref = localStorage.getItem('edumoe-crt');
+    if (crtPref === 'off' || (crtPref === null && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { document.documentElement.classList.add('no-crt'); }
+    document.getElementById('customColorPicker').addEventListener('input', function(e) { setCustomTheme(e.target.value); });
+    document.addEventListener('DOMContentLoaded', () => {
+      const dot = document.getElementById('td-' + savedTheme);
+      if (dot && savedTheme !== 'custom' && savedTheme !== 'ruby') dot.classList.add('active');
+      else if (savedTheme === 'ruby') document.getElementById('td-ruby')?.classList.add('active');
+      updateCRTButton();
+      const crtBtn = document.getElementById('crtToggle');
+      if (crtBtn && document.documentElement.classList.contains('no-crt')) crtBtn.classList.add('off');
+    });
+
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let editingCourseId = null;
+    let editingLectureId = null;
+    let editingFlashcardId = null;
+    let charts = {};
+    let allUsers = [
+      { id: 1, name: 'Ahmed Hassan', email: 'ahmed@edumoe.com', role: 'student', joined: '2026-01-15', status: 'active' },
+      { id: 2, name: 'Sara Mohamed', email: 'sara@edumoe.com', role: 'student', joined: '2026-02-03', status: 'active' },
+      { id: 3, name: 'Omar Khaled', email: 'omar@edumoe.com', role: 'admin', joined: '2026-03-10', status: 'active' },
+      { id: 4, name: 'Nadia Ibrahim', email: 'nadia@edumoe.com', role: 'student', joined: '2026-04-22', status: 'inactive' },
+      { id: 5, name: 'Youssef Ali', email: 'youssef@edumoe.com', role: 'admin', joined: '2026-05-01', status: 'active' },
+      { id: 6, name: 'Maya Farouk', email: 'maya@edumoe.com', role: 'student', joined: '2026-06-12', status: 'active' },
+      { id: 7, name: 'Khaled Tamer', email: 'khaled@edumoe.com', role: 'moderator', joined: '2026-07-05', status: 'active' },
+    ];
+
+    let allAdmins = [
+      { id: 1, name: 'Omar Khaled', email: 'omar@edumoe.com', role: 'super', joined: '2026-03-10' },
+      { id: 2, name: 'Youssef Ali', email: 'youssef@edumoe.com', role: 'content', joined: '2026-05-01' },
+      { id: 3, name: 'Khaled Tamer', email: 'khaled@edumoe.com', role: 'moderator', joined: '2026-07-05' },
+    ];
+
+    let courses = [
+      { id: 1, title: 'Structured Programming', subject: 'Computer Science', level: 'Beginner', duration: '14 weeks', description: 'C++ fundamentals from zero to mastery.', icon: '💻', color: '#e11d48' },
+      { id: 2, title: 'Logic Design', subject: 'Computer Science', level: 'Intermediate', duration: '12 weeks', description: 'Boolean algebra, gates, K-maps, adders.', icon: '🔌', color: '#a855f7' },
+      { id: 3, title: 'Differential Equations', subject: 'Mathematics', level: 'Advanced', duration: '12 weeks', description: 'ODEs, Laplace transforms, systems.', icon: '∫', color: '#34d399' },
+      { id: 4, title: 'Probability & Statistics', subject: 'Mathematics', level: 'Intermediate', duration: '12 weeks', description: 'Probability theory, distributions, inferential stats.', icon: '🎲', color: '#f43f5e' },
+      { id: 5, title: 'Calculus', subject: 'Mathematics', level: 'Intermediate', duration: '12 weeks', description: 'Limits, derivatives, integrals, series.', icon: '📐', color: '#00d4ff' },
+      { id: 6, title: 'Physics', subject: 'Science', level: 'Intermediate', duration: '12 weeks', description: 'Mechanics, electricity, magnetism.', icon: '⚡', color: '#fb7185' },
+      { id: 7, title: 'Discrete Mathematics', subject: 'Mathematics', level: 'Intermediate', duration: '12 weeks', description: 'Logic, sets, combinatorics, graphs.', icon: '🔢', color: '#c084fc' },
+      { id: 8, title: 'Computing Fundamentals', subject: 'Computer Science', level: 'Beginner', duration: '10 weeks', description: 'Hardware, software, networking, number systems.', icon: '💾', color: '#60a5fa' },
+    ];
+
+    let lectures = [
+      { id: 1, title: 'Introduction to C++', course: 'Structured Programming', unit: 'Unit 1', duration: '14:20', video: '', notes: '<p>Welcome to C++!</p>' },
+      { id: 2, title: 'Data Types & Variables', course: 'Structured Programming', unit: 'Unit 1', duration: '18:05', video: '', notes: '<p>int, double, char, bool.</p>' },
+      { id: 3, title: 'Boolean Algebra Basics', course: 'Logic Design', unit: 'Unit 1', duration: '20:30', video: '', notes: '<p>The 12 identities.</p>' },
+      { id: 4, title: 'K-Map Simplification', course: 'Logic Design', unit: 'Unit 2', duration: '22:10', video: '', notes: '<p>3-variable and 4-variable K-maps.</p>' },
+      { id: 5, title: 'First-Order ODEs', course: 'Differential Equations', unit: 'Unit 1', duration: '19:40', video: '', notes: '<p>Separable equations.</p>' },
+      { id: 6, title: 'Probability Axioms', course: 'Probability & Statistics', unit: 'Unit 1', duration: '18:20', video: '', notes: '<p>The three axioms.</p>' },
+    ];
+
+    let quizQuestions = [
+      { id: 1, question: 'Which header must you include to use cout?', options: ['<stdio.h>', '<iostream>', '<string>', '<conio.h>'], correct: 'B', subject: 'cpp', difficulty: 'easy', explanation: '<iostream> provides cout.' },
+      { id: 2, question: 'What is the output of NAND(1,1)?', options: ['0', '1', 'X', 'Z'], correct: 'A', subject: 'logic', difficulty: 'easy', explanation: 'NAND = NOT AND.' },
+    ];
+
+    let flashcards = [
+      { id: 1, front: 'What is the order of an ODE?', back: 'The highest derivative present.', category: 'DE', subject: 'de' },
+      { id: 2, front: 'What is a NAND gate?', back: 'AND followed by NOT.', category: 'Logic', subject: 'logic' },
+    ];
+
+    let logs = [
+      { time: '2026-07-25 10:30', user: 'Omar Khaled', action: 'Added course', details: 'Structured Programming' },
+      { time: '2026-07-25 10:15', user: 'Youssef Ali', action: 'Updated user', details: 'Nadia Ibrahim → Admin' },
+      { time: '2026-07-25 09:45', user: 'Khaled Tamer', action: 'Deleted question', details: 'ID: 42' },
+    ];
+
+    let flashcardIdCounter = 3;
+    let logIdCounter = 4;
+    let lectureIdCounter = 7;
+    let quizIdCounter = 3;
+    let courseIdCounter = 9;
+
+    // ============================================================
+    //  NAVIGATION
+    // ============================================================
+    function showSection(id, el) {
+      document.querySelectorAll('.asec').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+      const sec = document.getElementById('sec-' + id);
+      if (sec) sec.classList.add('active');
+      if (el) el.classList.add('active');
+      if (id === 'dashboard') renderCharts();
+      if (id === 'users') renderUsers(allUsers);
+      if (id === 'admins') renderAdmins(allAdmins);
+      if (id === 'logs') renderLogs();
+    }
+
+    // ============================================================
+    //  DASHBOARD
+    // ============================================================
+    function refreshAll() {
+      renderCharts();
+      showToast('✅ Dashboard refreshed');
+    }
+
+    function renderCharts() {
+      const ctx1 = document.getElementById('userGrowthChart');
+      if (ctx1) {
+        if (charts.userGrowth) charts.userGrowth.destroy();
+        charts.userGrowth = new Chart(ctx1, {
+          type: 'line',
+          data: { labels: ['Jun 1', 'Jun 8', 'Jun 15', 'Jun 22', 'Jun 29', 'Jul 6', 'Jul 13', 'Jul 20'], datasets: [{ label: 'Users', data: [160, 175, 190, 205, 215, 225, 235, 247], borderColor: '#f43f5e', fill: false, tension: 0.3 }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx2 = document.getElementById('quizPerfChart');
+      if (ctx2) {
+        if (charts.quizPerf) charts.quizPerf.destroy();
+        charts.quizPerf = new Chart(ctx2, {
+          type: 'bar',
+          data: { labels: ['C++', 'Logic', 'Calculus', 'Prob', 'DE', 'Physics', 'Discrete', 'CF'], datasets: [{ label: 'Avg Score %', data: [72, 65, 58, 70, 63, 55, 68, 45], backgroundColor: '#f43f5e88' }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx3 = document.getElementById('coursePopChart');
+      if (ctx3) {
+        if (charts.coursePop) charts.coursePop.destroy();
+        charts.coursePop = new Chart(ctx3, {
+          type: 'doughnut',
+          data: { labels: ['Structured Programming', 'Logic Design', 'Calculus', 'DE', 'Probability', 'Physics', 'Discrete', 'CF'], datasets: [{ data: [230, 180, 150, 120, 110, 90, 70, 50], backgroundColor: ['#f43f5e', '#a855f7', '#34d399', '#fb7185', '#fbbf24', '#60a5fa', '#c084fc', '#4fff8f'] }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } } }
+        });
+      }
+
+      const ctx4 = document.getElementById('activityChart');
+      if (ctx4) {
+        if (charts.activity) charts.activity.destroy();
+        charts.activity = new Chart(ctx4, {
+          type: 'line',
+          data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Active Users', data: [45, 52, 48, 61, 55, 70, 68], borderColor: '#4fff8f', fill: false, tension: 0.3 }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx5 = document.getElementById('simUsageChart');
+      if (ctx5) {
+        if (charts.simUsage) charts.simUsage.destroy();
+        charts.simUsage = new Chart(ctx5, {
+          type: 'bar',
+          data: { labels: ['Logic', 'C++', 'Calculus', 'Prob', 'Discrete', 'Physics'], datasets: [{ label: 'Sessions', data: [340, 280, 210, 190, 150, 120], backgroundColor: '#f43f5e66' }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx6 = document.getElementById('aiTypesChart');
+      if (ctx6) {
+        if (charts.aiTypes) charts.aiTypes.destroy();
+        charts.aiTypes = new Chart(ctx6, {
+          type: 'pie',
+          data: { labels: ['Explain', 'Debug', 'Generate', 'Summarize', 'Recommend'], datasets: [{ data: [45, 25, 15, 10, 5], backgroundColor: ['#f43f5e', '#a855f7', '#34d399', '#fbbf24', '#60a5fa'] }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } } }
+        });
+      }
+
+      // Analytics charts
+      const ctx7 = document.getElementById('dauChart');
+      if (ctx7) {
+        if (charts.dau) charts.dau.destroy();
+        charts.dau = new Chart(ctx7, {
+          type: 'line',
+          data: { labels: ['Jul 1', 'Jul 3', 'Jul 5', 'Jul 7', 'Jul 9', 'Jul 11', 'Jul 13', 'Jul 15', 'Jul 17', 'Jul 19', 'Jul 21', 'Jul 23', 'Jul 25'], datasets: [{ label: 'DAU', data: [32, 38, 35, 42, 40, 48, 45, 52, 50, 55, 58, 62, 68], borderColor: '#4fff8f', fill: false, tension: 0.3 }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx8 = document.getElementById('quizAttemptsChart');
+      if (ctx8) {
+        if (charts.quizAttempts) charts.quizAttempts.destroy();
+        charts.quizAttempts = new Chart(ctx8, {
+          type: 'bar',
+          data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Attempts', data: [45, 52, 48, 61, 55, 70, 68], backgroundColor: '#f43f5e66' }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { x: { ticks: { color: '#666' } }, y: { ticks: { color: '#666' } } } }
+        });
+      }
+
+      const ctx9 = document.getElementById('subjectPerfChart');
+      if (ctx9) {
+        if (charts.subjectPerf) charts.subjectPerf.destroy();
+        charts.subjectPerf = new Chart(ctx9, {
+          type: 'radar',
+          data: { labels: ['C++', 'Logic', 'Calculus', 'Prob', 'DE', 'Physics', 'Discrete', 'CF'], datasets: [{ label: 'Avg Score', data: [72, 65, 58, 70, 63, 55, 68, 45], backgroundColor: 'rgba(244,63,94,0.2)', borderColor: '#f43f5e' }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { r: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.1)' } } } }
+        });
+      }
+
+      const ctx10 = document.getElementById('aiFeatureChart');
+      if (ctx10) {
+        if (charts.aiFeature) charts.aiFeature.destroy();
+        charts.aiFeature = new Chart(ctx10, {
+          type: 'doughnut',
+          data: { labels: ['Code Help', 'Explain', 'Quiz Gen', 'Summary', 'Other'], datasets: [{ data: [35, 28, 18, 12, 7], backgroundColor: ['#f43f5e', '#a855f7', '#34d399', '#fbbf24', '#60a5fa'] }] },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } } }
+        });
+      }
+    }
+
+    // ============================================================
+    //  COURSES CRUD
+    // ============================================================
+    function openCourseForm(data) {
+      editingCourseId = data?.id || null;
+      const wrap = document.getElementById('courseForm');
+      const title = document.getElementById('courseFormTitle');
+      if (data) {
+        document.getElementById('cfTitle').value = data.title || '';
+        document.getElementById('cfSubject').value = data.subject || '';
+        document.getElementById('cfLevel').value = data.level || '';
+        document.getElementById('cfDuration').value = data.duration || '';
+        document.getElementById('cfDesc').value = data.description || '';
+        document.getElementById('cfIcon').value = data.icon || '📚';
+        document.getElementById('cfColor').value = data.color || '#e11d48';
+        title.textContent = 'Edit Course';
+      } else {
+        ['cfTitle', 'cfSubject', 'cfLevel', 'cfDuration', 'cfDesc', 'cfIcon'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('cfColor').value = '#e11d48';
+        title.textContent = 'Add Course';
+      }
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeCourseForm() {
+      document.getElementById('courseForm').style.display = 'none';
+      editingCourseId = null;
+    }
+
+    function saveCourse() {
+      const title = document.getElementById('cfTitle').value.trim();
+      if (!title) { showToast('⚠️ Title required'); return; }
+      const payload = {
+        id: editingCourseId || ++courseIdCounter,
+        title,
+        subject: document.getElementById('cfSubject').value.trim() || 'General',
+        level: document.getElementById('cfLevel').value.trim() || 'Beginner',
+        duration: document.getElementById('cfDuration').value.trim() || '',
+        description: document.getElementById('cfDesc').value.trim(),
+        icon: document.getElementById('cfIcon').value.trim() || '📚',
+        color: document.getElementById('cfColor').value || '#e11d48'
+      };
+      if (editingCourseId) {
+        const idx = courses.findIndex(c => c.id === editingCourseId);
+        if (idx !== -1) courses[idx] = payload;
+      } else {
+        courses.push(payload);
+      }
+      renderCourses();
+      closeCourseForm();
+      addLog('Added/Updated course: ' + title);
+      showToast('✅ Course saved');
+    }
+
+    function deleteCourse(id) {
+      if (!confirm('Delete this course?')) return;
+      courses = courses.filter(c => c.id !== id);
+      renderCourses();
+      addLog('Deleted course: ' + id);
+      showToast('🗑️ Deleted');
+    }
+
+    function renderCourses() {
+      const list = document.getElementById('coursesList');
+      if (!list) return;
+      document.getElementById('courseCount').textContent = courses.length;
+      if (!courses.length) { list.innerHTML = '<div class="aempty"><i class="ic" data-ic="book"></i>No courses yet.</div>'; return; }
+      list.innerHTML = courses.map(c => `
+        <div class="aitem">
+          <div class="aitem-icon" style="background:${c.color};"><span style="font-size:18px;">${c.icon}</span></div>
+          <div class="aitem-body">
+            <div class="aitem-title">${c.title}</div>
+            <div class="aitem-sub">${c.subject || ''} · ${c.level || ''} · ${c.duration || ''}</div>
+            <div class="aitem-sub" style="margin-top:4px;color:var(--txt3);">${(c.description || '').substring(0, 80)}${(c.description || '').length > 80 ? '…' : ''}</div>
+          </div>
+          <div class="aitem-acts">
+            <button class="abtn" onclick="openCourseForm(${JSON.stringify(c).replace(/"/g, '&quot;')})"><i class="ic" data-ic="edit"></i></button>
+            <button class="abtn danger" onclick="deleteCourse(${c.id})"><i class="ic" data-ic="trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+      injectIcons(list);
+    }
+
+    // ============================================================
+    //  LECTURES CRUD
+    // ============================================================
+    function openLectureForm(data) {
+      editingLectureId = data?.id || null;
+      const wrap = document.getElementById('lectureForm');
+      if (data) {
+        document.getElementById('lfTitle').value = data.title || '';
+        document.getElementById('lfCourse').value = data.course || '';
+        document.getElementById('lfUnit').value = data.unit || '';
+        document.getElementById('lfDuration').value = data.duration || '';
+        document.getElementById('lfVideo').value = data.video || '';
+        document.getElementById('lfNotes').value = data.notes || '';
+      } else {
+        ['lfTitle', 'lfCourse', 'lfUnit', 'lfDuration', 'lfVideo', 'lfNotes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      }
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeLectureForm() {
+      document.getElementById('lectureForm').style.display = 'none';
+      editingLectureId = null;
+    }
+
+    function saveLecture() {
+      const title = document.getElementById('lfTitle').value.trim();
+      if (!title) { showToast('⚠️ Title required'); return; }
+      const payload = {
+        id: editingLectureId || ++lectureIdCounter,
+        title,
+        course: document.getElementById('lfCourse').value || 'General',
+        unit: document.getElementById('lfUnit').value || '',
+        duration: document.getElementById('lfDuration').value || '',
+        video: document.getElementById('lfVideo').value || '',
+        notes: document.getElementById('lfNotes').value || ''
+      };
+      if (editingLectureId) {
+        const idx = lectures.findIndex(l => l.id === editingLectureId);
+        if (idx !== -1) lectures[idx] = payload;
+      } else {
+        lectures.push(payload);
+      }
+      renderLectures();
+      closeLectureForm();
+      addLog('Added/Updated lecture: ' + title);
+      showToast('✅ Lecture saved');
+    }
+
+    function deleteLecture(id) {
+      if (!confirm('Delete this lecture?')) return;
+      lectures = lectures.filter(l => l.id !== id);
+      renderLectures();
+      addLog('Deleted lecture: ' + id);
+      showToast('🗑️ Deleted');
+    }
+
+    function renderLectures() {
+      const list = document.getElementById('lecturesList');
+      if (!list) return;
+      document.getElementById('lectureCount').textContent = lectures.length;
+      if (!lectures.length) { list.innerHTML = '<div class="aempty"><i class="ic" data-ic="video"></i>No lectures yet.</div>'; return; }
+      list.innerHTML = lectures.map(l => `
+        <div class="aitem">
+          <div class="aitem-icon"><i class="ic" data-ic="video"></i></div>
+          <div class="aitem-body">
+            <div class="aitem-title">${l.title}</div>
+            <div class="aitem-sub">${l.course} · ${l.unit} · ${l.duration}</div>
+            <div class="aitem-sub" style="margin-top:4px;color:var(--txt3);">${l.video ? '📹 Video attached' : '📝 Notes only'}</div>
+          </div>
+          <div class="aitem-acts">
+            <button class="abtn" onclick="openLectureForm(${JSON.stringify(l).replace(/"/g, '&quot;')})"><i class="ic" data-ic="edit"></i></button>
+            <button class="abtn danger" onclick="deleteLecture(${l.id})"><i class="ic" data-ic="trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+      injectIcons(list);
+    }
+
+    // ============================================================
+    //  QUIZ CRUD
+    // ============================================================
+    function openQuestionForm(data) {
+      const wrap = document.getElementById('questionForm');
+      if (data) {
+        document.getElementById('qfQ').value = data.question || '';
+        document.getElementById('qfA').value = data.options?.[0] || '';
+        document.getElementById('qfB').value = data.options?.[1] || '';
+        document.getElementById('qfC').value = data.options?.[2] || '';
+        document.getElementById('qfD').value = data.options?.[3] || '';
+        document.getElementById('qfAns').value = data.correct || 'A';
+        document.getElementById('qfSubject').value = data.subject || 'cpp';
+        document.getElementById('qfDiff').value = data.difficulty || 'medium';
+        document.getElementById('qfExp').value = data.explanation || '';
+      } else {
+        ['qfQ', 'qfA', 'qfB', 'qfC', 'qfD', 'qfExp'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('qfAns').value = 'A';
+        document.getElementById('qfSubject').value = 'cpp';
+        document.getElementById('qfDiff').value = 'medium';
+      }
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeQuestionForm() {
+      document.getElementById('questionForm').style.display = 'none';
+    }
+
+    function saveQuestion() {
+      const q = document.getElementById('qfQ').value.trim();
+      if (!q) { showToast('⚠️ Question required'); return; }
+      const payload = {
+        id: ++quizIdCounter,
+        question: q,
+        options: [document.getElementById('qfA').value || '', document.getElementById('qfB').value || '', document.getElementById('qfC').value || '', document.getElementById('qfD').value || ''],
+        correct: document.getElementById('qfAns').value || 'A',
+        subject: document.getElementById('qfSubject').value || 'cpp',
+        difficulty: document.getElementById('qfDiff').value || 'medium',
+        explanation: document.getElementById('qfExp').value || ''
+      };
+      quizQuestions.push(payload);
+      renderQuestions();
+      closeQuestionForm();
+      addLog('Added question: ' + q.substring(0, 40) + '…');
+      showToast('✅ Question saved');
+    }
+
+    function deleteQuestion(id) {
+      if (!confirm('Delete this question?')) return;
+      quizQuestions = quizQuestions.filter(q => q.id !== id);
+      renderQuestions();
+      addLog('Deleted question: ' + id);
+      showToast('🗑️ Deleted');
+    }
+
+    function renderQuestions() {
+      const list = document.getElementById('questionsList');
+      if (!list) return;
+      document.getElementById('quizCount').textContent = quizQuestions.length;
+      if (!quizQuestions.length) { list.innerHTML = '<div class="aempty"><i class="ic" data-ic="question"></i>No questions yet.</div>'; return; }
+      list.innerHTML = quizQuestions.map(q => `
+        <div class="aitem">
+          <div class="aitem-icon"><i class="ic" data-ic="question"></i></div>
+          <div class="aitem-body">
+            <div class="aitem-title">${q.question.substring(0, 70)}${q.question.length > 70 ? '…' : ''}</div>
+            <div class="aitem-sub">Correct: <strong style="color:var(--accent2);">${q.correct}</strong> · ${q.subject} · ${q.difficulty}</div>
+          </div>
+          <div class="aitem-acts">
+            <button class="abtn" onclick="openQuestionForm(${JSON.stringify(q).replace(/"/g, '&quot;')})"><i class="ic" data-ic="edit"></i></button>
+            <button class="abtn danger" onclick="deleteQuestion(${q.id})"><i class="ic" data-ic="trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+      injectIcons(list);
+    }
+
+    function bulkImportQuestions() {
+      const count = prompt('How many questions to generate? (5-50)', '10');
+      if (!count) return;
+      const n = parseInt(count);
+      if (isNaN(n) || n < 1 || n > 50) { showToast('⚠️ Enter 5-50'); return; }
+      const subjects = ['cpp', 'logic', 'calculus', 'prob', 'de', 'physics', 'discrete', 'cf'];
+      const difficulties = ['easy', 'medium', 'hard'];
+      for (let i = 0; i < n; i++) {
+        const subj = subjects[Math.floor(Math.random() * subjects.length)];
+        const diff = difficulties[Math.floor(Math.random() * difficulties.length)];
+        quizQuestions.push({
+          id: ++quizIdCounter,
+          question: `Question ${quizIdCounter}: This is a sample ${subj} question?`,
+          options: ['Option A', 'Option B', 'Option C', 'Option D'],
+          correct: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)],
+          subject: subj,
+          difficulty: diff,
+          explanation: 'This is an auto-generated question for testing.'
+        });
+      }
+      renderQuestions();
+      addLog(`Bulk imported ${n} questions`);
+      showToast(`✅ Imported ${n} questions`);
+    }
+
+    // ============================================================
+    //  FLASHCARDS CRUD
+    // ============================================================
+    function openFlashcardForm(data) {
+      editingFlashcardId = data?.id || null;
+      const wrap = document.getElementById('flashcardForm');
+      if (data) {
+        document.getElementById('ffFront').value = data.front || '';
+        document.getElementById('ffBack').value = data.back || '';
+        document.getElementById('ffCategory').value = data.category || '';
+        document.getElementById('ffSubject').value = data.subject || 'cpp';
+      } else {
+        ['ffFront', 'ffBack', 'ffCategory'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('ffSubject').value = 'cpp';
+      }
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeFlashcardForm() {
+      document.getElementById('flashcardForm').style.display = 'none';
+      editingFlashcardId = null;
+    }
+
+    function saveFlashcard() {
+      const front = document.getElementById('ffFront').value.trim();
+      const back = document.getElementById('ffBack').value.trim();
+      if (!front || !back) { showToast('⚠️ Both front and back required'); return; }
+      const payload = {
+        id: editingFlashcardId || ++flashcardIdCounter,
+        front,
+        back,
+        category: document.getElementById('ffCategory').value.trim() || 'General',
+        subject: document.getElementById('ffSubject').value || 'cpp'
+      };
+      if (editingFlashcardId) {
+        const idx = flashcards.findIndex(f => f.id === editingFlashcardId);
+        if (idx !== -1) flashcards[idx] = payload;
+      } else {
+        flashcards.push(payload);
+      }
+      renderFlashcards();
+      closeFlashcardForm();
+      addLog('Added/Updated flashcard: ' + front);
+      showToast('✅ Flashcard saved');
+    }
+
+    function deleteFlashcard(id) {
+      if (!confirm('Delete this flashcard?')) return;
+      flashcards = flashcards.filter(f => f.id !== id);
+      renderFlashcards();
+      addLog('Deleted flashcard: ' + id);
+      showToast('🗑️ Deleted');
+    }
+
+    function renderFlashcards() {
+      const list = document.getElementById('flashcardsList');
+      if (!list) return;
+      document.getElementById('flashcardCount').textContent = flashcards.length;
+      if (!flashcards.length) { list.innerHTML = '<div class="aempty"><i class="ic" data-ic="layer-group"></i>No flashcards yet.</div>'; return; }
+      list.innerHTML = flashcards.map(f => `
+        <div class="aitem">
+          <div class="aitem-icon"><i class="ic" data-ic="layer-group"></i></div>
+          <div class="aitem-body">
+            <div class="aitem-title">${f.front}</div>
+            <div class="aitem-sub">${f.back} · ${f.category} · ${f.subject}</div>
+          </div>
+          <div class="aitem-acts">
+            <button class="abtn" onclick="openFlashcardForm(${JSON.stringify(f).replace(/"/g, '&quot;')})"><i class="ic" data-ic="edit"></i></button>
+            <button class="abtn danger" onclick="deleteFlashcard(${f.id})"><i class="ic" data-ic="trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+      injectIcons(list);
+    }
+
+    function generateFlashcards() {
+      const count = prompt('How many AI-generated flashcards to create? (3-20)', '10');
+      if (!count) return;
+      const n = parseInt(count);
+      if (isNaN(n) || n < 1 || n > 20) { showToast('⚠️ Enter 3-20'); return; }
+      const subjects = ['cpp', 'logic', 'calculus', 'prob', 'de', 'physics', 'discrete', 'cf'];
+      const categories = ['Syntax', 'Concepts', 'Definitions', 'Examples', 'Tricks'];
+      for (let i = 0; i < n; i++) {
+        const subj = subjects[Math.floor(Math.random() * subjects.length)];
+        flashcards.push({
+          id: ++flashcardIdCounter,
+          front: `Term ${flashcardIdCounter}: Sample ${subj} concept`,
+          back: `Definition for sample ${subj} concept #${i+1}`,
+          category: categories[Math.floor(Math.random() * categories.length)],
+          subject: subj
+        });
+      }
+      renderFlashcards();
+      addLog(`AI generated ${n} flashcards`);
+      showToast(`✅ Generated ${n} flashcards`);
+    }
+
+    // ============================================================
+    //  USERS
+    // ============================================================
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTbody');
+      if (!tbody) return;
+      document.getElementById('userCount').textContent = users.length;
+      if (!users || !users.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--txt3);">No users</td></tr>'; return; }
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td style="color:var(--txt2);">${u.email}</td>
+          <td><span class="badg ${u.role === 'admin' ? 'badg-warn' : u.role === 'moderator' ? 'badg' : 'badg-ok'}">${u.role}</span></td>
+          <td style="color:var(--txt3);font-size:12px;">${u.joined}</td>
+          <td><span class="badg ${u.status === 'active' ? 'badg-ok' : 'badg-err'}">${u.status}</span></td>
+          <td>
+            <button class="abtn btn-sm" onclick="toggleUserStatus(${u.id})" style="padding:4px 10px;font-size:11px;">${u.status === 'active' ? 'Deactivate' : 'Activate'}</button>
+            <button class="abtn btn-sm danger" onclick="deleteUser(${u.id})" style="padding:4px 10px;font-size:11px;"><i class="ic" data-ic="trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      injectIcons(tbody);
+    }
+
+    function filterUsers(q) {
+      renderUsers(allUsers.filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase())));
+    }
+
+    function loadUsers(filter) {
+      let filtered = allUsers;
+      if (filter === 'active') filtered = allUsers.filter(u => u.status === 'active');
+      else if (filter === 'inactive') filtered = allUsers.filter(u => u.status === 'inactive');
+      else if (filter === 'admin') filtered = allUsers.filter(u => u.role === 'admin' || u.role === 'moderator');
+      renderUsers(filtered);
+      document.getElementById('userFilterInfo').textContent = `Showing ${filtered.length} users`;
+    }
+
+    function toggleUserStatus(id) {
+      const user = allUsers.find(u => u.id === id);
+      if (user) {
+        user.status = user.status === 'active' ? 'inactive' : 'active';
+        renderUsers(allUsers);
+        addLog(`User ${user.name} → ${user.status}`);
+        showToast(`✅ User ${user.status}`);
+      }
+    }
+
+    function deleteUser(id) {
+      if (!confirm('Delete this user?')) return;
+      allUsers = allUsers.filter(u => u.id !== id);
+      renderUsers(allUsers);
+      addLog('Deleted user: ' + id);
+      showToast('🗑️ Deleted');
+    }
+
+    function exportUsers() {
+      let csv = 'Name,Email,Role,Status,Joined\n';
+      allUsers.forEach(u => { csv += `${u.name},${u.email},${u.role},${u.status},${u.joined}\n`; });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `users_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      showToast('📥 Users exported');
+    }
+
+    // ============================================================
+    //  ADMINS
+    // ============================================================
+    function openAdminForm(data) {
+      const wrap = document.getElementById('adminForm');
+      if (data) {
+        document.getElementById('afEmail').value = data.email || '';
+        document.getElementById('afName').value = data.name || '';
+        document.getElementById('afRole').value = data.role || 'moderator';
+      } else {
+        ['afEmail', 'afName'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('afRole').value = 'moderator';
+      }
+      wrap.style.display = 'block';
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeAdminForm() {
+      document.getElementById('adminForm').style.display = 'none';
+    }
+
+    function saveAdmin() {
+      const email = document.getElementById('afEmail').value.trim();
+      const name = document.getElementById('afName').value.trim();
+      if (!email || !name) { showToast('⚠️ Email and name required'); return; }
+      allAdmins.push({
+        id: allAdmins.length + 1,
+        name,
+        email,
+        role: document.getElementById('afRole').value || 'moderator',
+        joined: new Date().toISOString().slice(0, 10)
+      });
+      renderAdmins(allAdmins);
+      closeAdminForm();
+      addLog('Added admin: ' + name);
+      showToast('✅ Admin added');
+    }
+
+    function deleteAdmin(id) {
+      if (!confirm('Remove this admin?')) return;
+      allAdmins = allAdmins.filter(a => a.id !== id);
+      renderAdmins(allAdmins);
+      addLog('Removed admin: ' + id);
+      showToast('🗑️ Removed');
+    }
+
+    function renderAdmins(admins) {
+      const list = document.getElementById('adminsList');
+      if (!list) return;
+      document.getElementById('adminCount').textContent = admins.length;
+      if (!admins.length) { list.innerHTML = '<div class="aempty"><i class="ic" data-ic="shield"></i>No admins.</div>'; return; }
+      list.innerHTML = admins.map(a => `
+        <div class="aitem">
+          <div class="aitem-icon"><i class="ic" data-ic="shield"></i></div>
+          <div class="aitem-body">
+            <div class="aitem-title">${a.name} <span class="badg badg-warn">${a.role}</span></div>
+            <div class="aitem-sub">${a.email} · Joined ${a.joined}</div>
+          </div>
+          <div class="aitem-acts">
+            <button class="abtn" onclick="openAdminForm(${JSON.stringify(a).replace(/"/g, '&quot;')})"><i class="ic" data-ic="edit"></i></button>
+            <button class="abtn danger" onclick="deleteAdmin(${a.id})"><i class="ic" data-ic="trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+      injectIcons(list);
+    }
+
+    // ============================================================
+    //  LOGS
+    // ============================================================
+    function addLog(action, details = '') {
+      logs.unshift({
+        time: new Date().toLocaleString(),
+        user: 'Admin',
+        action,
+        details
+      });
+      if (logs.length > 100) logs.pop();
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const tbody = document.getElementById('logsTbody');
+      if (!tbody) return;
+      if (!logs.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--txt3);">No logs</td></tr>'; return; }
+      tbody.innerHTML = logs.slice(0, 30).map(l => `
+        <tr>
+          <td style="color:var(--txt2);font-size:12px;">${l.time}</td>
+          <td style="color:var(--txt2);">${l.user}</td>
+          <td><span class="badg badg-ok">${l.action}</span></td>
+          <td style="color:var(--txt3);">${l.details || '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function refreshLogs() { renderLogs(); showToast('✅ Logs refreshed'); }
+    function clearLogs() { if (!confirm('Clear all logs?')) return; logs = []; renderLogs(); showToast('🗑️ Logs cleared'); }
+
+    // ============================================================
+    //  ANALYTICS
+    // ============================================================
+    function refreshAnalytics() {
+      // In demo mode, just update the numbers
+      document.getElementById('analyticsUsers').textContent = allUsers.length;
+      document.getElementById('analyticsRetention').textContent = Math.floor(60 + Math.random() * 20) + '%';
+      document.getElementById('analyticsAvgScore').textContent = Math.floor(65 + Math.random() * 20) + '%';
+      showToast('📊 Analytics refreshed');
+    }
+
+    function exportAnalytics() {
+      showToast('📊 Analytics report exported (simulated)');
+    }
+
+    // ============================================================
+    //  SETTINGS
+    // ============================================================
+    function saveSettings() {
+      const theme = document.getElementById('stTheme').value;
+      if (theme !== savedTheme) setTheme(theme, document.getElementById('td-' + theme));
+      addLog('Settings updated');
+      showToast('✅ Settings saved');
+    }
+
+    function clearCache() {
+      if (!confirm('Clear all cached data?')) return;
+      showToast('🧹 Cache cleared (simulated)');
+    }
+
+    function resetAll() {
+      if (!confirm('⚠️ This will delete ALL data. Are you sure?')) return;
+      if (!confirm('Really? This cannot be undone.')) return;
+      courses = [];
+      lectures = [];
+      quizQuestions = [];
+      flashcards = [];
+      logs = [];
+      renderCourses();
+      renderLectures();
+      renderQuestions();
+      renderFlashcards();
+      renderLogs();
+      addLog('⚠️ ALL DATA RESET');
+      showToast('💀 All data reset');
+    }
+
+    function backupData() {
+      const data = { courses, lectures, quizQuestions, flashcards, users: allUsers, admins: allAdmins, logs };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `edumoe_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      addLog('Backup created');
+      showToast('📦 Backup downloaded');
+    }
+
+    function exportData() {
+      const data = { courses, lectures, quizQuestions, flashcards, users: allUsers, admins: allAdmins, logs };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `edumoe_export_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      showToast('📥 Data exported');
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    let toastTimer;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast'), m = document.getElementById('toastMsg');
+      if (!t || !m) return;
+      m.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ============================================================
+    //  KEYBOARD SHORTCUTS
+    // ============================================================
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const active = document.querySelector('.asec.active');
+        if (active) {
+          if (active.id === 'sec-courses') saveCourse();
+          else if (active.id === 'sec-lectures') saveLecture();
+          else if (active.id === 'sec-quiz') saveQuestion();
+          else if (active.id === 'sec-flashcards') saveFlashcard();
+          else if (active.id === 'sec-settings') saveSettings();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Q') {
+        e.preventDefault();
+        const active = document.querySelector('.asec.active');
+        if (active) {
+          if (active.id === 'sec-courses') openCourseForm();
+          else if (active.id === 'sec-lectures') openLectureForm();
+          else if (active.id === 'sec-quiz') openQuestionForm();
+          else if (active.id === 'sec-flashcards') openFlashcardForm();
+        }
+      }
+    });
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      injectIcons();
+      renderCourses();
+      renderLectures();
+      renderQuestions();
+      renderFlashcards();
+      renderUsers(allUsers);
+      renderAdmins(allAdmins);
+      renderLogs();
+      renderCharts();
+      refreshAnalytics();
+      console.log('🔐 EDUMOE Ultimate Admin Panel (Demo Mode) loaded.');
+    });
+
+    // Expose functions globally
+    window.setTheme = setTheme;
+    window.setCustomTheme = setCustomTheme;
+    window.toggleCRT = toggleCRT;
+    window.showSection = showSection;
+    window.refreshAll = refreshAll;
+    window.exportData = exportData;
+    window.openCourseForm = openCourseForm;
+    window.closeCourseForm = closeCourseForm;
+    window.saveCourse = saveCourse;
+    window.deleteCourse = deleteCourse;
+    window.openLectureForm = openLectureForm;
+    window.closeLectureForm = closeLectureForm;
+    window.saveLecture = saveLecture;
+    window.deleteLecture = deleteLecture;
+    window.openQuestionForm = openQuestionForm;
+    window.closeQuestionForm = closeQuestionForm;
+    window.saveQuestion = saveQuestion;
+    window.deleteQuestion = deleteQuestion;
+    window.bulkImportQuestions = bulkImportQuestions;
+    window.openFlashcardForm = openFlashcardForm;
+    window.closeFlashcardForm = closeFlashcardForm;
+    window.saveFlashcard = saveFlashcard;
+    window.deleteFlashcard = deleteFlashcard;
+    window.generateFlashcards = generateFlashcards;
+    window.loadUsers = loadUsers;
+    window.filterUsers = filterUsers;
+    window.toggleUserStatus = toggleUserStatus;
+    window.deleteUser = deleteUser;
+    window.exportUsers = exportUsers;
+    window.openAdminForm = openAdminForm;
+    window.closeAdminForm = closeAdminForm;
+    window.saveAdmin = saveAdmin;
+    window.deleteAdmin = deleteAdmin;
+    window.refreshLogs = refreshLogs;
+    window.clearLogs = clearLogs;
+    window.refreshAnalytics = refreshAnalytics;
+    window.exportAnalytics = exportAnalytics;
+    window.saveSettings = saveSettings;
+    window.clearCache = clearCache;
+    window.resetAll = resetAll;
+    window.backupData = backupData;
+    window.showToast = showToast;
+  </script>
+</body>
+</html>

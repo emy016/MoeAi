@@ -1,26 +1,62 @@
+import { readdirSync } from "node:fs";
+import path from "node:path";
 import type { NextConfig } from "next";
 
-const config: NextConfig = {
+/**
+ * The EduMoe pages are plain HTML in public/ — no React, no hydration, which is
+ * why they feel instant and the glass blur stays smooth.
+ *
+ * Next serves them at their literal path (/courses.html) and has no route for
+ * /courses, so the clean URLs are declared here rather than left to Vercel's
+ * `cleanUrls`. Two reasons: this works identically in `next start`, so it can
+ * be tested before deploying, and `/` needs an explicit mapping either way
+ * since there is no app/page.tsx.
+ *
+ * Generated from what is actually in public/, so adding a page is just adding
+ * the file.
+ */
+function htmlPages(): string[] {
+  try {
+    return readdirSync(path.join(process.cwd(), "public"))
+      .filter((file) => file.endsWith(".html"))
+      .map((file) => file.replace(/\.html$/, ""));
+  } catch {
+    return [];
+  }
+}
+
+const pages = htmlPages();
+
+const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  devIndicators: false,
   // Source maps are a "this was vibecoded" giveaway and leak your logic.
   productionBrowserSourceMaps: false,
-  poweredByHeader: false,
-  compress: true,
-  async headers() {
+  // Read at runtime by the MoeAI route, so it has to be traced into the
+  // serverless bundle rather than left behind at build time.
+  outputFileTracingIncludes: {
+    "/api/moeai": ["./lib/moeai/personality.md", "./prompts/**"],
+  },
+
+  async rewrites() {
     return [
-      {
-        source: "/:path*",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-        ],
-      },
+      { source: "/", destination: "/index.html" },
+      ...pages
+        .filter((page) => page !== "index")
+        .map((page) => ({ source: `/${page}`, destination: `/${page}.html` })),
+    ];
+  },
+
+  // One canonical address per page: /courses.html sends you to /courses, which
+  // then serves the file internally without changing the URL again.
+  async redirects() {
+    return [
+      { source: "/index.html", destination: "/", permanent: true },
+      ...pages
+        .filter((page) => page !== "index")
+        .map((page) => ({ source: `/${page}.html`, destination: `/${page}`, permanent: true })),
     ];
   },
 };
 
-export default config;
+export default nextConfig;
