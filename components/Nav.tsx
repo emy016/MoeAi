@@ -2,6 +2,7 @@
 // Desktop top navigation. Hidden below 768px, where BottomBar takes over.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AuthButton from "./AuthButton";
 
 // MoeAI and the library come first: the tutor is the product, EduMoe is the
 // environment around it.
@@ -37,6 +38,8 @@ export default function Nav() {
         </ul>
       </nav>
 
+      <AuthButton />
+
       <style jsx>{`
         .nav {
           display: none;
@@ -56,6 +59,7 @@ export default function Nav() {
         @media (min-width: 768px) { .nav { display: flex; } }
 
         .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; }
+        nav { flex: 1; display: flex; justify-content: center; }
         .mark {
           width: 22px; height: 22px; border-radius: 6px;
           background: var(--gradient);
