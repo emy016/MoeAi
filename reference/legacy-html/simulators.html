@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EDUMOE · Ultimate Simulators</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Nerdamer CAS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/all.min.js"></script>
+  <script>
+    if (typeof nerdamer === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/all.min.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    /* =============================================================
+       EDUMOE V2 – ULTIMATE SIMULATORS (FUE-ALIGNED)
+       6 tabs: Logic | C++ | Probability | Calculus | Discrete | Physics
+       ============================================================= */
+    :root {
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a2a;
+      --accent: #e11d48;
+      --accent2: #f43f5e;
+      --accent3: #fb7185;
+      --accent-glow: rgba(225,29,72,0.35);
+      --glow: rgba(225,29,72,0.28);
+      --glow2: rgba(225,29,72,0.12);
+      --glass-border: rgba(225,29,72,0.18);
+      --glass-border2: rgba(225,29,72,0.32);
+      --txt1: #fff0f5;
+      --txt2: rgba(255,192,208,0.75);
+      --txt3: rgba(192,128,144,0.50);
+      --tint: rgba(225,29,72,0.05);
+      --tint2: rgba(225,29,72,0.10);
+      --tint3: rgba(225,29,72,0.18);
+      --c-glass: #c8a0a8;
+      --c-light: #ffe0e8;
+      --c-dark: #300010;
+      --reflex-l: 0.45;
+      --reflex-d: 1.7;
+      --sat: 190%;
+      --glass-blur: 14px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.3);
+      --wire-off: #4a4a58;
+      --wire-on: #4fff8f;
+      --ok: #4fff8f;
+      --okbg: rgba(79,255,143,0.12);
+      --okbd: rgba(79,255,143,0.35);
+      --no: #ff6b6b;
+      --nobg: rgba(255,107,107,0.10);
+    }
+
+    [data-theme="lava"] { --bg1:#0c0c0e;--bg2:#161618;--bg3:#202024;--accent:#ff5a1f;--accent2:#ff8c42;--accent3:#ffb347;--accent-glow:rgba(255,90,31,0.35);--glow:rgba(255,90,31,0.28);--glow2:rgba(255,90,31,0.12);--glass-border:rgba(255,90,31,0.18);--glass-border2:rgba(255,90,31,0.32);--txt1:#fff;--txt2:rgba(255,255,255,0.70);--txt3:rgba(255,255,255,0.40);--tint:rgba(255,255,255,0.05);--tint2:rgba(255,255,255,0.10);--tint3:rgba(255,255,255,0.18);--c-glass:#c8c8c9;--c-light:#fff;--c-dark:#000;--reflex-l:0.35;--reflex-d:1.8;--sat:180%; }
+    [data-theme="space"] { --bg1:#000;--bg2:#0a0a14;--bg3:#141428;--accent:#7c3aed;--accent2:#a855f7;--accent3:#c084fc;--accent-glow:rgba(124,58,237,0.35);--glow:rgba(124,58,237,0.28);--glow2:rgba(124,58,237,0.12);--glass-border:rgba(124,58,237,0.18);--glass-border2:rgba(124,58,237,0.32);--txt1:#f0e8ff;--txt2:#c8b0ff;--txt3:#a080e0;--tint:rgba(124,58,237,0.05);--tint2:rgba(124,58,237,0.10);--tint3:rgba(124,58,237,0.18);--c-glass:#b0a0d0;--c-light:#e8d8ff;--c-dark:#1a0030;--reflex-l:0.50;--reflex-d:1.6;--sat:200%; }
+    [data-theme="oxford"] { --bg1:#000510;--bg2:#020a18;--bg3:#081530;--accent:#00d4ff;--accent2:#00f0ff;--accent3:#80f8ff;--accent-glow:rgba(0,212,255,0.35);--glow:rgba(0,212,255,0.28);--glow2:rgba(0,212,255,0.12);--glass-border:rgba(0,212,255,0.18);--glass-border2:rgba(0,212,255,0.32);--txt1:#e0fcff;--txt2:#80d8f0;--txt3:#40b0d0;--tint:rgba(0,212,255,0.05);--tint2:rgba(0,212,255,0.10);--tint3:rgba(0,212,255,0.18);--c-glass:#80e8f8;--c-light:#e0fcff;--c-dark:#000810;--reflex-l:0.55;--reflex-d:1.5;--sat:200%; }
+    [data-theme="gray"] { --bg1:#0f0f12;--bg2:#18181b;--bg3:#22222a;--accent:#6b7280;--accent2:#9ca3af;--accent3:#d1d5db;--accent-glow:rgba(107,114,128,0.35);--glow:rgba(107,114,128,0.28);--glow2:rgba(107,114,128,0.12);--glass-border:rgba(107,114,128,0.18);--glass-border2:rgba(107,114,128,0.32);--txt1:#f3f4f6;--txt2:#9ca3af;--txt3:#6b7280;--tint:rgba(107,114,128,0.05);--tint2:rgba(107,114,128,0.10);--tint3:rgba(107,114,128,0.18);--c-glass:#c8c8c9;--c-light:#fff;--c-dark:#000;--reflex-l:0.35;--reflex-d:1.8;--sat:120%; }
+    [data-theme="light"] { --bg1:#fff;--bg2:#f4f4f6;--bg3:#e8e8ec;--accent:#111;--accent2:#333;--accent3:#555;--accent-glow:rgba(0,0,0,0.12);--glow:rgba(0,0,0,0.12);--glow2:rgba(0,0,0,0.06);--glass-border:rgba(0,0,0,0.10);--glass-border2:rgba(0,0,0,0.20);--txt1:#1a1a1a;--txt2:#555;--txt3:#888;--tint:rgba(0,0,0,0.03);--tint2:rgba(0,0,0,0.06);--tint3:rgba(0,0,0,0.12);--c-glass:#000;--c-light:#fff;--c-dark:#000;--reflex-l:0.06;--reflex-d:0.6;--sat:100%; }
+    [data-theme="custom"] { --bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a2a;--accent:var(--custom-accent,#e11d48);--accent2:var(--custom-accent2,#f43f5e);--accent3:var(--custom-accent3,#fb7185);--accent-glow:var(--custom-glow,rgba(225,29,72,0.35));--glow:var(--custom-glow,rgba(225,29,72,0.28));--glow2:var(--custom-glow2,rgba(225,29,72,0.12));--glass-border:var(--custom-border,rgba(225,29,72,0.18));--glass-border2:var(--custom-border2,rgba(225,29,72,0.32));--txt1:#fff0f5;--txt2:#ffc0d0;--txt3:#c08090;--tint:var(--custom-tint,rgba(225,29,72,0.05));--tint2:var(--custom-tint2,rgba(225,29,72,0.10));--tint3:var(--custom-tint3,rgba(225,29,72,0.18));--c-glass:#c8a0a8;--c-light:#ffe0e8;--c-dark:#300010;--reflex-l:0.45;--reflex-d:1.7;--sat:190%; }
+    [data-theme="terminal"] { --bg1:#050a05;--bg2:#071007;--bg3:#0a180a;--accent:#4fff8f;--accent2:#6effa0;--accent3:#9dffc0;--accent-glow:rgba(79,255,143,0.35);--glow:rgba(79,255,143,0.28);--glow2:rgba(79,255,143,0.10);--glass-border:rgba(79,255,143,0.18);--glass-border2:rgba(79,255,143,0.32);--txt1:#b8ffcf;--txt2:#4fff8f;--txt3:#2f8f57;--tint:rgba(79,255,143,0.04);--tint2:rgba(79,255,143,0.08);--tint3:rgba(79,255,143,0.14);--c-glass:#4fff8f;--c-light:#b8ffcf;--c-dark:#001a08;--reflex-l:0.20;--reflex-d:1.2;--sat:130%;--glass-blur:8px;--shadow:0 8px 32px rgba(0,0,0,0.6); }
+    [data-theme="terminal"] body,.brand,.tab,.gate-btn { font-family:'Fira Code',monospace !important;letter-spacing:0 !important; }
+    [data-theme="terminal"] .brand-mark { background:var(--accent)!important;color:#000!important; }
+
+    .crt-overlay { display:none;position:fixed;inset:0;z-index:9998;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.10)0px,rgba(0,0,0,0.10)1px,transparent 1px,transparent 3px);mix-blend-mode:multiply; }
+    [data-theme="terminal"] .crt-overlay { display:block; }
+    [data-theme="terminal"]:not(.no-crt) body { animation:crt-flicker 4s infinite; }
+    @keyframes crt-flicker { 0%,95%,100%{opacity:1}96%{opacity:0.94}98%{opacity:0.98} }
+    html.no-crt .crt-overlay { display:none!important; }
+    html.no-crt [data-theme="terminal"] body { animation:none!important; }
+    @media(prefers-reduced-motion:reduce){ [data-theme="terminal"] body{animation:none!important}.crt-overlay{background:none} }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg1);color:var(--txt1);min-height:100vh;overflow-x:hidden;transition:background .5s ease,color .4s ease;padding-bottom:72px}
+    .ic{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;vertical-align:-.125em}
+    .ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .ic.fill svg{fill:currentColor;stroke:none}
+    .lg{position:relative;isolation:isolate}
+    .lg-effect{position:absolute;inset:0;z-index:0;border-radius:inherit;backdrop-filter:blur(var(--glass-blur,14px)) saturate(var(--sat));-webkit-backdrop-filter:blur(var(--glass-blur,14px)) saturate(var(--sat));overflow:hidden}
+    .lg-tint{position:absolute;inset:0;z-index:1;border-radius:inherit;background:var(--tint);transition:background .4s ease}
+    .lg-shine{position:absolute;inset:0;z-index:2;border-radius:inherit;overflow:hidden;box-shadow:inset 2px 3px 0 -1.5px color-mix(in srgb,var(--c-light) calc(var(--reflex-l)*90%),transparent),inset 0 0 0 1px color-mix(in srgb,var(--c-light) calc(var(--reflex-l)*12%),transparent),inset -2px -2px 0 -1px color-mix(in srgb,var(--c-light) calc(var(--reflex-l)*70%),transparent),inset -2px -7px 1px -5px color-mix(in srgb,var(--c-light) calc(var(--reflex-l)*55%),transparent),inset 0 -1px 4px 0 color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*10%),transparent),inset -1.5px 2.5px 0 -2px color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*18%),transparent),inset 0 3px 5px -2px color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*16%),transparent),inset 2px -6px 1px -4px color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*8%),transparent),0 1px 6px 0 color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*10%),transparent),0 8px 20px 0 color-mix(in srgb,var(--c-dark) calc(var(--reflex-d)*8%),transparent),0 0 40px -10px var(--glow2)}
+    .lg>:not(.lg-effect):not(.lg-tint):not(.lg-shine){position:relative;z-index:3}
+    .lg-pill{border-radius:999px}
+    .lg-card{border-radius:var(--radius-lg)}
+    .lg-panel{border-radius:var(--radius-xl)}
+
+    .topbar{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--glass-border);background:var(--bg2);position:sticky;top:0;z-index:100;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em;text-decoration:none;color:var(--txt1);font-size:18px}
+    .brand-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-size:14px;box-shadow:0 4px 12px var(--accent-glow)}
+    .brand small{color:var(--txt3);font-weight:500;font-size:12px}
+    .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .theme-switcher{display:flex;align-items:center;gap:4px;padding:4px 6px;border:1px solid var(--glass-border);border-radius:999px;background:var(--tint);flex-wrap:wrap}
+    .theme-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid transparent;cursor:pointer;transition:transform .2s,border-color .2s;flex-shrink:0}
+    .theme-dot:hover{transform:scale(1.25)}
+    .theme-dot.active{border-color:var(--txt1);transform:scale(1.1)}
+    .td-ruby{background:#e11d48}.td-lava{background:#ff5a1f}.td-space{background:#7c3aed}.td-oxford{background:#00d4ff}.td-gray{background:#6b7280}.td-light{background:#ddd;border:1px solid #aaa}.td-terminal{background:#4fff8f;box-shadow:0 0 8px rgba(79,255,143,0.6)}
+    .custom-color-wrap{position:relative;width:20px;height:20px;border-radius:50%;overflow:hidden;border:2px solid var(--glass-border);cursor:pointer;flex-shrink:0;background:var(--accent)}
+    .custom-color-wrap input[type=color]{position:absolute;top:-4px;left:-4px;width:calc(100%+8px);height:calc(100%+8px);border:none;padding:0;cursor:pointer;background:none}
+    .custom-color-wrap input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+    .custom-color-wrap input[type=color]::-webkit-color-swatch{border:none;border-radius:50%}
+    .crt-toggle{display:none;width:28px;height:28px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint2);color:var(--txt2);cursor:pointer;font-size:12px;align-items:center;justify-content:center;transition:all .2s}
+    .crt-toggle:hover{color:var(--txt1);border-color:var(--accent2)}
+    [data-theme="terminal"] .crt-toggle{display:inline-flex}
+    .crt-toggle.off{opacity:.4}
+    .btn-back{padding:7px 14px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+    .btn-back:hover{background:var(--tint2);color:var(--txt1);border-color:var(--accent2)}
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);cursor:pointer;font-family:inherit;text-decoration:none;transition:all .16s}
+    .btn:hover{border-color:var(--accent2);background:var(--tint2);transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;box-shadow:0 4px 14px var(--accent-glow)}
+    .btn-primary:hover{box-shadow:0 6px 24px var(--accent-glow);transform:translateY(-2px)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-danger{border-color:rgba(239,68,68,0.3);color:#f87171}
+    .btn-danger:hover{background:rgba(239,68,68,0.12);border-color:#ef4444}
+
+    .wrap{max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;flex-direction:column}
+    .page-head{flex-shrink:0;margin-bottom:26px}
+    .page-head h1{font-size:32px;font-weight:900;letter-spacing:-.03em;display:flex;align-items:center;gap:12px}
+    .page-head h1 .ic{color:var(--accent2)}
+    .page-head p{color:var(--txt3);font-size:14px;margin-top:5px}
+    .page-head .kbd-hint{font-size:11px;color:var(--txt3);margin-top:6px;opacity:.7}
+    .page-head .kbd-hint kbd{padding:1px 6px;border-radius:4px;background:var(--tint2);border:1px solid var(--glass-border);font-family:'Fira Code',monospace;font-size:10px}
+
+    .tabs{display:flex;gap:4px;background:var(--tint);padding:4px;border-radius:12px;border:1px solid var(--glass-border);margin-bottom:26px;flex-wrap:wrap;flex-shrink:0}
+    .tab{padding:9px 18px;border-radius:9px;font-size:13.5px;font-weight:600;border:none;background:none;color:var(--txt3);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:all .18s}
+    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 12px var(--accent-glow)}
+    .tab:not(.active):hover{color:var(--txt1);background:var(--tint2)}
+    .view{display:none;flex-direction:column;flex:1;min-height:60vh}
+    .view.active{display:flex}
+
+    /* ─── LOGIC (simplified) ─── */
+    .logic-toolbar{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .logic-toolbar .sep{width:1px;height:22px;background:var(--glass-border);margin:0 4px}
+    .logic-body{flex:1;display:flex;min-height:0;background:var(--bg1);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none;overflow:hidden}
+    .palette{width:140px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--glass-border);padding:10px 8px;overflow-y:auto}
+    .palette h4{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin:8px 0 4px}
+    .gate-btn{display:flex;align-items:center;gap:6px;width:100%;padding:4px 8px;margin-bottom:3px;border-radius:6px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);cursor:grab;font-size:11px;font-weight:600;font-family:inherit;transition:all .15s;text-align:left}
+    .gate-btn:hover{border-color:var(--accent2);background:var(--tint2)}
+    .gate-btn i{width:14px;text-align:center;color:var(--accent3);font-size:10px}
+    .canvas-area{flex:1;position:relative;min-width:0;background:var(--bg1);overflow:hidden}
+    #logicCanvas{display:block;width:100%;height:100%;touch-action:none}
+    .canvas-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--txt3);background:var(--bg2);padding:3px 12px;border-radius:999px;border:1px solid var(--glass-border);pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+    .zoom-ctrl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:3px}
+    .zoom-ctrl button{width:28px;height:28px;border-radius:6px;border:1px solid var(--glass-border);background:var(--bg2);color:var(--txt1);cursor:pointer;font-size:12px}
+    .panel{width:200px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--glass-border);padding:12px;overflow-y:auto}
+    .panel h3{font-size:12px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:5px}
+    .expr-box{font-family:'Fira Code',monospace;font-size:11px;background:var(--bg1);border:1px solid var(--glass-border);border-radius:6px;padding:6px 8px;margin-bottom:10px;color:var(--wire-on);word-break:break-all;line-height:1.5;min-height:16px}
+    .tt-wrap{overflow:auto;max-height:200px;border-radius:6px;border:1px solid var(--glass-border)}
+    table.tt{width:100%;border-collapse:collapse;font-family:'Fira Code',monospace;font-size:10px}
+    table.tt th,table.tt td{padding:4px 5px;text-align:center;border-bottom:1px solid var(--glass-border)}
+    table.tt th{background:var(--tint2);color:var(--txt2);font-weight:600;position:sticky;top:0}
+    table.tt td.in-col{color:var(--txt3)}
+    table.tt td.out-1{color:var(--wire-on);font-weight:700}
+    table.tt td.out-0{color:var(--txt3)}
+    .empty-note{font-size:11px;color:var(--txt3);line-height:1.5;padding:4px 2px}
+    .legend{font-size:10px;color:var(--txt3);line-height:1.8}
+    .legend b{color:var(--txt2)}
+    .dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:3px}
+    .dot.on{background:var(--wire-on)}
+    .dot.off{background:var(--wire-off)}
+    kbd{background:var(--tint2);border:1px solid var(--glass-border);border-radius:3px;padding:1px 4px;font-family:'Fira Code',monospace;font-size:9px;color:var(--txt2)}
+
+    /* ─── C++ ─── */
+    .cpp-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .cpp-toolbar select{padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);cursor:pointer;font-family:inherit}
+    .cpp-frame{flex:1;min-height:0;background:#0d0d14;border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none;position:relative}
+    .cpp-frame iframe{width:100%;height:100%;border:none;display:block;position:absolute;top:0;left:0}
+
+    /* ─── PROBABILITY (FUE-aligned) ─── */
+    .prob-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .prob-toolbar .pill-group{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0}
+    .prob-toolbar .mode-pill{padding:6px 13px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+    .prob-toolbar .mode-pill:hover{border-color:var(--accent2);color:var(--txt1)}
+    .prob-toolbar .mode-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 3px 10px var(--accent-glow)}
+    .prob-body{flex:1;display:flex;min-height:0;background:var(--bg1);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none;overflow:hidden}
+    .prob-chart-wrap{flex:1;padding:12px;min-width:0;display:flex;flex-direction:column}
+    .prob-chart-wrap canvas{width:100%;flex:1;display:block;min-height:150px}
+    .prob-practice{flex:1;padding:16px 20px;overflow-y:auto;display:none}
+    .prob-practice.active{display:block}
+    .prob-panel{width:200px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--glass-border);padding:12px;overflow-y:auto}
+    .prob-panel .stat-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+    .prob-panel .stat-row{display:flex;justify-content:space-between;font-size:11px;padding:4px 8px;border-radius:4px;background:var(--tint);border:1px solid var(--glass-border)}
+    .prob-panel .stat-row span:last-child{font-family:'Fira Code',monospace;font-weight:600;color:var(--wire-on)}
+    .prob-panel .param{display:flex;flex-direction:column;gap:2px;font-size:10px;color:var(--txt3);margin-bottom:8px}
+    .prob-panel .param label{display:flex;justify-content:space-between;font-weight:600}
+    .prob-panel .param label b{color:var(--accent3);font-family:'Fira Code',monospace}
+    .prob-panel .param input[type=range]{width:100%;accent-color:var(--accent2);cursor:pointer}
+    .prob-dist-tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+    .prob-dist-tab{padding:3px 8px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+    .prob-dist-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .prob-dist-tab:hover{border-color:var(--accent2)}
+    .prob-practice .prob-q{font-size:15px;line-height:1.5;color:var(--txt1);margin-bottom:12px}
+    .prob-practice .prob-ans-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+    .prob-practice .prob-ans-row input{padding:7px 12px;border-radius:8px;font-size:13px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);font-family:inherit;width:140px}
+    .prob-practice .prob-ans-row input:focus{outline:none;border-color:var(--accent2)}
+    .prob-practice .prob-result{margin-top:10px}
+    .prob-practice .prob-solution{margin-top:6px;font-size:12px;line-height:1.7;border-left:2px solid var(--glass-border);padding-left:10px;color:var(--wire-on)}
+    .prob-practice .prob-solution .step{font-family:'Fira Code',monospace;padding:3px 0}
+    .prob-practice .prob-tip{margin-top:10px;padding:8px 12px;border-radius:6px;background:rgba(255,180,80,0.08);border:1px solid rgba(255,180,80,0.25);font-size:12px;color:#ffd9a0}
+
+    /* ─── CALCULUS / ODE (FUE-aligned) ─── */
+    .calc-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .calc-toolbar select{padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);cursor:pointer;font-family:inherit}
+    .calc-input{flex:1;min-width:120px;padding:7px 12px;border-radius:8px;border:1px solid var(--glass-border);background:var(--bg1);color:var(--txt1);font-family:'Fira Code',monospace;font-size:13px}
+    .calc-input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px var(--tint3)}
+    .calc-input.mini{flex:none;width:60px;min-width:0;text-align:center}
+    .calc-extra{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .calc-extra label{font-size:11px;color:var(--txt3);display:flex;align-items:center;gap:4px}
+    .calc-presets{display:flex;gap:3px;flex-wrap:wrap}
+    .calc-presets button{padding:3px 8px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:10px;font-family:'Fira Code',monospace;cursor:pointer;transition:all .15s}
+    .calc-presets button:hover{border-color:var(--accent2);color:var(--txt1)}
+    .calc-hint{padding:4px 14px;font-size:11px;color:var(--txt3);background:var(--bg2);border-bottom:1px solid var(--glass-border);flex-shrink:0}
+    .calc-hint code{background:var(--tint2);padding:1px 5px;border-radius:3px;font-family:'Fira Code',monospace;color:var(--txt2)}
+    .calc-body{flex:1;display:flex;min-height:0;background:var(--bg1);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none}
+    .calc-work{flex:1;padding:12px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+    .calc-work .box{font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);background:var(--bg2);border:1px solid var(--glass-border);border-radius:6px;padding:8px 12px;overflow-x:auto}
+    .calc-work .box-label{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:2px}
+    .calc-work .box-check{font-size:11px;color:var(--txt3);margin-top:3px}
+    .calc-work .box-check span{color:var(--txt2);font-family:'Fira Code',monospace}
+    .calc-work .err{padding:12px 14px;border-radius:6px;background:rgba(255,120,120,0.08);border:1px solid rgba(255,120,120,0.25);color:#ffb0b0;font-size:13px}
+    .calc-work .history-item{font-size:11px;padding:4px 8px;border-bottom:1px solid var(--glass-border);color:var(--txt2);display:flex;justify-content:space-between}
+    .calc-work .history-item .h-expr{font-family:'Fira Code',monospace;color:var(--txt1)}
+    .calc-work .history-item .h-result{font-family:'Fira Code',monospace;color:var(--wire-on)}
+    .calc-work .steps-box{font-family:'Fira Code',monospace;font-size:12px;color:var(--txt2);background:var(--tint);border:1px solid var(--glass-border);border-radius:6px;padding:8px 12px;line-height:1.7;max-height:150px;overflow-y:auto}
+    .calc-side{width:180px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--glass-border);padding:12px;overflow-y:auto}
+    .calc-side .stat-list{display:flex;flex-direction:column;gap:3px}
+    .calc-side .stat-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 6px;border-radius:4px;background:var(--tint);border:1px solid var(--glass-border);font-family:'Fira Code',monospace}
+    .calc-side .stat-row span:last-child{color:var(--wire-on)}
+    .calc-side h4{font-size:11px;font-weight:700;margin:8px 0 4px;color:var(--txt2)}
+    #odeCanvas2{width:100%;height:300px;background:var(--bg1);border:1px solid var(--glass-border);border-radius:6px;margin-top:4px}
+    .ode-readout{margin-top:4px;font-family:'Fira Code',monospace;font-size:11px;color:var(--txt2)}
+    .ode-controls{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+    /* ─── DISCRETE (FUE-aligned) ─── */
+    .dm-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .dm-toolbar .pill-group{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0}
+    .dm-toolbar .mode-pill{padding:6px 13px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+    .dm-toolbar .mode-pill:hover{border-color:var(--accent2);color:var(--txt1)}
+    .dm-toolbar .mode-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 3px 10px var(--accent-glow)}
+    .dm-body{flex:1;display:flex;min-height:0;background:var(--bg1);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none;overflow:hidden}
+    .dm-work{flex:1;padding:12px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+    .dm-work .dm-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:6px;padding:10px 14px}
+    .dm-work .dm-card h4{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--txt2)}
+    .dm-work .dm-card .dm-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0}
+    .dm-work .dm-card input,.dm-work .dm-card select{padding:5px 10px;border-radius:6px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);font-family:'Fira Code',monospace;font-size:12px;min-width:60px}
+    .dm-work .dm-card input:focus{outline:none;border-color:var(--accent2)}
+    .dm-work .dm-card .dm-result{font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:4px}
+    .dm-side{width:180px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--glass-border);padding:12px;overflow-y:auto}
+    .dm-side .dm-rule{font-size:11px;color:var(--txt3);padding:4px 0;border-bottom:1px solid var(--glass-border)}
+
+    /* ─── PHYSICS (FUE-aligned – DC Circuits) ─── */
+    .phys-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--glass-border);background:var(--bg2);flex-wrap:wrap;flex-shrink:0;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+    .phys-toolbar .pill-group{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0}
+    .phys-toolbar .mode-pill{padding:6px 13px;border-radius:999px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+    .phys-toolbar .mode-pill:hover{border-color:var(--accent2);color:var(--txt1)}
+    .phys-toolbar .mode-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 3px 10px var(--accent-glow)}
+    .phys-body{flex:1;display:flex;min-height:0;background:var(--bg1);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:1px solid var(--glass-border);border-top:none;overflow:hidden}
+    .phys-work{flex:1;padding:12px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+    .phys-work .phys-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:6px;padding:10px 14px}
+    .phys-work .phys-card h4{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--txt2)}
+    .phys-work .phys-card .phys-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0}
+    .phys-work .phys-card input,.phys-work .phys-card select{padding:5px 10px;border-radius:6px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);font-family:'Fira Code',monospace;font-size:12px;min-width:60px}
+    .phys-work .phys-card input:focus{outline:none;border-color:var(--accent2)}
+    .phys-work .phys-card .phys-result{font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:4px}
+    .phys-work .phys-card .phys-step{font-size:12px;color:var(--txt2);padding:2px 0;font-family:'Fira Code',monospace}
+    .phys-work .phys-card .circuit-diagram{width:100%;height:180px;background:var(--bg1);border-radius:6px;border:1px solid var(--glass-border);margin-top:6px}
+    .phys-side{width:180px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--glass-border);padding:12px;overflow-y:auto}
+    .phys-side .phys-const{font-size:11px;color:var(--txt3);padding:4px 0;border-bottom:1px solid var(--glass-border)}
+    .phys-side .phys-const b{color:var(--txt2)}
+
+    .toast{position:fixed;bottom:80px;right:24px;z-index:9000;padding:10px 20px;border-radius:999px;background:var(--tint2);backdrop-filter:blur(20px);border:1px solid var(--glass-border2);transform:translateX(120%);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.4,1.1),opacity .3s;font-size:12px;font-weight:500}
+    .toast.show{transform:translateX(0);opacity:1}
+
+    @media(max-width:860px){.palette{width:110px}.panel{width:160px}.prob-panel{width:160px}.calc-side,.dm-side,.phys-side{width:140px}.logic-body,.prob-body,.calc-body,.dm-body,.phys-body{flex-direction:column}.calc-presets{display:none}}
+    @media(max-width:700px){.topbar{padding:8px 12px;gap:6px}.brand small{display:none}.theme-switcher{gap:2px;padding:2px 3px}.theme-dot{width:10px;height:10px}.custom-color-wrap{width:14px;height:14px}.btn-back span{display:none}.wrap{padding:0 12px}.page-head h1{font-size:22px}.tab{font-size:11px;padding:6px 10px}.tab .ic{display:none}.palette{width:80px;padding:6px}.gate-btn{font-size:9px;padding:3px 6px}.panel,.prob-panel,.calc-side,.dm-side,.phys-side{width:100%;border-left:none;border-top:1px solid var(--glass-border)}.prob-practice .prob-ans-row{flex-direction:column;align-items:stretch}.prob-practice .prob-ans-row input{width:100%}}
+    @media(max-width:450px){.topbar{padding:6px 8px}.brand{font-size:13px}.brand-mark{width:24px;height:24px;font-size:11px}.theme-switcher{gap:1px;padding:1px 2px}.theme-dot{width:8px;height:8px}.custom-color-wrap{width:12px;height:12px}}
+  </style>
+</head>
+<body>
+
+<div class="crt-overlay" id="crtOverlay"></div>
+
+<div class="topbar">
+  <a class="brand" href="#">
+    <div class="brand-mark"><i class="ic" data-ic="flask"></i></div>
+    EDUMOE <small>· Simulators</small>
+  </a>
+  <div class="topbar-right">
+    <div class="theme-switcher">
+      <button class="theme-dot td-ruby active" id="td-ruby" onclick="setTheme('ruby',this)"></button>
+      <button class="theme-dot td-lava" id="td-lava" onclick="setTheme('lava',this)"></button>
+      <button class="theme-dot td-space" id="td-space" onclick="setTheme('space',this)"></button>
+      <button class="theme-dot td-oxford" id="td-oxford" onclick="setTheme('oxford',this)"></button>
+      <button class="theme-dot td-gray" id="td-gray" onclick="setTheme('gray',this)"></button>
+      <button class="theme-dot td-light" id="td-light" onclick="setTheme('light',this)"></button>
+      <div class="custom-color-wrap" id="customColorWrap"><input type="color" id="customColorPicker" value="#e11d48"/></div>
+      <button class="theme-dot td-terminal" id="td-terminal" onclick="setTheme('terminal',this)"></button>
+    </div>
+    <button class="crt-toggle" id="crtToggle" onclick="toggleCRT()"><i class="ic" data-ic="tv"></i></button>
+    <a href="index.html" class="btn-back"><i class="ic" data-ic="arrow-left"></i> <span>Back</span></a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1><i class="ic" data-ic="flask"></i> Ultimate Simulators</h1>
+    <p>Six fully functional tools — Logic, C++, Probability, Calculus, Discrete Maths, and Physics (DC Circuits).</p>
+    <div class="kbd-hint"><kbd>1</kbd> Logic · <kbd>2</kbd> C++ · <kbd>3</kbd> Probability · <kbd>4</kbd> Calculus · <kbd>5</kbd> Discrete · <kbd>6</kbd> Physics</div>
+  </div>
+  <div class="tabs" id="tabContainer">
+    <button class="tab active" data-tab="logic" onclick="showTab('logic')"><i class="ic" data-ic="microchip"></i> Logic</button>
+    <button class="tab" data-tab="cpp" onclick="showTab('cpp')"><i class="ic" data-ic="terminal"></i> C++</button>
+    <button class="tab" data-tab="prob" onclick="showTab('prob')"><i class="ic" data-ic="dice"></i> Probability</button>
+    <button class="tab" data-tab="ode" onclick="showTab('ode')"><i class="ic" data-ic="square-root-alt"></i> Calculus</button>
+    <button class="tab" data-tab="discrete" onclick="showTab('discrete')"><i class="ic" data-ic="project-diagram"></i> Discrete</button>
+    <button class="tab" data-tab="physics" onclick="showTab('physics')"><i class="ic" data-ic="bolt"></i> Physics</button>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: LOGIC (unchanged)
+       =========================================================== -->
+  <div class="view active" id="logicView">
+    <div class="logic-toolbar">
+      <button class="btn btn-sm" onclick="LOGIC.loadExample('halfadder')"><i class="ic" data-ic="lightbulb"></i> Half</button>
+      <button class="btn btn-sm" onclick="LOGIC.loadExample('fulladder')"><i class="ic" data-ic="lightbulb"></i> Full</button>
+      <button class="btn btn-sm" onclick="LOGIC.loadExample('mux')"><i class="ic" data-ic="lightbulb"></i> MUX</button>
+      <span class="sep"></span>
+      <button class="btn btn-sm" id="undoBtn" onclick="LOGIC.undo()"><i class="ic" data-ic="undo"></i> Undo</button>
+      <button class="btn btn-sm" onclick="LOGIC.truthTable()"><i class="ic" data-ic="table"></i> Truth</button>
+      <span class="sep"></span>
+      <button class="btn btn-sm" onclick="LOGIC.save()"><i class="ic" data-ic="save"></i> Save</button>
+      <button class="btn btn-sm" onclick="LOGIC.load()"><i class="ic" data-ic="folder-open"></i> Load</button>
+      <button class="btn btn-sm" onclick="LOGIC.exportPNG()"><i class="ic" data-ic="image"></i> PNG</button>
+      <span class="sep"></span>
+      <button class="btn btn-sm btn-danger" onclick="LOGIC.clear()"><i class="ic" data-ic="trash"></i> Clear</button>
+    </div>
+    <div class="logic-body">
+      <div class="palette">
+        <h4>Inputs</h4>
+        <button class="gate-btn" draggable="true" data-type="INPUT"><i class="ic" data-ic="toggle-on"></i> Switch</button>
+        <button class="gate-btn" draggable="true" data-type="CLOCK"><i class="ic" data-ic="clock"></i> Clock</button>
+        <button class="gate-btn" draggable="true" data-type="HIGH"><i class="ic" data-ic="1"></i> 1</button>
+        <button class="gate-btn" draggable="true" data-type="LOW"><i class="ic" data-ic="0"></i> 0</button>
+        <button class="gate-btn" draggable="true" data-type="OUTPUT"><i class="ic" data-ic="lightbulb"></i> LED</button>
+        <h4>Gates</h4>
+        <button class="gate-btn" draggable="true" data-type="AND"><i class="ic" data-ic="times"></i> AND</button>
+        <button class="gate-btn" draggable="true" data-type="OR"><i class="ic" data-ic="plus"></i> OR</button>
+        <button class="gate-btn" draggable="true" data-type="NOT"><i class="ic" data-ic="exclamation"></i> NOT</button>
+        <button class="gate-btn" draggable="true" data-type="NAND"><i class="ic" data-ic="times"></i> NAND</button>
+        <button class="gate-btn" draggable="true" data-type="NOR"><i class="ic" data-ic="plus"></i> NOR</button>
+        <button class="gate-btn" draggable="true" data-type="XOR"><i class="ic" data-ic="code-branch"></i> XOR</button>
+        <button class="gate-btn" draggable="true" data-type="XNOR"><i class="ic" data-ic="code-branch"></i> XNOR</button>
+      </div>
+      <div class="canvas-area">
+        <canvas id="logicCanvas"></canvas>
+        <div class="zoom-ctrl">
+          <button onclick="LOGIC.zoom(1.2)" title="In"><i class="ic" data-ic="plus"></i></button>
+          <button onclick="LOGIC.zoom(0.8)" title="Out"><i class="ic" data-ic="minus"></i></button>
+          <button onclick="LOGIC.resetView()" title="Reset"><i class="ic" data-ic="compress"></i></button>
+        </div>
+        <div class="canvas-hint" id="hint">Drag gates · click switch to toggle · drag output→input to wire · click wire to delete</div>
+      </div>
+      <div class="panel">
+        <h3><i class="ic" data-ic="terminal"></i> Expression</h3>
+        <div class="expr-box" id="exprBox">—</div>
+        <h3><i class="ic" data-ic="table"></i> Truth Table</h3>
+        <div id="ttContent"><div class="empty-note">Add switches, gates, and an LED, wire them up, then hit <b>Truth</b>.</div></div>
+        <div class="legend"><div><span class="dot on"></span> <b>1</b> &nbsp; <span class="dot off"></span> <b>0</b></div><div style="margin-top:4px;"><kbd>Del</kbd> delete · <kbd>Ctrl+Z</kbd> undo</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: C++ (unchanged)
+       =========================================================== -->
+  <div class="view" id="cppView">
+    <div class="cpp-toolbar">
+      <select id="langSelect" onchange="switchLang()">
+        <option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option>
+      </select>
+      <span style="font-size:11px;color:var(--txt3);margin-left:auto;"><i class="ic" data-ic="info-circle"></i> OneCompiler</span>
+    </div>
+    <div class="cpp-frame">
+      <iframe id="ocFrame" src="https://onecompiler.com/embed/cpp?theme=dark&hideTitle=true&hideNew=true&hideStdin=false" allowfullscreen title="C++ Compiler"></iframe>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: PROBABILITY (FUE-aligned – fixed)
+       =========================================================== -->
+  <div class="view" id="probView">
+    <div class="prob-toolbar">
+      <div class="pill-group">
+        <button class="mode-pill active" data-mode="practice" onclick="PROB.setMode('practice',this)">🎯 Practice</button>
+        <button class="mode-pill" data-mode="dist" onclick="PROB.setMode('dist',this)">📊 Distributions</button>
+        <button class="mode-pill" data-mode="sets" onclick="PROB.setMode('sets',this)">📐 Venn / Sets</button>
+        <button class="mode-pill" data-mode="bayes" onclick="PROB.setMode('bayes',this)">🧠 Bayes Tree</button>
+      </div>
+      <select id="probTopic" onchange="PROB.newProblem()" style="display:none">
+        <option value="mixed">Mixed</option>
+        <option value="counting">Counting</option>
+        <option value="addition">Addition</option>
+        <option value="conditional">Conditional</option>
+        <option value="bayes">Bayes</option>
+        <option value="binomial">Binomial</option>
+        <option value="poisson">Poisson</option>
+        <option value="geometric">Geometric</option>
+      </select>
+    </div>
+    <div class="prob-body">
+      <div class="prob-practice active" id="probPractice"><div id="probPracticeContent"></div></div>
+      <div class="prob-chart-wrap" id="probChartWrap" style="display:none;">
+        <canvas id="probCanvas"></canvas>
+        <div class="prob-dist-tabs" id="distTabs" style="margin-top:6px;">
+          <button class="prob-dist-tab active" data-dist="normal" onclick="PROB.setDist('normal',this)">Normal</button>
+          <button class="prob-dist-tab" data-dist="binomial" onclick="PROB.setDist('binomial',this)">Binomial</button>
+          <button class="prob-dist-tab" data-dist="poisson" onclick="PROB.setDist('poisson',this)">Poisson</button>
+          <button class="prob-dist-tab" data-dist="exponential" onclick="PROB.setDist('exponential',this)">Exponential</button>
+        </div>
+      </div>
+      <div class="prob-panel" id="probPanel"></div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: CALCULUS / ODE (FUE-aligned – removed Taylor)
+       =========================================================== -->
+  <div class="view" id="odeView">
+    <div class="calc-toolbar">
+      <select id="calcMode" onchange="ODE.mode()">
+        <option value="integral">∫ Integrate</option>
+        <option value="derivative">d/dx Differentiate</option>
+        <option value="defint">∫ₐᵇ Definite</option>
+        <option value="odeplot">dy/dx ODE</option>
+        <option value="simplify">🧹 Simplify</option>
+      </select>
+      <input id="calcInput" class="calc-input" placeholder="e.g.  x^3*e^x" spellcheck="false" onkeydown="if(event.key==='Enter')ODE.solve()"/>
+      <span class="calc-extra" id="calcExtra"></span>
+      <button class="btn btn-primary" onclick="ODE.solve()"><i class="ic" data-ic="play"></i> Solve</button>
+      <div class="calc-presets">
+        <button onclick="ODE.applyPreset('x^2')">x²</button>
+        <button onclick="ODE.applyPreset('sin(x)')">sin</button>
+        <button onclick="ODE.applyPreset('e^x')">eˣ</button>
+        <button onclick="ODE.applyPreset('1/x')">1/x</button>
+      </div>
+    </div>
+    <div class="calc-hint" id="calcHint">Use <code>^</code> powers, <code>*</code> multiply, <code>sin, cos, e^x, ln(x), sqrt(x)</code>.</div>
+    <div class="calc-body">
+      <div class="calc-work" id="calcWork">
+        <div style="color:var(--txt3);font-size:13px;text-align:center;padding:30px 0;">Enter an expression and press Solve.</div>
+      </div>
+      <div class="calc-side" id="calcSide">
+        <h4>📜 History</h4>
+        <div id="calcHistory" style="font-size:11px;color:var(--txt3);"><div style="padding:6px 0;">No history yet.</div></div>
+        <h4 style="margin-top:8px;">⚡ Rules</h4>
+        <div class="stat-list">
+          <div class="stat-row"><span>∫xⁿ</span><span>xⁿ⁺¹/(n+1)</span></div>
+          <div class="stat-row"><span>∫eˣ</span><span>eˣ</span></div>
+          <div class="stat-row"><span>∫1/x</span><span>ln|x|</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: DISCRETE (FUE-aligned – cleaned)
+       =========================================================== -->
+  <div class="view" id="discreteView">
+    <div class="dm-toolbar">
+      <div class="pill-group">
+        <button class="mode-pill active" data-mode="truth" onclick="DM.setMode('truth',this)">Truth Table</button>
+        <button class="mode-pill" data-mode="sets" onclick="DM.setMode('sets',this)">Set Calculator</button>
+        <button class="mode-pill" data-mode="venn" onclick="DM.setMode('venn',this)">Venn Diagram</button>
+        <button class="mode-pill" data-mode="combinatorics" onclick="DM.setMode('combinatorics',this)">Combinatorics</button>
+        <button class="mode-pill" data-mode="functions" onclick="DM.setMode('functions',this)">Functions</button>
+        <button class="mode-pill" data-mode="relations" onclick="DM.setMode('relations',this)">Relations</button>
+        <button class="mode-pill" data-mode="modular" onclick="DM.setMode('modular',this)">GCD & Modular</button>
+        <button class="mode-pill" data-mode="induction" onclick="DM.setMode('induction',this)">Induction Helper</button>
+      </div>
+    </div>
+    <div class="dm-body">
+      <div class="dm-work" id="dmWork">
+        <div style="color:var(--txt3);font-size:13px;text-align:center;padding:30px 0;">Select a tool above.</div>
+      </div>
+      <div class="dm-side" id="dmSide">
+        <div style="font-size:11px;color:var(--txt3);padding:4px 0;border-bottom:1px solid var(--glass-border);font-weight:700;">Quick Reference</div>
+        <div class="dm-rule">¬ (NOT) — negation</div>
+        <div class="dm-rule">∧ (AND) — conjunction</div>
+        <div class="dm-rule">∨ (OR) — disjunction</div>
+        <div class="dm-rule">→ (IMPLIES) — implication</div>
+        <div class="dm-rule">↔ (IFF) — biconditional</div>
+        <div class="dm-rule">∪ — union · ∩ — intersection</div>
+        <div class="dm-rule">|P(A)| = 2ⁿ (power set)</div>
+        <div class="dm-rule">nPr = n!/(n−r)!</div>
+        <div class="dm-rule">nCr = n!/(r!(n−r)!)</div>
+        <div class="dm-rule">gcd(a,b)·lcm(a,b) = a·b</div>
+        <div class="dm-rule">Injective: no two inputs share an output</div>
+        <div class="dm-rule">Surjective: every output is hit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       VIEW: PHYSICS (FUE-aligned – DC Circuits + PHET-style)
+       =========================================================== -->
+  <div class="view" id="physicsView">
+    <div class="phys-toolbar">
+      <div class="pill-group">
+        <span class="pill-group-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);font-weight:700;margin-right:2px;">DC Circuits</span>
+        <button class="mode-pill active" data-mode="ohms" onclick="PHYS.setMode('ohms',this)">Ohm's Law</button>
+        <button class="mode-pill" data-mode="resistors" onclick="PHYS.setMode('resistors',this)">Resistors (2)</button>
+        <button class="mode-pill" data-mode="capacitors" onclick="PHYS.setMode('capacitors',this)">Capacitors (2)</button>
+        <button class="mode-pill" data-mode="circuit" onclick="PHYS.setMode('circuit',this)">⚡ Circuit Sim</button>
+      </div>
+    </div>
+    <div class="phys-body">
+      <div class="phys-work" id="physWork">
+        <div style="color:var(--txt3);font-size:13px;text-align:center;padding:30px 0;">Select a tool above.</div>
+      </div>
+      <div class="phys-side" id="physSide">
+        <div style="font-size:11px;color:var(--txt3);padding:4px 0;border-bottom:1px solid var(--glass-border);font-weight:700;">DC Circuit Formulas</div>
+        <div class="phys-const"><b>V</b> = IR (Ohm's Law)</div>
+        <div class="phys-const"><b>P</b> = VI = I²R = V²/R</div>
+        <div class="phys-const"><b>Series (R)</b>: R_eq = R₁ + R₂</div>
+        <div class="phys-const"><b>Parallel (R)</b>: 1/R_eq = 1/R₁ + 1/R₂</div>
+        <div class="phys-const"><b>Series (C)</b>: 1/C_eq = 1/C₁ + 1/C₂</div>
+        <div class="phys-const"><b>Parallel (C)</b>: C_eq = C₁ + C₂</div>
+        <div style="font-size:11px;color:var(--txt3);padding:4px 0;border-bottom:1px solid var(--glass-border);font-weight:700;margin-top:6px;">Constants</div>
+        <div class="phys-const"><b>k</b> = 8.99×10⁹ N·m²/C²</div>
+        <div class="phys-const"><b>ε₀</b> = 8.85×10⁻¹² C²/N·m²</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+// ============================================================
+// ICONS
+// ============================================================
+const ICONS = {
+  'flask': '<path d="M9 3h6M10 3v6l-5.5 9a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L15 9V3"/><path d="M7 14h10"/>',
+  'microchip': '<rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  'terminal': '<polyline points="5 8 9 12 5 16"/><line x1="12" y1="16" x2="18" y2="16"/><rect x="2" y="4" width="20" height="16" rx="2"/>',
+  'dice': '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  'square-root-alt': '<path d="M3 12h2l2 7 4-16h10"/>',
+  'tv': '<rect x="2" y="5" width="20" height="13" rx="2"/><polyline points="8 21 12 18 16 21"/>',
+  'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  'lightbulb': '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  'clock': '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/>',
+  'undo': '<path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/>',
+  'table': '<rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/>',
+  'save': '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+  'folder-open': '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1H5.5a2 2 0 0 0-1.9 1.4L2 19V7z"/><path d="M3.6 19h14.8a2 2 0 0 0 1.9-1.4L22 11H6.5a2 2 0 0 0-1.9 1.4L3.6 19z"/>',
+  'image': '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  'trash': '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  'toggle-on': '<rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="16" cy="12" r="3" fill="currentColor"/>',
+  'times': '<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+  'plus': '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  'exclamation': '<line x1="12" y1="4" x2="12" y2="15"/><circle cx="12" cy="20" r="0.6" fill="currentColor"/>',
+  'code-branch': '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 2-6 6"/>',
+  '1': '<path d="M9 8l3-2v12M9 18h6"/>',
+  '0': '<ellipse cx="12" cy="12" rx="5" ry="7"/>',
+  'compress': '<polyline points="9 3 9 9 3 9"/><polyline points="15 3 15 9 21 9"/><polyline points="9 21 9 15 3 15"/><polyline points="15 21 15 15 21 15"/>',
+  'minus': '<line x1="5" y1="12" x2="19" y2="12"/>',
+  'info-circle': '<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/>',
+  'play': '<polygon points="6 4 20 12 6 20 6 4" fill="currentColor"/>',
+  'check': '<polyline points="20 6 9 17 4 12"/>',
+  'brain': '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V15a3 3 0 0 0 4 2.8A2.5 2.5 0 0 0 12 20V5a2.5 2.5 0 0 0-3-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5.8V15a3 3 0 0 1-4 2.8A2.5 2.5 0 0 1 12 20"/>',
+  'project-diagram': '<rect x="2" y="4" width="6" height="5" rx="1"/><rect x="16" y="4" width="6" height="5" rx="1"/><rect x="9" y="15" width="6" height="5" rx="1"/><path d="M5 9v2a2 2 0 0 0 2 2h3M19 9v2a2 2 0 0 1-2 2h-3"/>',
+  'bolt': '<polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2" fill="currentColor" stroke="none"/>',
+};
+function injectIcons(r){(r||document).querySelectorAll('i.ic[data-ic]').forEach(el=>{if(el.dataset.done)return;const p=ICONS[el.dataset.ic];if(p){el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';el.dataset.done='1';}})}
+
+// ============================================================
+// THEME SYSTEM (unchanged)
+// ============================================================
+function clearCustomInlineStyles(){const r=document.documentElement;['--custom-accent','--custom-accent2','--custom-accent3','--custom-glow','--custom-glow2','--custom-border','--custom-border2','--custom-tint','--custom-tint2','--custom-tint3'].forEach(v=>r.style.removeProperty(v));document.querySelectorAll('.td-ruby,.td-lava,.td-space,.td-oxford,.td-gray,.td-light,.td-terminal').forEach(el=>{el.style.removeProperty('background');el.style.removeProperty('box-shadow')});document.getElementById('customColorWrap')?.style.removeProperty('box-shadow')}
+function setTheme(t,e){clearCustomInlineStyles();if(t==='terminal'){document.documentElement.setAttribute('data-theme','terminal');localStorage.setItem('edumoe-theme','terminal');localStorage.removeItem('edumoe-custom-color');showToast('$ mode --terminal');document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));if(e)e.classList.add('active');updateCRTButton();return}if(t==='ruby'){document.documentElement.removeAttribute('data-theme');document.getElementById('customColorPicker').value='#e11d48';document.getElementById('customColorWrap').style.background='#e11d48';localStorage.removeItem('edumoe-custom-color');localStorage.setItem('edumoe-theme','ruby');showToast('Theme: Ruby')}else{document.documentElement.setAttribute('data-theme',t);localStorage.setItem('edumoe-theme',t);localStorage.removeItem('edumoe-custom-color');const c={lava:'#ff5a1f',space:'#7c3aed',oxford:'#00d4ff',gray:'#6b7280',light:'#111111'};if(c[t]){document.getElementById('customColorPicker').value=c[t];document.getElementById('customColorWrap').style.background=c[t]}showToast('Theme: '+t.charAt(0).toUpperCase()+t.slice(1))}document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));if(e)e.classList.add('active');updateCRTButton()}
+function setCustomTheme(c){clearCustomInlineStyles();const r=parseInt(c.slice(1,3),16),g=parseInt(c.slice(3,5),16),b=parseInt(c.slice(5,7),16);document.documentElement.setAttribute('data-theme','custom');const root=document.documentElement;root.style.setProperty('--custom-accent',c);root.style.setProperty('--custom-accent2',`rgb(${Math.min(r+40,255)},${Math.min(g+40,255)},${Math.min(b+40,255)})`);root.style.setProperty('--custom-accent3',`rgb(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)})`);root.style.setProperty('--custom-glow',`rgba(${r},${g},${b},0.35)`);root.style.setProperty('--custom-glow2',`rgba(${r},${g},${b},0.14)`);root.style.setProperty('--custom-border',`rgba(${r},${g},${b},0.18)`);root.style.setProperty('--custom-border2',`rgba(${r},${g},${b},0.32)`);root.style.setProperty('--custom-tint',`rgba(${r},${g},${b},0.05)`);root.style.setProperty('--custom-tint2',`rgba(${r},${g},${b},0.10)`);root.style.setProperty('--custom-tint3',`rgba(${r},${g},${b},0.16)`);document.getElementById('customColorWrap').style.background=c;document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));localStorage.setItem('edumoe-theme','custom');localStorage.setItem('edumoe-custom-color',c);updateCRTButton();showToast('🎨 Custom color')}
+function toggleCRT(){const html=document.documentElement,btn=document.getElementById('crtToggle');const off=html.classList.toggle('no-crt');localStorage.setItem('edumoe-crt',off?'off':'on');if(btn)btn.classList.toggle('off',off);showToast(off?'$ crt --off':'$ crt --on')}
+function updateCRTButton(){const btn=document.getElementById('crtToggle');if(!btn)return;const isTerminal=document.documentElement.getAttribute('data-theme')==='terminal';btn.style.display=isTerminal?'inline-flex':'none';btn.classList.toggle('off',document.documentElement.classList.contains('no-crt'))}
+const savedTheme=localStorage.getItem('edumoe-theme')||'ruby';const savedColor=localStorage.getItem('edumoe-custom-color');if(savedTheme==='custom'&&savedColor){setCustomTheme(savedColor);document.getElementById('customColorPicker').value=savedColor}else if(savedTheme!=='ruby'&&savedTheme!=='custom'){document.documentElement.setAttribute('data-theme',savedTheme)}
+const crtPref=localStorage.getItem('edumoe-crt');if(crtPref==='off'||(crtPref===null&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)){document.documentElement.classList.add('no-crt')}
+document.getElementById('customColorPicker').addEventListener('input',function(e){setCustomTheme(e.target.value)});
+document.addEventListener('DOMContentLoaded',()=>{const dot=document.getElementById('td-'+savedTheme);if(dot&&savedTheme!=='custom'&&savedTheme!=='ruby')dot.classList.add('active');else if(savedTheme==='ruby')document.getElementById('td-ruby')?.classList.add('active');updateCRTButton();const btn=document.getElementById('crtToggle');if(btn&&document.documentElement.classList.contains('no-crt'))btn.classList.add('off')});
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown',e=>{
+  const tabs=['logic','cpp','prob','ode','discrete','physics'];
+  const idx=parseInt(e.key)-1;
+  if(idx>=0&&idx<tabs.length&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+    const target=document.querySelector(`.tab[data-tab="${tabs[idx]}"]`);
+    if(target){showTab(tabs[idx]);e.preventDefault()}
+  }
+});
+
+// ============================================================
+// SHOW TAB
+// ============================================================
+let cppLoaded=false;
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(name+'View').classList.add('active');
+  if(name==='logic')LOGIC.onShow();
+  if(name==='prob')PROB.onShow();
+  if(name==='ode')ODE.onShow();
+  if(name==='discrete')DM.onShow();
+  if(name==='physics')PHYS.onShow();
+  if(name==='cpp'&&!cppLoaded){cppLoaded=true}
+}
+function switchLang(){const lang=document.getElementById('langSelect').value;document.getElementById('ocFrame').src='https://onecompiler.com/embed/'+lang+'?theme=dark&hideTitle=true&hideNew=true&hideStdin=false'}
+let toastTimer;function showToast(msg){const t=document.getElementById('toast'),m=document.getElementById('toastMsg');if(!t||!m)return;m.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800)}
+
+// ============================================================
+// LOGIC SIM (unchanged – full)
+// ============================================================
+const LOGIC=(function(){
+  const canvas=document.getElementById('logicCanvas'),ctx=canvas.getContext('2d'),hint=document.getElementById('hint');
+  let nodes=[],wires=[],idc=1,selected=null,view={x:0,y:0,scale:1},history=[],clockTimer=null;
+  const G={INPUT:{w:50,h:36,ins:0},CLOCK:{w:50,h:36,ins:0},HIGH:{w:42,h:34,ins:0},LOW:{w:42,h:34,ins:0},OUTPUT:{w:42,h:42,ins:1},AND:{w:56,h:44,ins:2},OR:{w:56,h:44,ins:2},NOT:{w:50,h:38,ins:1},NAND:{w:56,h:44,ins:2},NOR:{w:56,h:44,ins:2},XOR:{w:56,h:44,ins:2},XNOR:{w:56,h:44,ins:2}};
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  function toWorld(sx,sy){return{x:(sx-view.x)/view.scale,y:(sy-view.y)/view.scale}}
+  function pos(e){const r=canvas.getBoundingClientRect();const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return toWorld(cx,cy)}
+  function resize(){const r=canvas.parentElement.getBoundingClientRect();const dpr=window.devicePixelRatio||1;canvas.width=r.width*dpr;canvas.height=r.height*dpr;canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+  window.addEventListener('resize',resize);
+
+  function outPin(n){const d=G[n.type];return{x:n.x+d.w/2+6,y:n.y}}
+  function inPins(n){const d=G[n.type],arr=[];if(d.ins===0)return arr;if(d.ins===1){arr.push({x:n.x-d.w/2-6,y:n.y})}else if(d.ins===2){arr.push({x:n.x-d.w/2-6,y:n.y-9});arr.push({x:n.x-d.w/2-6,y:n.y+9})}return arr}
+  function evaluate(){const out={};nodes.forEach(n=>{if(n.type==='INPUT'||n.type==='CLOCK')out[n.id]=n.value?1:0;else if(n.type==='HIGH')out[n.id]=1;else if(n.type==='LOW')out[n.id]=0});for(let it=0;it<nodes.length+2;it++){nodes.forEach(n=>{if(['INPUT','CLOCK','HIGH','LOW'].includes(n.type))return;const d=G[n.type],vals=[];for(let pi=0;pi<d.ins;pi++){const w=wires.find(w=>w.to.node===n.id&&w.to.pinIndex===pi);vals.push(w?(out[w.from.node]??0):0)}out[n.id]=logic(n.type,vals)})}nodes.forEach(n=>n.value=out[n.id]?1:0);return out}
+  function logic(t,v){const a=v[0]||0,b=v[1]||0;switch(t){case'AND':return a&&b?1:0;case'OR':return a||b?1:0;case'NOT':return a?0:1;case'NAND':return a&&b?0:1;case'NOR':return a||b?0:1;case'XOR':return a!==b?1:0;case'XNOR':return a===b?1:0;case'OUTPUT':return a?1:0;default:return 0}}
+
+  function draw(){evaluate();const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(view.x,view.y);ctx.scale(view.scale,view.scale);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1/view.scale;const x0=-view.x/view.scale,y0=-view.y/view.scale,x1=x0+w/view.scale,y1=y0+h/view.scale;for(let x=Math.floor(x0/20)*20;x<x1;x+=20){ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke()}for(let y=Math.floor(y0/20)*20;y<y1;y+=20){ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke()}wires.forEach(wire=>{const f=nodes.find(n=>n.id===wire.from.node),t=nodes.find(n=>n.id===wire.to.node);if(!f||!t)return;const p1=outPin(f),p2=inPins(t)[wire.to.pinIndex];if(p2){ctx.strokeStyle=f.value?css('--wire-on'):css('--wire-off');ctx.lineWidth=(f.value?2.5:1.5)/1;ctx.shadowColor=f.value?css('--wire-on'):'transparent';ctx.shadowBlur=f.value?4:0;ctx.beginPath();ctx.moveTo(p1.x,p1.y);const mx=(p1.x+p2.x)/2;ctx.bezierCurveTo(mx,p1.y,mx,p2.y,p2.x,p2.y);ctx.stroke();ctx.shadowBlur=0}});if(drag&&drag.mode==='wire'){ctx.strokeStyle=css('--wire-on');ctx.lineWidth=2;ctx.shadowColor=css('--wire-on');ctx.shadowBlur=6;ctx.beginPath();ctx.moveTo(drag.start.x,drag.start.y);const mx=(drag.start.x+drag.cur.x)/2;ctx.bezierCurveTo(mx,drag.start.y,mx,drag.cur.y,drag.cur.x,drag.cur.y);ctx.stroke();ctx.shadowBlur=0}
+  nodes.forEach(n=>{const on=n.value===1,d=G[n.type];if(n===selected){ctx.strokeStyle=css('--accent2');ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.strokeRect(n.x-d.w/2-4,n.y-d.h/2-4,d.w+8,d.h+8);ctx.setLineDash([])}ctx.strokeStyle=on?css('--wire-on'):css('--glass-border2');ctx.lineWidth=1.5;ctx.fillStyle=on?'rgba(79,255,143,0.08)':'rgba(255,255,255,0.03)';if(n.type==='INPUT'||n.type==='CLOCK'||n.type==='HIGH'||n.type==='LOW'){ctx.fillRect(n.x-d.w/2,n.y-d.h/2,d.w,d.h);ctx.strokeRect(n.x-d.w/2,n.y-d.h/2,d.w,d.h);ctx.fillStyle=on?css('--wire-on'):css('--txt3');ctx.font='bold 14px Fira Code';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.type==='HIGH'?'1':n.type==='LOW'?'0':on?'1':'0',n.x,n.y)}else if(n.type==='OUTPUT'){ctx.beginPath();ctx.arc(n.x,n.y,d.w/2,0,Math.PI*2);ctx.fill();ctx.stroke();if(on){ctx.shadowColor=css('--wire-on');ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0}const lc=on?css('--wire-on'):css('--txt3');ctx.strokeStyle=lc;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(n.x,n.y-2,5,Math.PI*0.15,Math.PI*0.85,false);ctx.arc(n.x,n.y-2,5,Math.PI*0.85,Math.PI*2.15,false);ctx.stroke();ctx.beginPath();ctx.moveTo(n.x-3,n.y+4);ctx.lineTo(n.x+3,n.y+4);ctx.moveTo(n.x-2,n.y+6);ctx.lineTo(n.x+2,n.y+6);ctx.stroke()}else{ctx.fillRect(n.x-d.w/2,n.y-d.h/2,d.w,d.h);ctx.strokeRect(n.x-d.w/2,n.y-d.h/2,d.w,d.h);ctx.fillStyle=on?css('--wire-on'):css('--txt1');ctx.font='bold 9px Fira Code';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.type,n.x,n.y)}});ctx.restore();updateExpr()}
+
+  function updateExpr(){const box=document.getElementById('exprBox');const outs=nodes.filter(n=>n.type==='OUTPUT');if(!outs.length){box.textContent='—';return}const names={};let ci=0;nodes.filter(n=>['INPUT','CLOCK'].includes(n.type)).forEach(n=>names[n.id]=String.fromCharCode(65+ci++));function expr(nodeId,depth){if(depth>40)return'…';const n=nodes.find(x=>x.id===nodeId);if(!n)return'0';if(names[n.id])return names[n.id];if(n.type==='HIGH')return'1';if(n.type==='LOW')return'0';const d=G[n.type],parts=[];for(let pi=0;pi<d.ins;pi++){const w=wires.find(w=>w.to.node===n.id&&w.to.pinIndex===pi);parts.push(w?expr(w.from.node,depth+1):'0')}switch(n.type){case'NOT':return'¬'+parts[0];case'AND':return'('+parts.join('·')+')';case'OR':return'('+parts.join('+')+')';case'NAND':return'¬('+parts.join('·')+')';case'NOR':return'¬('+parts.join('+')+')';case'XOR':return'('+parts.join('⊕')+')';case'XNOR':return'¬('+parts.join('⊕')+')';case'OUTPUT':return parts[0];default:return'0'}}const lines=outs.map((o,i)=>{const w=wires.find(w=>w.to.node===o.id&&w.to.pinIndex===0);return'Q'+(outs.length>1?(i+1):'')+' = '+(w?expr(w.from.node,0):'?')});box.innerHTML=lines.join('<br>')}
+
+  function nodeAt(x,y){for(let i=nodes.length-1;i>=0;i--){const n=nodes[i],d=G[n.type];if(Math.abs(x-n.x)<=d.w/2+2&&Math.abs(y-n.y)<=d.h/2+2)return n}return null}
+  function outPinAt(x,y){for(const n of nodes){if(n.type==='OUTPUT')continue;const p=outPin(n);if(Math.hypot(x-p.x,y-p.y)<9)return n}return null}
+  function inPinAt(x,y){for(const n of nodes){const ps=inPins(n);for(let i=0;i<ps.length;i++)if(Math.hypot(x-ps[i].x,y-ps[i].y)<9)return{node:n,pinIndex:i}}return null}
+  function wireAt(x,y){for(const wire of wires){const f=nodes.find(n=>n.id===wire.from.node),t=nodes.find(n=>n.id===wire.to.node);if(!f||!t)continue;const p1=outPin(f),p2=inPins(t)[wire.to.pinIndex];if(!p2)continue;const mx=(p1.x+p2.x)/2;for(let s=0;s<=1;s+=0.05){const bx=(1-s)**3*p1.x+3*(1-s)**2*s*mx+3*(1-s)*s*s*mx+s**3*p2.x;const by=(1-s)**3*p1.y+3*(1-s)**2*s*p1.y+3*(1-s)*s*s*p2.y+s**3*p2.y;if(Math.hypot(x-bx,y-by)<6)return wire}}return null}
+  let drag=null;
+  function down(e){const w=pos(e);const op=outPinAt(w.x,w.y);if(op){drag={mode:'wire',from:op,start:outPin(op),startVal:op.value,cur:w};return}const n=nodeAt(w.x,w.y);if(n){pushHistory();selected=n;drag={mode:'move',node:n,dx:w.x-n.x,dy:w.y-n.y,moved:false};draw();return}const wire=wireAt(w.x,w.y);if(wire){pushHistory();wires=wires.filter(x=>x!==wire);draw();return}selected=null;const r=canvas.getBoundingClientRect();const sx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,sy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;drag={mode:'pan',ox:sx-view.x,oy:sy-view.y};draw()}
+  function move(e){if(!drag)return;if(drag.mode==='pan'){const r=canvas.getBoundingClientRect();const sx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,sy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;view.x=sx-drag.ox;view.y=sy-drag.oy;draw();return}const w=pos(e);if(drag.mode==='move'){drag.node.x=Math.round(w.x/12)*12;drag.node.y=Math.round(w.y/12)*12;drag.moved=true;draw()}else if(drag.mode==='wire'){drag.cur=w;draw()}}
+  function up(e){if(!drag)return;if(drag.mode==='wire'){const w=pos(e.changedTouches?{touches:e.changedTouches}:e);const tgt=inPinAt(w.x,w.y);if(tgt&&tgt.node.id!==drag.from.id){pushHistory();wires=wires.filter(x=>!(x.to.node===tgt.node.id&&x.to.pinIndex===tgt.pinIndex));wires.push({from:{node:drag.from.id},to:{node:tgt.node.id,pinIndex:tgt.pinIndex}})}}if(drag.mode==='move'&&!drag.moved&&(drag.node.type==='INPUT'||drag.node.type==='CLOCK')){drag.node.value=drag.node.value?0:1}drag=null;draw()}
+  canvas.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);canvas.addEventListener('touchstart',e=>{down(e);e.preventDefault()},{passive:false});canvas.addEventListener('touchmove',e=>{move(e);e.preventDefault()},{passive:false});canvas.addEventListener('touchend',up);canvas.addEventListener('contextmenu',e=>{e.preventDefault();const w=pos(e);const n=nodeAt(w.x,w.y);if(n){pushHistory();deleteNode(n)}});canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();const sx=e.clientX-r.left,sy=e.clientY-r.top;const before=toWorld(sx,sy);const f=e.deltaY<0?1.12:0.89;view.scale=Math.max(0.3,Math.min(3,view.scale*f));const after=toWorld(sx,sy);view.x+=(after.x-before.x)*view.scale;view.y+=(after.y-before.y)*view.scale;draw()},{passive:false});
+  window.addEventListener('keydown',e=>{if(!document.getElementById('logicView').classList.contains('active'))return;if(e.key==='Delete'||e.key==='Backspace'){if(selected){pushHistory();deleteNode(selected);selected=null}}else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo()}});
+  function deleteNode(n){nodes=nodes.filter(z=>z!==n);wires=wires.filter(w=>w.from.node!==n.id&&w.to.node!==n.id);draw()}
+  document.querySelectorAll('.gate-btn').forEach(b=>b.addEventListener('dragstart',e=>e.dataTransfer.setData('type',b.dataset.type)));
+  canvas.addEventListener('dragover',e=>e.preventDefault());canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('type');if(!type)return;const w=pos(e);pushHistory();const n={id:idc++,type,x:Math.round(w.x/12)*12,y:Math.round(w.y/12)*12,value:0};if(type==='HIGH')n.value=1;nodes.push(n);selected=n;draw()});
+  function snapshot(){return JSON.stringify({nodes,wires,idc})}
+  function pushHistory(){history.push(snapshot());if(history.length>30)history.shift();document.getElementById('undoBtn').disabled=false}
+  function undo(){if(!history.length)return;const s=JSON.parse(history.pop());nodes=s.nodes;wires=s.wires;idc=s.idc;selected=null;if(!history.length)document.getElementById('undoBtn').disabled=true;draw()}
+  function truthTable(){const ins=nodes.filter(n=>['INPUT','CLOCK'].includes(n.type)),outs=nodes.filter(n=>n.type==='OUTPUT');const el=document.getElementById('ttContent');if(!ins.length||!outs.length){el.innerHTML='<div class="empty-note">Need switches and LEDs.</div>';return}if(ins.length>6){el.innerHTML='<div class="empty-note">Too many inputs.</div>';return}const saved=ins.map(n=>n.value),rows=[],combos=1<<ins.length;for(let c=0;c<combos;c++){ins.forEach((n,i)=>n.value=(c>>(ins.length-1-i))&1);evaluate();rows.push({in:ins.map(n=>n.value),out:outs.map(n=>n.value)})}ins.forEach((n,i)=>n.value=saved[i]);evaluate();draw();let html='<div class="tt-wrap"><table class="tt"><thead><tr>';ins.forEach((n,i)=>html+='<th>'+String.fromCharCode(65+i)+'</th>');outs.forEach((n,i)=>html+='<th>Q'+(outs.length>1?(i+1):'')+'</th>');html+='</tr></thead><tbody>';rows.forEach(r=>{html+='<tr>';r.in.forEach(v=>html+='<td class="in-col">'+v+'</td>');r.out.forEach(v=>html+='<td class="out-'+v+'">'+v+'</td>');html+='</tr>'});html+='</tbody></table></div>';el.innerHTML=html}
+  function save(){try{localStorage.setItem('edumoe_logic',snapshot());hint.textContent='Saved'}catch(e){}}
+  function load(){try{const s=localStorage.getItem('edumoe_logic');if(!s){hint.textContent='None found';return}pushHistory();const d=JSON.parse(s);nodes=d.nodes;wires=d.wires;idc=d.idc;selected=null;draw();hint.textContent='Loaded'}catch(e){}}
+  function exportPNG(){const tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=canvas.height;const t=tmp.getContext('2d');t.fillStyle=css('--bg1');t.fillRect(0,0,tmp.width,tmp.height);t.drawImage(canvas,0,0);const a=document.createElement('a');a.download='circuit.png';a.href=tmp.toDataURL('image/png');a.click()}
+  function zoom(f){const w=canvas.clientWidth/2,h=canvas.clientHeight/2;const before=toWorld(w,h);view.scale=Math.max(0.3,Math.min(3,view.scale*f));const after=toWorld(w,h);view.x+=(after.x-before.x)*view.scale;view.y+=(after.y-before.y)*view.scale;draw()}
+  function resetView(){view={x:0,y:0,scale:1};draw()}
+  function startClock(){if(clockTimer)return;clockTimer=setInterval(()=>{let has=false;nodes.forEach(n=>{if(n.type==='CLOCK'){n.value=n.value?0:1;has=true}});if(has)draw()},800)}
+  function clear(){pushHistory();nodes=[];wires=[];selected=null;document.getElementById('ttContent').innerHTML='<div class="empty-note">Cleared.</div>';draw()}
+  function loadExample(which){nodes=[];wires=[];selected=null;idc=1;view={x:0,y:0,scale:1};const cx=canvas.clientWidth,cy=canvas.clientHeight;
+    function N(type,x,y,value=0){const n={id:idc++,type,x:Math.round(x),y:Math.round(y),value};nodes.push(n);return n}
+    function W(a,b,pi){wires.push({from:{node:a.id},to:{node:b.id,pinIndex:pi}})}
+    if(which==='halfadder'){const A=N('INPUT',80,cy*0.35,1),B=N('INPUT',80,cy*0.6,1);const X=N('XOR',cx*0.4,cy*0.35),AN=N('AND',cx*0.4,cy*0.62);const S=N('OUTPUT',cx*0.65,cy*0.35),C=N('OUTPUT',cx*0.65,cy*0.62);W(A,X,0);W(B,X,1);W(A,AN,0);W(B,AN,1);W(X,S,0);W(AN,C,0);hint.textContent='Half Adder'}
+    else if(which==='fulladder'){const A=N('INPUT',60,cy*0.2,1),B=N('INPUT',60,cy*0.4,0),Ci=N('INPUT',60,cy*0.6,1);const X1=N('XOR',cx*0.3,cy*0.3),X2=N('XOR',cx*0.5,cy*0.28);const A1=N('AND',cx*0.3,cy*0.55),A2=N('AND',cx*0.5,cy*0.6),O=N('OR',cx*0.7,cy*0.58);const S=N('OUTPUT',cx*0.75,cy*0.28),Co=N('OUTPUT',cx*0.85,cy*0.58);W(A,X1,0);W(B,X1,1);W(X1,X2,0);W(Ci,X2,1);W(X1,A2,0);W(Ci,A2,1);W(A,A1,0);W(B,A1,1);W(A2,O,0);W(A1,O,1);W(X2,S,0);W(O,Co,0);hint.textContent='Full Adder'}
+    else if(which==='mux'){const A=N('INPUT',70,cy*0.25,1),B=N('INPUT',70,cy*0.5,0),S=N('INPUT',70,cy*0.75,0);const NS=N('NOT',cx*0.32,cy*0.75);const A1=N('AND',cx*0.5,cy*0.32),A2=N('AND',cx*0.5,cy*0.62),O=N('OR',cx*0.7,cy*0.47),Q=N('OUTPUT',cx*0.85,cy*0.47);W(S,NS,0);W(A,A1,0);W(NS,A1,1);W(B,A2,0);W(S,A2,1);W(A1,O,0);W(A2,O,1);W(O,Q,0);hint.textContent='2:1 MUX'}draw()}
+  function onShow(){resize()}
+  window.addEventListener('load',()=>{resize();loadExample('halfadder');startClock();document.getElementById('undoBtn').disabled=true});
+  return {onShow,truthTable,loadExample,undo,save,load,exportPNG,zoom,resetView,clear}
+})();
+
+// ============================================================
+// PROBABILITY MODULE (FUE-aligned – cleaned)
+// ============================================================
+const PROB=(function(){
+  const canvas=document.getElementById('probCanvas'),ctx=canvas.getContext('2d');
+  let shown=false,cur='practice';let S={pa:0.5,pb:0.4,pab:0.2},B={pa:0.01,pBgA:0.99,pBgNA:0.05},problem=null;
+  let distState={type:'normal',mu:0,sigma:1,n:10,p:0.5,lambda:3,rate:1};
+
+  function setMode(m,el){cur=m;document.querySelectorAll('.prob-toolbar .mode-pill').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');mode()}
+  function mode(){const chart=document.getElementById('probChartWrap'),practice=document.getElementById('probPractice'),panel=document.getElementById('probPanel'),topic=document.getElementById('probTopic'),distTabs=document.getElementById('distTabs');
+    chart.style.display='none';practice.style.display='none';panel.style.display='none';topic.style.display='none';distTabs.style.display='none';
+    if(cur==='practice'){practice.style.display='block';topic.style.display='';newProblem()}
+    else if(cur==='dist'){chart.style.display='flex';panel.style.display='block';distTabs.style.display='flex';renderDistribution()}
+    else{chart.style.display='block';panel.style.display='block';buildPanel();render()}
+    injectIcons()}
+  function buildPanel(){const p=document.getElementById('probPanel');const sl=(id,label,val,min=0,max=1,step=.01)=>`<div class="param"><label>${label} <b id="pv_${id}">${(+val).toFixed(2)}</b></label><input type="range" min="${min}" max="${max}" step="${step}" value="${val}" oninput="PROB.set('${id}',this.value)"></div>`;if(cur==='sets'){p.innerHTML=`<h3>Given</h3><div class="stat-list">${sl('pa','P(A)',S.pa)}${sl('pb','P(B)',S.pb)}${sl('pab','P(A∩B)',S.pab)}</div><h3>Computed</h3><div id="probOut" class="stat-list"></div><div id="probWarn" class="legend"></div>`}else if(cur==='bayes'){p.innerHTML=`<h3>Given</h3><div class="stat-list">${sl('pa','P(A) prior',B.pa)}${sl('pBgA','P(B|A)',B.pBgA)}${sl('pBgNA','P(B|¬A)',B.pBgNA)}</div><h3>Result</h3><div id="probOut" class="stat-list"></div><div class="legend">Bayes: P(A|B) = P(B|A)·P(A) / [P(B|A)·P(A) + P(B|¬A)·P(¬A)]</div>`}else if(cur==='dist'){renderDistributionPanel()}injectIcons()}
+  function renderDistributionPanel(){const p=document.getElementById('probPanel');const type=distState.type;let html=`<h3>${type.charAt(0).toUpperCase()+type.slice(1)}</h3>`;const param=(id,label,val,min,max,step)=>`<div class="param"><label>${label} <b id="dpv_${id}">${val}</b></label><input type="range" min="${min}" max="${max}" step="${step}" value="${val}" oninput="PROB.setDistParam('${id}',this.value)"></div>`;if(type==='normal'){html+=param('mu','μ',distState.mu,-5,5,.1);html+=param('sigma','σ',distState.sigma,.2,4,.1)}else if(type==='binomial'){html+=param('n','n',distState.n,1,30,1);html+=param('p','p',distState.p,.01,.99,.01)}else if(type==='poisson'){html+=param('lambda','λ',distState.lambda,.5,15,.5)}else if(type==='exponential'){html+=param('rate','λ',distState.rate,.1,5,.1)}html+=`<div id="distStats" class="stat-list"></div>`;p.innerHTML=html;injectIcons(p);updateDistStats()}
+  function updateDistStats(){const el=document.getElementById('distStats');if(!el)return;const type=distState.type;let stats=[];if(type==='normal'){const m=distState.mu,s=distState.sigma;stats=[['Mean',m.toFixed(2)],['Variance',(s*s).toFixed(2)],['Std Dev',s.toFixed(2)]]}else if(type==='binomial'){const n=distState.n,p=distState.p;stats=[['Mean',(n*p).toFixed(2)],['Variance',(n*p*(1-p)).toFixed(2)],['Std Dev',Math.sqrt(n*p*(1-p)).toFixed(2)]]}else if(type==='poisson'){const l=distState.lambda;stats=[['Mean',l.toFixed(2)],['Variance',l.toFixed(2)],['Std Dev',Math.sqrt(l).toFixed(2)]]}else if(type==='exponential'){const r=distState.rate;stats=[['Mean',(1/r).toFixed(2)],['Variance',(1/(r*r)).toFixed(2)],['Std Dev',(1/r).toFixed(2)]]}el.innerHTML=stats.map(s=>`<div class="stat-row"><span>${s[0]}</span><span>${s[1]}</span></div>`).join('')}
+  function setDistParam(id,val){val=parseFloat(val);distState[id]=val;const el=document.getElementById('dpv_'+id);if(el)el.textContent=val.toFixed(2);renderDistribution();updateDistStats()}
+  function setDist(type,el){distState.type=type;document.querySelectorAll('.prob-dist-tab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');if(cur==='dist'){renderDistributionPanel();renderDistribution()}}
+  function renderDistribution(){resize();const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const type=distState.type;let labels=[],data=[];let isBar=false;if(type==='normal'){const m=distState.mu,s=distState.sigma;for(let i=0;i<=150;i++){const x=m-4*s+(8*s*i/150);labels.push(x.toFixed(2));data.push((1/(s*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*((x-m)/s)**2))}}else if(type==='binomial'){const n=distState.n,p=distState.p;function C(n,k){let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r}for(let k=0;k<=n;k++){labels.push('k='+k);data.push(C(n,k)*Math.pow(p,k)*Math.pow(1-p,n-k))}isBar=true}else if(type==='poisson'){const l=distState.lambda;function fact(n){return n<=1?1:n*fact(n-1)}const kmax=Math.min(Math.ceil(l+4*Math.sqrt(l)),30);for(let k=0;k<=kmax;k++){labels.push('k='+k);data.push((Math.exp(-l)*Math.pow(l,k))/fact(k))}isBar=true}else if(type==='exponential'){const r=distState.rate;for(let i=0;i<=80;i++){const x=5*i/80;labels.push(x.toFixed(2));data.push(r*Math.exp(-r*x))}}const ac=getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim()||'#f43f5e';ctx.strokeStyle=ac;ctx.fillStyle=ac+'22';ctx.lineWidth=2;if(isBar){const bw=W/data.length*0.7,maxVal=Math.max(...data);for(let i=0;i<data.length;i++){const x=i*(W/data.length)+(W/data.length-bw)/2,h=(data[i]/maxVal)*(H-30);ctx.fillStyle=ac+'88';ctx.fillRect(x,H-15-h,bw,h)}}else{ctx.beginPath();const maxVal=Math.max(...data);for(let i=0;i<data.length;i++){const x=(i/(data.length-1))*W,y=H-15-(data[i]/maxVal)*(H-30);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke();ctx.fillStyle=ac+'22';ctx.lineTo(W,H-15);ctx.lineTo(0,H-15);ctx.closePath();ctx.fill()}updateDistStats()}
+  function set(id,val){val=parseFloat(val);(cur==='sets'?S:B)[id]=val;const el=document.getElementById('pv_'+id);if(el)el.textContent=val.toFixed(2);render()}
+  function row(k,v,hot){return`<div class="stat-row"><span>${k}</span><span${hot?' style="color:var(--accent3)"':''}>${v}</span></div>`}
+  function render(){if(!shown)return;resize();if(cur==='sets')renderSets();else renderBayes()}
+  function renderSets(){let{pa,pb,pab}=S;const out=document.getElementById('probOut'),warn=document.getElementById('probWarn');const union=pa+pb-pab;let msgs=[];if(pab>pa||pab>pb)msgs.push('⚠ P(A∩B) can\'t exceed P(A) or P(B).');if(union>1.0001)msgs.push('⚠ P(A∪B) > 1');const pAgB=pb>0?pab/pb:0,pBgA=pa>0?pab/pa:0;const indep=Math.abs(pab-pa*pb)<.005,excl=pab<.0001;out.innerHTML=row('P(A∪B)',union.toFixed(3))+row('P(A∩B)',pab.toFixed(3))+row('P(A|B)',pAgB.toFixed(3))+row('P(B|A)',pBgA.toFixed(3))+row("P(A')",(1-pa).toFixed(3))+row('P(only A)',(pa-pab).toFixed(3))+row('P(only B)',(pb-pab).toFixed(3))+row('P(neither)',Math.max(0,1-union).toFixed(3))+row('Independent?',indep?'YES':'no',true)+row('Mutually excl.?',excl?'YES':'no',true);warn.innerHTML=msgs.length?'<div style="color:#ff8080">'+msgs.join('<br>')+'</div>':'';drawVenn(pa,pb,pab,union)}
+  function renderBayes(){let{pa,pBgA,pBgNA}=B;const pNA=1-pa,num=pBgA*pa,den=num+pBgNA*pNA,post=den>0?num/den:0;document.getElementById('probOut').innerHTML=row('P(¬A)',pNA.toFixed(3))+row('P(B) total',den.toFixed(4))+row('P(A|B) posterior',post.toFixed(4),true)+row('change',((post-pa)>=0?'+':'')+(post-pa).toFixed(4));drawBayesTree(pa,pBgA,pBgNA,post)}
+  function resize(){const r=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=r.width*dpr;canvas.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+  function drawVenn(pa,pb,pab,union){const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const cy=H/2,r=Math.min(W,H)*.18,off=r*.65,cxA=W/2-off,cxB=W/2+off;ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.strokeRect(20,20,W-40,H-40);ctx.fillStyle=css('--txt3');ctx.font='11px Fira Code';ctx.textAlign='left';ctx.fillText('S',25,35);ctx.beginPath();ctx.arc(cxA,cy,r,0,7);ctx.fillStyle='rgba(225,29,72,0.18)';ctx.fill();ctx.strokeStyle=css('--accent2');ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(cxB,cy,r,0,7);ctx.fillStyle='rgba(79,255,143,0.12)';ctx.fill();ctx.strokeStyle=css('--wire-on');ctx.stroke();ctx.textAlign='center';ctx.font='600 12px Inter';ctx.fillStyle=css('--accent3');ctx.fillText('A',cxA-r*.4,cy-r*.6);ctx.fillStyle=css('--wire-on');ctx.fillText('B',cxB+r*.4,cy-r*.6);ctx.font='10px Fira Code';ctx.fillStyle=css('--txt1');ctx.fillText((pa-pab).toFixed(2),cxA-r*.4,cy+3);ctx.fillText(pab.toFixed(2),W/2,cy+3);ctx.fillText((pb-pab).toFixed(2),cxB+r*.4,cy+3);ctx.fillStyle=css('--txt3');ctx.fillText('neither: '+Math.max(0,1-union).toFixed(2),W/2,H-25)}
+  function drawBayesTree(pa,pBgA,pBgNA,post){const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const x0=40,x1=W*.4,x2=W*.75,yA=H*.3,yNA=H*.7,yRoot=H/2;ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1.5;ctx.font='10px Fira Code';function branch(x,y,x2,y2,lbl,col){ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x2,y2);ctx.stroke();ctx.fillStyle=css('--txt3');ctx.fillText(lbl,(x+x2)/2-6,(y+y2)/2-5)}branch(x0,yRoot,x1,yA,'P(A)='+pa.toFixed(2),css('--accent2'));branch(x0,yRoot,x1,yNA,'P(¬A)='+(1-pa).toFixed(2),'rgba(255,255,255,0.2)');branch(x1,yA,x2,yA,'P(B|A)='+pBgA.toFixed(2),css('--accent2'));branch(x1,yNA,x2,yNA,'P(B|¬A)='+pBgNA.toFixed(2),'rgba(255,255,255,0.2)');function nd(x,y,t,c){ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fillStyle=c;ctx.fill();ctx.fillStyle=css('--txt1');ctx.font='600 11px Inter';ctx.fillText(t,x+8,y+3)}nd(x0,yRoot,'',css('--txt2'));nd(x1,yA,'A',css('--accent3'));nd(x1,yNA,'¬A',css('--txt3'));nd(x2,yA,'A∩B',css('--accent3'));nd(x2,yNA,'¬A∩B',css('--txt3'));ctx.fillStyle=css('--wire-on');ctx.font='700 13px Fira Code';ctx.textAlign='center';ctx.fillText('P(A|B) = '+post.toFixed(4),W/2,H-20)}
+  const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,rc=a=>a[Math.floor(Math.random()*a.length)];
+  const nCr=(n,k)=>{if(k<0||k>n)return 0;k=Math.min(k,n-k);let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return Math.round(r)};
+  const nPr=(n,k)=>{let r=1;for(let i=0;i<k;i++)r*=(n-i);return r};const fmt=x=>Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):(+x).toFixed(4);
+  function gen(topic){const types={counting(){const n=ri(5,10),k=ri(2,4),order=rc([true,false]);const ans=order?nPr(n,k):nCr(n,k);return{q:`Club has ${n} members. Ways to choose a ${order?`${k}-person ranked committee`:`committee of ${k}`} ${order?'(order matters)':'(order does not)'}?`,ans,unit:'ways',steps:[order?`Order matters → ${n}P${k}`:`Order doesn't → ${n}C${k}`,order?`${n}P${k} = ${n}!/(${n}−${k})! = ${ans}`:`${n}C${k} = ${n}!/(${k}!·${n-k}!) = ${ans}`,'Answer: '+ans],trap:'"committee/group" → combination. "ranked/ordered" → permutation.'}},addition(){const pa=ri(3,6)/10,pb=ri(3,6)/10,pab=ri(1,Math.round(Math.min(pa,pb)*10))/10;const ans=+(pa+pb-pab).toFixed(2);return{q:`P(A)=${pa.toFixed(1)}, P(B)=${pb.toFixed(1)}, P(A∩B)=${pab.toFixed(1)}. Find P(A∪B).`,ans,unit:'',steps:['P(A∪B)=P(A)+P(B)-P(A∩B)',`= ${pa.toFixed(1)}+${pb.toFixed(1)}-${pab.toFixed(1)}`,'= '+ans],trap:'Subtract the overlap.'}},conditional(){const pab=ri(1,3)/10,pb=ri(4,7)/10;const ans=+(pab/pb).toFixed(4);return{q:`P(A∩B)=${pab.toFixed(1)}, P(B)=${pb.toFixed(1)}. Find P(A|B).`,ans,unit:'',steps:['P(A|B)=P(A∩B)/P(B)',`= ${pab.toFixed(1)}/${pb.toFixed(1)}`,'= '+ans],trap:'Divide by the condition (what\'s after the bar).'}},bayes(){const prior=rc([1,2,5])/100,sens=ri(90,99)/100,fp=ri(2,10)/100;const num=sens*prior,den=num+fp*(1-prior),ans=+(num/den).toFixed(4);return{q:`Disease affects ${prior*100}%. Test ${sens*100}% accurate, false positive ${fp*100}%. Positive → probability?`,ans,unit:'',steps:['Bayes: P(D|+) = P(+|D)P(D) / [P(+|D)P(D)+P(+|¬D)P(¬D)]','Num='+sens+'·'+prior+'='+fmt(num),'Den='+fmt(num)+'+'+fp+'·'+(1-prior).toFixed(2)+'='+fmt(den),'P(D|+)='+fmt(num)+'/'+fmt(den)+'='+ans],trap:'Rare disease + accurate test → still low posterior.'}},binomial(){const n=ri(5,10),p=ri(2,7)/10,k=ri(1,n-1);const ans=+(nCr(n,k)*p**k*(1-p)**(n-k)).toFixed(4);return{q:`Success prob ${p.toFixed(1)} on ${n} trials. P(exactly ${k} successes)?`,ans,unit:'',steps:['Binomial: P(X=k)=C(n,k)·pᵏ·(1-p)ⁿ⁻ᵏ','=C('+n+','+k+')·'+p.toFixed(1)+'^'+k+'·'+(1-p).toFixed(1)+'^'+(n-k),'='+nCr(n,k)+'·'+fmt(p**k)+'·'+fmt((1-p)**(n-k)),'='+ans],trap:'"Fixed trials" + "exactly k" → Binomial. Remember C(n,k).'}},poisson(){const lam=ri(2,6),k=ri(1,5);const ans=+(Math.exp(-lam)*lam**k/[1,1,2,6,24,120][k]).toFixed(4);return{q:`Average rate ${lam}/hour. P(exactly ${k} arrivals in 1 hour)?`,ans,unit:'',steps:['Poisson: P(X=k)=e⁻ˡ·λᵏ/k!','=e^−'+lam+'·'+lam+'^'+k+'/'+k+'!','='+fmt(Math.exp(-lam))+'·'+lam**k+'/'+[1,1,2,6,24,120][k],'='+ans],trap:'"Average rate / unit time" → Poisson. λ = mean = variance.'}},geometric(){const p=ri(1,9)/10,k=ri(2,6);const ans=+((1-p)**(k-1)*p).toFixed(4);return{q:`Success prob ${p.toFixed(1)}. P(first success on ${k}th trial)?`,ans,unit:'',steps:['Geometric: P(X=k)=(1-p)ᵏ⁻¹·p','=(1-'+p.toFixed(1)+')^'+(k-1)+'·'+p.toFixed(1),'='+fmt((1-p)**(k-1))+'·'+p.toFixed(1),'='+ans],trap:'Geometric = trials UNTIL first success.'}}};const keys=Object.keys(types);const pick=topic==='mixed'?rc(keys):topic;return types[pick]()}
+  function newProblem(){const topic=document.getElementById('probTopic').value;problem=gen(topic);const el=document.getElementById('probPracticeContent');el.innerHTML=`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent3);margin-bottom:8px">Practice Problem</div><div class="prob-q">${problem.q}</div><div class="prob-ans-row"><input id="probAns" placeholder="Your answer" onkeydown="if(event.key==='Enter')PROB.check()" /><button class="btn btn-sm btn-primary" onclick="PROB.check()">Check</button><button class="btn btn-sm" onclick="PROB.reveal()">Solution</button><button class="btn btn-sm" onclick="PROB.newProblem()">New</button></div><div class="prob-result" id="probResult"></div>`;injectIcons(el)}
+  function solutionHtml(){return`<div class="prob-solution">${problem.steps.map(s=>`<div class="step">${s}</div>`).join('')}<div class="prob-tip"><b>Exam tip:</b> ${problem.trap}</div></div>`}
+  function check(){if(!problem)return;const raw=document.getElementById('probAns').value.trim().replace(/\s/g,'');const res=document.getElementById('probResult');if(raw===''){res.innerHTML='<div style="color:var(--txt3)">Type an answer.</div>';return}const guess=parseFloat(raw);const correct=Math.abs(guess-problem.ans)<.01||(Number.isInteger(problem.ans)&&guess===problem.ans);res.innerHTML=(correct?`<div style="color:var(--wire-on);font-weight:700;font-size:14px;margin-bottom:4px">✓ Correct! ${fmt(problem.ans)} ${problem.unit}</div>`:`<div style="color:#ff8080;font-weight:700;font-size:14px;margin-bottom:4px">✗ Answer: ${fmt(problem.ans)} ${problem.unit}</div>`)+solutionHtml()}
+  function reveal(){if(!problem)return;document.getElementById('probResult').innerHTML=`<div style="color:var(--txt2);font-weight:600;margin-bottom:4px">Answer: ${fmt(problem.ans)} ${problem.unit}</div>`+solutionHtml()}
+  function onShow(){if(!shown){shown=true}mode()}
+  window.addEventListener('resize',()=>{if(document.getElementById('probView').classList.contains('active')&&cur!=='practice')render()});
+  return {mode,setMode,set,onShow,newProblem,check,reveal,setDist,setDistParam,renderDistribution,renderDistributionPanel}
+})();
+
+// ============================================================
+// CALCULUS / ODE MODULE (FUE-aligned – removed Taylor)
+// ============================================================
+const ODE=(function(){
+  let shown=false,nerdReady=false,history=[];const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  function ready(){if(nerdReady)return true;if(typeof nerdamer!=='undefined'){nerdReady=true;return true}return false}
+  function waitAndSolve(attempt){if(ready()){solve();return}if(attempt>15){err('Math engine not loaded. Refresh.');return}setTimeout(()=>waitAndSolve(attempt+1),250)}
+  function pretty(s){return String(s).replace(/\*\*/g,'^').replace(/\*/g,'·').replace(/log\(/g,'ln(').replace(/sqrt\(/g,'√(').replace(/\bpi\b/g,'π')}
+  function mode(){const m=document.getElementById('calcMode').value;const input=document.getElementById('calcInput'),extra=document.getElementById('calcExtra'),hint=document.getElementById('calcHint');if(m==='defint'){extra.innerHTML='<label>from <input id="loB" class="calc-input mini" value="0"></label><label>to <input id="hiB" class="calc-input mini" value="1"></label>';input.placeholder='e.g.  x^2';hint.innerHTML='Definite integral ∫ₐᵇ f(x) dx. Bounds: <code>x^2 from 0 to 1</code>.'}else if(m==='odeplot'){extra.innerHTML='<label>y(0)= <input id="y0" class="calc-input mini" value="1"></label>';input.placeholder="dy/dx = x*y";hint.innerHTML='Enter RHS of <b>dy/dx = f(x,y)</b>. RK4 numerical solver.'}else{extra.innerHTML='';input.placeholder='e.g.  x^3*e^x';hint.innerHTML=(m==='derivative'?'Differentiate. ':m==='simplify'?'Simplify. ':'Integrate. ')+'Use <code>^, *, sin, cos, e^x, ln(x), sqrt(x)</code>.'}
+  document.getElementById('calcWork').innerHTML='<div style="color:var(--txt3);font-size:13px;text-align:center;padding:30px 0;">Enter expression, press Solve.</div>';
+  document.getElementById('calcSide').innerHTML=`<h4>📜 History</h4><div id="calcHistory" style="font-size:11px;color:var(--txt3);"><div style="padding:6px 0;">None</div></div><h4 style="margin-top:6px;">⚡ Rules</h4><div class="stat-list"><div class="stat-row"><span>∫xⁿ</span><span>xⁿ⁺¹/(n+1)</span></div><div class="stat-row"><span>∫eˣ</span><span>eˣ</span></div><div class="stat-row"><span>∫1/x</span><span>ln|x|</span></div></div>`;injectIcons();renderHistory()}
+  function applyPreset(val){document.getElementById('calcInput').value=val;solve()}
+  function renderHistory(){const c=document.getElementById('calcHistory');if(!history.length){c.innerHTML='<div style="padding:6px 0;">None</div>';return}c.innerHTML=history.slice(-4).reverse().map(h=>`<div class="history-item"><span class="h-expr">${h.input}</span><span class="h-result">${h.result}</span></div>`).join('')}
+  function err(msg){document.getElementById('calcWork').innerHTML=`<div class="err">${msg}</div>`}
+  function addHistory(input,result){history.push({input,result});renderHistory()}
+  function box(label,val,big){return`<div class="box"><div class="box-label">${label}</div><div style="font-size:${big?'18px':'14px'};color:var(--wire-on);">${val}</div></div>`}
+  function stepsBox(steps){if(!steps||steps.length===0)return'';return`<div class="steps-box">${steps.map(s=>`<div>${s}</div>`).join('')}</div>`}
+  function solve(){if(!ready()){document.getElementById('calcWork').innerHTML='<div style="padding:16px;color:var(--txt3)">Loading math…</div>';waitAndSolve(0);return}const m=document.getElementById('calcMode').value;const raw=document.getElementById('calcInput').value.trim();if(!raw){err('Type a function.');return}const work=document.getElementById('calcWork');try{let resultHtml='',resultStr='',steps=[];if(m==='integral'){const res=nerdamer('integrate('+raw+', x)');resultStr=res.toString();const prettyRes=pretty(resultStr);let check='';try{check=pretty(nerdamer('diff('+resultStr+', x)').expand().toString())}catch(e){}try{const s=res.steps();if(s&&s.length)steps=s.map(s=>pretty(s))}catch(e){}resultHtml=box('Problem','∫('+pretty(raw)+')dx')+box('Answer',prettyRes+' + C',true)+(steps.length?stepsBox(steps):'')+(check?`<div class="box-check">✓ Check: <span>${check}</span></div>`:'')}else if(m==='derivative'){const res=nerdamer('diff('+raw+', x)');resultStr=res.toString();const prettyRes=pretty(resultStr);try{const s=res.steps();if(s&&s.length)steps=s.map(s=>pretty(s))}catch(e){}resultHtml=box('Problem','d/dx('+pretty(raw)+')')+box('Derivative',prettyRes,true)+(steps.length?stepsBox(steps):'')}else if(m==='defint'){const a=document.getElementById('loB').value.trim()||'0',b=document.getElementById('hiB').value.trim()||'1';const anti=nerdamer('integrate('+raw+', x)').toString();const val=nerdamer('defint('+raw+','+a+','+b+', x)');let num='';try{num=val.evaluate().text('decimals')}catch(e){num=val.toString()}resultStr=val.toString();resultHtml=box('Problem','∫_'+a+'^'+b+'('+pretty(raw)+')dx')+box('Antiderivative',pretty(anti)+'+C')+box('Definite',pretty(val.toString())+' ≈ '+(parseFloat(num).toFixed(6)),true)}else if(m==='simplify'){const res=nerdamer('simplify('+raw+')');resultStr=res.toString();resultHtml=box('Problem',pretty(raw))+box('Simplified',pretty(resultStr),true)}else if(m==='odeplot'){plotODE(raw);return}work.innerHTML=resultHtml;addHistory(raw,resultStr||'done')}catch(e){err('Syntax error. '+String(e.message||e).slice(0,70))}}
+  function plotODE(raw){const y0=parseFloat(document.getElementById('y0').value)||0;let f;try{f=nerdamer(raw).buildFunction(['x','y']);f(0,0)}catch(e){err('Couldn\'t parse f(x,y). Use x and y only, e.g. <code>x*y</code>.');return}const work=document.getElementById('calcWork');work.innerHTML=`<h2 style="font-size:17px;font-weight:700;margin-bottom:2px">dy/dx = ${pretty(raw)}, y(0)=${y0}</h2><div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Slope field + RK4 solution</div><canvas id="odeCanvas2"></canvas><div class="ode-readout" id="odeReadout"></div><div class="ode-controls"><button class="btn btn-sm" onclick="ODE.zoomPlot(1.2)">Zoom In</button><button class="btn btn-sm" onclick="ODE.zoomPlot(0.8)">Zoom Out</button><button class="btn btn-sm" onclick="ODE.resetPlot()">Reset</button><button class="btn btn-sm" onclick="ODE.solveMethod('euler')">Euler</button><button class="btn btn-sm" onclick="ODE.solveMethod('rk4')">RK4</button></div>`;const canvas=document.getElementById('odeCanvas2'),ctx=canvas.getContext('2d');const r=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1,W=Math.max(r.width,200),H=300;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);const xmin=-5,xmax=5,ymin=-5,ymax=5;const sx=x=>(x-xmin)/(xmax-xmin)*W,sy=y=>H-(y-ymin)/(ymax-ymin)*H;ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx(0),0);ctx.lineTo(sx(0),H);ctx.moveTo(0,sy(0));ctx.lineTo(W,sy(0));ctx.stroke();ctx.strokeStyle='rgba(225,29,72,0.3)';ctx.lineWidth=1;const step=0.6,L=0.18;for(let gx=xmin;gx<=xmax;gx+=step){for(let gy=ymin;gy<=ymax;gy+=step){let slope;try{slope=f(gx,gy)}catch(e){continue}if(!isFinite(slope))continue;const ang=Math.atan(slope),dx=Math.cos(ang)*L,dy=Math.sin(ang)*L;ctx.beginPath();ctx.moveTo(sx(gx-dx),sy(gy-dy));ctx.lineTo(sx(gx+dx),sy(gy+dy));ctx.stroke()}}function integrate(dir,method){const pts=[];let x=0,y=y0,h=0.02*dir;for(let i=0;i<=500;i++){pts.push({x,y});if(x<xmin-.5||x>xmax+.5||y<ymin-2||y>ymax+2)break;if(method==='euler'){const k=f(x,y);y+=h*k}else{const k1=f(x,y),k2=f(x+h/2,y+h*k1/2),k3=f(x+h/2,y+h*k2/2),k4=f(x+h,y+h*k3);y+=h*(k1+2*k2+2*k3+k4)/6}x+=h}return pts}const method=window._odeMethod||'rk4';const curve=[...integrate(-1,method).reverse(),...integrate(1,method)];ctx.strokeStyle=css('--wire-on');ctx.lineWidth=2.5;ctx.shadowColor=css('--wire-on');ctx.shadowBlur=5;ctx.beginPath();curve.forEach((p,i)=>i?ctx.lineTo(sx(p.x),sy(p.y)):ctx.moveTo(sx(p.x),sy(p.y)));ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle=css('--wire-on');ctx.beginPath();ctx.arc(sx(0),sy(y0),4,0,7);ctx.fill();ctx.fillStyle=css('--txt3');ctx.font='10px Fira Code';ctx.fillText('x',W-12,sy(0)-4);ctx.fillText('y',sx(0)+4,10);let vals=[];[-2,-1,0,1,2].forEach(xt=>{const seg=curve.reduce((a,b)=>Math.abs(b.x-xt)<Math.abs(a.x-xt)?b:a);vals.push('y('+xt+')≈'+seg.y.toFixed(3))});document.getElementById('odeReadout').innerHTML='Samples: '+vals.join(' ')+' · '+method.toUpperCase();addHistory('ODE: '+raw,'plotted')}
+  function zoomPlot(factor){const canvas=document.getElementById('odeCanvas2');if(!canvas)return;const cs=parseFloat(canvas.style.transform?.replace('scale(','')||1);canvas.style.transform=`scale(${Math.max(0.5,Math.min(3,cs*factor))})`;canvas.style.transformOrigin='top left'}
+  function resetPlot(){const canvas=document.getElementById('odeCanvas2');if(canvas){canvas.style.transform='scale(1)';canvas.style.transformOrigin='top left'}}
+  function solveMethod(method){window._odeMethod=method;showToast('Method: '+method.toUpperCase());if(document.getElementById('odeCanvas2')){const input=document.getElementById('calcInput');if(input.value.trim())solve()}}
+  function onShow(){if(!shown){shown=true;mode()}}
+  return {mode,solve,onShow,applyPreset,zoomPlot,resetPlot,solveMethod}
+})();
+
+// ============================================================
+// DISCRETE MATHS MODULE (FUE-aligned – cleaned)
+// ============================================================
+const DM=(function(){
+  let shown=false,cur='truth';
+  function setMode(m,el){cur=m;document.querySelectorAll('.dm-toolbar .mode-pill').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');render()}
+  function mode(){render()}
+  function render(){
+    const work=document.getElementById('dmWork');const side=document.getElementById('dmSide');
+    const map={truth:truthUI,sets:setsUI,combinatorics:combinatoricsUI,venn:vennUI,functions:functionsUI,relations:relationsUI,modular:modularUI,induction:inductionUI};
+    work.innerHTML=(map[cur]||truthUI)();
+    injectIcons(work)
+  }
+  function truthUI(){
+    return `<div class="dm-card"><h4>Propositional Logic Truth Table</h4>
+      <div class="dm-row"><input id="ttExpr" placeholder="e.g.  (A AND B) OR NOT C" style="flex:1;min-width:120px;" onkeydown="if(event.key==='Enter')DM.truthTable()"/>
+      <button class="btn btn-sm btn-primary" onclick="DM.truthTable()">Generate</button></div>
+      <div id="ttResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:6px;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px;">Use <code>AND, OR, NOT, IMPLIES, IFF</code>. Variables: <code>A,B,C,D</code></div></div>`
+  }
+  function truthTable(){
+    const expr=document.getElementById('ttExpr').value.trim().toUpperCase();const res=document.getElementById('ttResult');if(!expr){res.innerHTML='';return}
+    try{
+      const vars=[...new Set(expr.match(/[A-D]/g)||[])].sort();if(vars.length===0||vars.length>4){res.innerHTML='<span style="color:#ff8080">Use 1-4 variables (A-D).</span>';return}
+      const rows=1<<vars.length;let html='<div style="overflow:auto;max-height:150px;"><table style="border-collapse:collapse;font-size:11px;font-family:Fira Code,monospace;">';
+      html+='<tr>';vars.forEach(v=>html+=`<th style="padding:2px 8px;border:1px solid var(--glass-border);">${v}</th>`);html+='<th style="padding:2px 8px;border:1px solid var(--glass-border);">Result</th></tr>';
+      const map={AND:'&&',OR:'||',NOT:'!',IMPLIES:'<=',IFF:'=='};
+      let js=expr;js=js.replace(/NOT\s*([A-D])/g,'!$1');js=js.replace(/AND/g,'&&');js=js.replace(/OR/g,'||');js=js.replace(/IMPLIES/g,'<=');js=js.replace(/IFF/g,'==');
+      for(let r=0;r<rows;r++){const vals={};vars.forEach((v,i)=>{vals[v]=(r>>(vars.length-1-i))&1});const ev=js;let result;try{result=eval(ev)?1:0}catch(e){result='?'}html+='<tr>';vars.forEach(v=>html+=`<td style="padding:2px 8px;border:1px solid var(--glass-border);">${vals[v]}</td>`);html+=`<td style="padding:2px 8px;border:1px solid var(--glass-border);font-weight:700;color:${result===1?'var(--wire-on)':'var(--no)'};">${result}</td></tr>`}
+      html+='</table></div>';res.innerHTML=html
+    }catch(e){res.innerHTML='<span style="color:#ff8080">Syntax error. Check expression.</span>'}
+  }
+  function setsUI(){
+    return `<div class="dm-card"><h4>Set Calculator</h4>
+      <div class="dm-row"><label style="font-size:11px;">Set A: </label><input id="setA" placeholder="{1,2,3,4}" style="flex:1;min-width:80px;"/></div>
+      <div class="dm-row"><label style="font-size:11px;">Set B: </label><input id="setB" placeholder="{3,4,5,6}" style="flex:1;min-width:80px;"/></div>
+      <div class="dm-row"><button class="btn btn-sm" onclick="DM.setOp('union')">∪ Union</button>
+      <button class="btn btn-sm" onclick="DM.setOp('intersection')">∩ Intersection</button>
+      <button class="btn btn-sm" onclick="DM.setOp('difference')">− Difference (A\B)</button>
+      <button class="btn btn-sm" onclick="DM.setOp('complement')">Complement (U={1..10})</button></div>
+      <div id="setResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div></div>`
+  }
+  function setOp(op){const res=document.getElementById('setResult');const a=document.getElementById('setA').value.replace(/[{}]/g,'').split(',').map(s=>s.trim()).filter(s=>s!=='').map(s=>isNaN(s)?s:Number(s));const b=document.getElementById('setB').value.replace(/[{}]/g,'').split(',').map(s=>s.trim()).filter(s=>s!=='').map(s=>isNaN(s)?s:Number(s));const U=[1,2,3,4,5,6,7,8,9,10];let result;if(op==='union'){result=[...new Set([...a,...b])]}else if(op==='intersection'){result=a.filter(x=>b.includes(x))}else if(op==='difference'){result=a.filter(x=>!b.includes(x))}else if(op==='complement'){result=U.filter(x=>!a.includes(x))}else{result=[]}res.innerHTML=`Result: {${result.join(', ')}} (${result.length} elements)`}
+  function combinatoricsUI(){
+    return `<div class="dm-card"><h4>Combinatorics</h4>
+      <div class="dm-row"><label style="font-size:11px;">n = </label><input id="comN" type="number" value="5" min="0" max="20" style="width:60px;"/>
+      <label style="font-size:11px;">r = </label><input id="comR" type="number" value="3" min="0" max="20" style="width:60px;"/></div>
+      <div class="dm-row"><button class="btn btn-sm" onclick="DM.compute('nPr')">nPr</button>
+      <button class="btn btn-sm" onclick="DM.compute('nCr')">nCr</button>
+      <button class="btn btn-sm" onclick="DM.compute('factorial')">n!</button></div>
+      <div id="comResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div></div>`
+  }
+  function compute(op){const n=parseInt(document.getElementById('comN').value)||0;const r=parseInt(document.getElementById('comR').value)||0;const res=document.getElementById('comResult');function fact(x){if(x<=1)return 1;let f=1;for(let i=2;i<=x;i++)f*=i;return f}
+    if(op==='nPr'){if(r>n){res.innerHTML='r cannot exceed n.';return}const ans=fact(n)/fact(n-r);res.innerHTML=`${n}P${r} = ${fact(n)}/${fact(n-r)} = ${ans}`}else if(op==='nCr'){if(r>n){res.innerHTML='r cannot exceed n.';return}const ans=fact(n)/(fact(r)*fact(n-r));res.innerHTML=`${n}C${r} = ${fact(n)}/(${fact(r)}·${fact(n-r)}) = ${ans}`}else if(op==='factorial'){res.innerHTML=`${n}! = ${fact(n)}`}}
+  function vennUI(){
+    return `<div class="dm-card"><h4>Venn Diagram (2 sets)</h4>
+      <div class="dm-row"><label style="font-size:11px;">A only: </label><input id="vAonly" type="number" value="2" style="width:60px;"/>
+      <label style="font-size:11px;">B only: </label><input id="vBonly" type="number" value="3" style="width:60px;"/>
+      <label style="font-size:11px;">A∩B: </label><input id="vAB" type="number" value="1" style="width:60px;"/>
+      <label style="font-size:11px;">Neither: </label><input id="vNone" type="number" value="4" style="width:60px;"/></div>
+      <button class="btn btn-sm btn-primary" onclick="DM.drawVenn()">Draw Venn</button>
+      <canvas id="vennCanvas" style="width:100%;height:160px;margin-top:8px;background:var(--bg1);border-radius:6px;border:1px solid var(--glass-border);"></canvas>
+      <div id="vennStats" style="font-size:12px;color:var(--txt2);margin-top:4px;"></div></div>`
+  }
+  function drawVenn(){const canvas=document.getElementById('vennCanvas');if(!canvas)return;const ctx=canvas.getContext('2d');const r=canvas.parentElement.getBoundingClientRect();const dpr=window.devicePixelRatio||1;canvas.width=Math.max(r.width,200)*dpr;canvas.height=160*dpr;canvas.style.width=Math.max(r.width,200)+'px';canvas.style.height='160px';ctx.setTransform(dpr,0,0,dpr,0,0);const W=Math.max(r.width,200),H=160;const aOnly=parseInt(document.getElementById('vAonly').value)||0;const bOnly=parseInt(document.getElementById('vBonly').value)||0;const ab=parseInt(document.getElementById('vAB').value)||0;const none=parseInt(document.getElementById('vNone').value)||0;ctx.clearRect(0,0,W,H);const cxA=W*0.35,cxB=W*0.65,cy=H/2,rad=Math.min(W*0.2,H*0.3);ctx.fillStyle='rgba(225,29,72,0.15)';ctx.beginPath();ctx.arc(cxA,cy,rad,0,7);ctx.fill();ctx.strokeStyle=css('--accent2');ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='rgba(79,255,143,0.12)';ctx.beginPath();ctx.arc(cxB,cy,rad,0,7);ctx.fill();ctx.strokeStyle=css('--wire-on');ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.strokeRect(10,10,W-20,H-20);ctx.fillStyle=css('--txt3');ctx.font='10px Fira Code';ctx.textAlign='left';ctx.fillText('S',14,24);ctx.textAlign='center';ctx.font='12px Inter';ctx.fillStyle=css('--txt1');ctx.fillText('A',cxA-rad*0.5,cy-rad*0.5);ctx.fillStyle=css('--txt1');ctx.fillText('B',cxB+rad*0.5,cy-rad*0.5);ctx.font='11px Fira Code';ctx.fillStyle=css('--wire-on');ctx.fillText(aOnly,cxA-rad*0.45,cy+3);ctx.fillText(ab,W/2,cy+3);ctx.fillText(bOnly,cxB+rad*0.45,cy+3);ctx.fillStyle=css('--txt3');ctx.fillText('neither: '+none,W/2,H-8);document.getElementById('vennStats').innerHTML=`|A| = ${aOnly+ab} |B| = ${bOnly+ab} |A∩B| = ${ab} |A∪B| = ${aOnly+bOnly+ab} |U| = ${aOnly+bOnly+ab+none}`}
+  function functionsUI(){
+    return `<div class="dm-card"><h4>Function Properties (Injective / Surjective / Bijective)</h4>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:6px;">Define f: A → B by listing where each element of A maps to (comma-separated, same order as A).</div>
+      <div class="dm-row"><label style="font-size:11px;">A: </label><input id="fnA" placeholder="1,2,3" style="flex:1;min-width:80px;"/></div>
+      <div class="dm-row"><label style="font-size:11px;">B (codomain): </label><input id="fnB" placeholder="a,b,c,d" style="flex:1;min-width:80px;"/></div>
+      <div class="dm-row"><label style="font-size:11px;">f(A) values: </label><input id="fnVals" placeholder="a,b,a" style="flex:1;min-width:80px;"/>
+      <button class="btn btn-sm btn-primary" onclick="DM.checkFunction()">Analyze</button></div>
+      <div id="fnResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:6px;white-space:pre-wrap;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px;">Injective (1-1): no two A-elements share an image. Surjective (onto): every B-element is hit. Bijective: both.</div></div>`
+  }
+  function checkFunction(){
+    const A=document.getElementById('fnA').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const B=document.getElementById('fnB').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const vals=document.getElementById('fnVals').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const res=document.getElementById('fnResult');
+    if(A.length!==vals.length){res.innerHTML='<span style="color:#ff8080">f(A) values must have exactly one entry per element of A.</span>';return}
+    if(!vals.every(v=>B.includes(v))){res.innerHTML='<span style="color:#ff8080">Some f(x) values aren\'t in B — not a valid function into B.</span>';return}
+    const map=A.map((a,i)=>`f(${a}) = ${vals[i]}`).join('\n');
+    const seen={};let injective=true;vals.forEach(v=>{seen[v]=(seen[v]||0)+1;if(seen[v]>1)injective=false});
+    const hitSet=new Set(vals);const surjective=B.every(b=>hitSet.has(b));
+    const bijective=injective&&surjective;
+    res.innerHTML=map+`\n\nInjective (1-1)?  ${injective?'YES — every image is unique':'NO — '+Object.entries(seen).filter(([k,v])=>v>1).map(([k])=>k).join(', ')+' hit more than once'}\nSurjective (onto)? ${surjective?'YES — every element of B is hit':'NO — '+B.filter(b=>!hitSet.has(b)).join(', ')+' never hit'}\nBijective? ${bijective?'YES':'NO'}`
+  }
+  function relationsUI(){
+    return `<div class="dm-card"><h4>Relation Properties</h4>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:6px;">Give the set and the relation as ordered pairs.</div>
+      <div class="dm-row"><label style="font-size:11px;">Set A: </label><input id="relSet" placeholder="1,2,3" style="flex:1;min-width:80px;"/></div>
+      <div class="dm-row"><label style="font-size:11px;">Pairs: </label><input id="relPairs" placeholder="(1,1),(1,2),(2,1),(3,3)" style="flex:1;min-width:120px;"/>
+      <button class="btn btn-sm btn-primary" onclick="DM.checkRelation()">Analyze</button></div>
+      <div id="relResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:6px;white-space:pre-wrap;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px;">Reflexive: (a,a) for all a. Symmetric: (a,b)→(b,a). Antisymmetric: (a,b)&(b,a),a≠b never both. Transitive: (a,b)&(b,c)→(a,c).</div></div>`
+  }
+  function checkRelation(){
+    const A=document.getElementById('relSet').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const raw=document.getElementById('relPairs').value;const res=document.getElementById('relResult');
+    const matches=[...raw.matchAll(/\(([^,]+),([^)]+)\)/g)].map(m=>[m[1].trim(),m[2].trim()]);
+    if(!matches.length){res.innerHTML='<span style="color:#ff8080">Enter pairs like (1,2),(2,3)</span>';return}
+    const has=(x,y)=>matches.some(([a,b])=>a===x&&b===y);
+    const reflexive=A.every(a=>has(a,a));
+    const symmetric=matches.every(([a,b])=>has(b,a));
+    const antisymmetric=matches.every(([a,b])=>a===b||!has(b,a));
+    const transitive=matches.every(([a,b])=>matches.every(([c,d])=>c!==b||has(a,d)));
+    res.innerHTML=`Relation: {${matches.map(([a,b])=>`(${a},${b})`).join(', ')}}\n\nReflexive?     ${reflexive?'YES':'NO'}\nSymmetric?     ${symmetric?'YES':'NO'}\nAntisymmetric? ${antisymmetric?'YES':'NO'}\nTransitive?    ${transitive?'YES':'NO'}\n\n${reflexive&&symmetric&&transitive?'→ This is an equivalence relation.':(reflexive&&antisymmetric&&transitive?'→ This is a partial order.':'')}`
+  }
+  function modularUI(){
+    return `<div class="dm-card"><h4>GCD (Euclidean Algorithm) & Modular Arithmetic</h4>
+      <div class="dm-row"><label style="font-size:11px;">a: </label><input id="gA" type="number" value="252" style="width:80px;"/>
+      <label style="font-size:11px;">b: </label><input id="gB" type="number" value="105" style="width:80px;"/>
+      <button class="btn btn-sm btn-primary" onclick="DM.gcdSteps()">Find GCD</button></div>
+      <div id="gcdResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:6px;white-space:pre-wrap;"></div>
+      <div class="dm-row" style="margin-top:10px;border-top:1px solid var(--glass-border);padding-top:8px;">
+      <label style="font-size:11px;">base: </label><input id="mBase" type="number" value="7" style="width:60px;"/>
+      <label style="font-size:11px;">^exp: </label><input id="mExp" type="number" value="128" style="width:60px;"/>
+      <label style="font-size:11px;">mod: </label><input id="mMod" type="number" value="13" style="width:60px;"/>
+      <button class="btn btn-sm btn-primary" onclick="DM.modExp()">Fast Power mod</button></div>
+      <div id="modExpResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:6px;white-space:pre-wrap;"></div></div>`
+  }
+  function gcdSteps(){
+    let a=parseInt(document.getElementById('gA').value)||0,b=parseInt(document.getElementById('gB').value)||0;
+    const res=document.getElementById('gcdResult');let steps=[];const origA=a,origB=b;
+    while(b!==0){const q=Math.floor(a/b),r=a%b;steps.push(`${a} = ${q}·${b} + ${r}`);a=b;b=r}
+    res.innerHTML=steps.join('\n')+`\n\ngcd(${origA}, ${origB}) = ${a}\nlcm(${origA}, ${origB}) = ${(origA*origB/a).toFixed(0)}  (since lcm = a·b/gcd)`
+  }
+  function modExp(){
+    let base=parseInt(document.getElementById('mBase').value)||0,exp=parseInt(document.getElementById('mExp').value)||0,m=parseInt(document.getElementById('mMod').value)||1;
+    const res=document.getElementById('modExpResult');let result=1,b=base%m,e=exp,steps=[];
+    steps.push(`Fast (repeated squaring) power: ${base}^${exp} mod ${m}`);
+    while(e>0){if(e&1){result=(result*b)%m;steps.push(`bit set → result = result·base mod m = ${result}`)}b=(b*b)%m;e=Math.floor(e/2);if(e>0)steps.push(`square base: base = base² mod m = ${b}`)}
+    res.innerHTML=steps.join('\n')+`\n\n${base}^${exp} mod ${m} = ${result}`
+  }
+  function inductionUI(){
+    return `<div class="dm-card"><h4>Mathematical Induction — Structure Checker</h4>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Pick a classic statement to see the full 3-part proof skeleton.</div>
+      <div class="dm-row">
+      <button class="btn btn-sm" onclick="DM.inductionExample('sum')">Σi</button>
+      <button class="btn btn-sm" onclick="DM.inductionExample('sumsq')">Σi²</button>
+      <button class="btn btn-sm" onclick="DM.inductionExample('geom')">Σ2ⁱ</button>
+      <button class="btn btn-sm" onclick="DM.inductionExample('divis')">3ⁿ−1 divisible by 2</button></div>
+      <div id="indResult" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--wire-on);margin-top:8px;white-space:pre-wrap;"></div></div>`
+  }
+  function inductionExample(which){
+    const res=document.getElementById('indResult');
+    const lib={
+      sum:{stmt:'P(n): 1+2+...+n = n(n+1)/2',base:'P(1): LHS=1, RHS=1(2)/2=1 ✓',hyp:'Assume P(k): 1+...+k = k(k+1)/2 holds.',step:'P(k+1): add (k+1) → k(k+1)/2+(k+1) = (k+1)(k/2+1) = (k+1)(k+2)/2 ✓'},
+      sumsq:{stmt:'P(n): 1²+2²+...+n² = n(n+1)(2n+1)/6',base:'P(1): 1=1·2·3/6=1 ✓',hyp:'Assume P(k) holds.',step:'Add (k+1)² → formula at n=k+1 ✓'},
+      geom:{stmt:'P(n): 2⁰+2¹+...+2ⁿ = 2ⁿ⁺¹−1',base:'P(0): 1=2¹−1=1 ✓',hyp:'Assume P(k) holds.',step:'Add 2ᵏ⁺¹ → 2ᵏ⁺²−1 ✓'},
+      divis:{stmt:'P(n): 2 | (3ⁿ−1)',base:'P(1): 3−1=2 ✓',hyp:'Assume 3ᵏ−1=2m.',step:'3ᵏ⁺¹−1 = 3(2m+1)−1 = 6m+2 = 2(3m+1) ✓'}
+    };
+    const ex=lib[which];
+    res.innerHTML=`STATEMENT\n${ex.stmt}\n\n① BASE CASE\n${ex.base}\n\n② INDUCTIVE HYPOTHESIS\n${ex.hyp}\n\n③ INDUCTIVE STEP\n${ex.step}\n\nConclusion: P(n) holds for all n.`
+  }
+  function onShow(){if(!shown){shown=true;render()}}
+  return {mode,setMode,onShow,truthTable,setOp,compute,drawVenn,checkFunction,checkRelation,gcdSteps,modExp,inductionExample}
+})();
+
+// ============================================================
+// PHYSICS MODULE (FUE-aligned – DC Circuits only)
+// ============================================================
+const PHYS=(function(){
+  let shown=false,cur='ohms';
+  function setMode(m,el){cur=m;document.querySelectorAll('.phys-toolbar .mode-pill').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');render()}
+  function mode(){render()}
+  function render(){
+    const work=document.getElementById('physWork');
+    const map={ohms:ohmsUI,resistors:resistorsUI,capacitors:capacitorsUI,circuit:circuitUI};
+    work.innerHTML=(map[cur]||ohmsUI)();
+    injectIcons(work)
+  }
+  function ohmsUI(){
+    return `<div class="phys-card"><h4>Ohm's Law & Power</h4>
+      <div class="phys-row"><label>V (Volts): </label><input id="o_v" type="number" step="any" style="width:70px;"/>
+      <label>I (Amps): </label><input id="o_i" type="number" step="any" style="width:70px;"/>
+      <label>R (Ohms): </label><input id="o_r" type="number" step="any" style="width:70px;"/></div>
+      <button class="btn btn-sm btn-primary" onclick="PHYS.ohms()">Solve</button>
+      <div id="ohmsResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px;">V = IR · P = VI · P = I²R · P = V²/R</div></div>`
+  }
+  function ohms(){
+    const v=document.getElementById('o_v').value;const i=document.getElementById('o_i').value;const r=document.getElementById('o_r').value;
+    const V=v!==''?parseFloat(v):null;const I=i!==''?parseFloat(i):null;const R=r!==''?parseFloat(r):null;const res=document.getElementById('ohmsResult');let out='';
+    if(V!==null&&I!==null&&R===null){const Rc=V/I;out+=`R = V/I = ${Rc.toFixed(3)} Ω\nP = VI = ${(V*I).toFixed(3)} W`}
+    else if(V!==null&&R!==null&&I===null){const Ic=V/R;out+=`I = V/R = ${Ic.toFixed(3)} A\nP = V²/R = ${(V*V/R).toFixed(3)} W`}
+    else if(I!==null&&R!==null&&V===null){const Vc=I*R;out+=`V = IR = ${Vc.toFixed(3)} V\nP = I²R = ${(I*I*R).toFixed(3)} W`}
+    else if(V!==null&&I!==null&&R!==null){out+=`R = ${(V/I).toFixed(3)} Ω\nP = ${(V*I).toFixed(3)} W`}
+    else{out='Enter at least 2 values.'}res.innerHTML='<pre style="font-family:Fira Code,monospace;font-size:13px;color:var(--wire-on);margin:0;">'+out+'</pre>'}
+  function resistorsUI(){
+    return `<div class="phys-card"><h4>Resistors in Series & Parallel</h4>
+      <div class="phys-row"><label>R₁ (Ω): </label><input id="r1" type="number" value="10" step="any" style="width:70px;"/>
+      <label>R₂ (Ω): </label><input id="r2" type="number" value="20" step="any" style="width:70px;"/></div>
+      <div class="phys-row"><label>Voltage (V): </label><input id="rv" type="number" value="12" step="any" style="width:70px;"/></div>
+      <div class="phys-row"><button class="btn btn-sm" onclick="PHYS.resistors('series')">Series</button>
+      <button class="btn btn-sm" onclick="PHYS.resistors('parallel')">Parallel</button></div>
+      <div id="resResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px;">Series: R_eq = R₁+R₂ · V₁=V·R₁/(R₁+R₂) · Parallel: 1/R_eq=1/R₁+1/R₂ · I₁=V/R₁, I₂=V/R₂</div></div>`
+  }
+  function resistors(mode){
+    const r1=parseFloat(document.getElementById('r1').value)||0;const r2=parseFloat(document.getElementById('r2').value)||0;const V=parseFloat(document.getElementById('rv').value)||0;
+    const res=document.getElementById('resResult');
+    if(mode==='series'){
+      const req=r1+r2;const v1=V*r1/req,v2=V*r2/req;res.innerHTML=`R_eq (series) = ${r1} + ${r2} = ${req.toFixed(2)} Ω\nV₁ = V·R₁/R_eq = ${v1.toFixed(2)} V\nV₂ = V·R₂/R_eq = ${v2.toFixed(2)} V\nI = V/R_eq = ${(V/req).toFixed(3)} A`
+    }else{
+      const req=1/(1/r1+1/r2);res.innerHTML=`1/R_eq = 1/${r1} + 1/${r2}\nR_eq (parallel) = ${req.toFixed(2)} Ω\nI₁ = V/R₁ = ${(V/r1).toFixed(3)} A\nI₂ = V/R₂ = ${(V/r2).toFixed(3)} A\nI_total = ${(V/r1+V/r2).toFixed(3)} A`
+    }
+  }
+  function capacitorsUI(){
+    return `<div class="phys-card"><h4>Capacitors in Series & Parallel</h4>
+      <div class="phys-row"><label>C₁ (µF): </label><input id="c1" type="number" value="4" step="any" style="width:70px;"/>
+      <label>C₂ (µF): </label><input id="c2" type="number" value="6" step="any" style="width:70px;"/></div>
+      <div class="phys-row"><button class="btn btn-sm" onclick="PHYS.capacitors('series')">Series</button>
+      <button class="btn btn-sm" onclick="PHYS.capacitors('parallel')">Parallel</button></div>
+      <div id="capResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px;">Series: 1/C_eq = 1/C₁+1/C₂ (opposite of resistors!) · Parallel: C_eq = C₁+C₂</div></div>`
+  }
+  function capacitors(mode){
+    const c1=parseFloat(document.getElementById('c1').value)||0;const c2=parseFloat(document.getElementById('c2').value)||0;const res=document.getElementById('capResult');
+    if(mode==='series'){
+      const ceq=1/(1/c1+1/c2);res.innerHTML=`1/C_eq = 1/${c1} + 1/${c2}\nC_eq (series) = ${ceq.toFixed(3)} µF`
+    }else{
+      const ceq=c1+c2;res.innerHTML=`C_eq (parallel) = ${c1} + ${c2} = ${ceq.toFixed(2)} µF`
+    }
+  }
+  function circuitUI(){
+    return `<div class="phys-card"><h4>⚡ DC Circuit Simulator</h4>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Build a simple circuit with a battery, 2 resistors (series/parallel), and see current and voltage.</div>
+      <div class="phys-row"><label>V (Volts): </label><input id="cv" type="number" value="12" step="any" style="width:70px;"/>
+      <label>R₁ (Ω): </label><input id="cr1" type="number" value="10" step="any" style="width:70px;"/>
+      <label>R₂ (Ω): </label><input id="cr2" type="number" value="20" step="any" style="width:70px;"/></div>
+      <div class="phys-row"><label>Connection: </label>
+        <select id="ccon" style="padding:5px 10px;border-radius:6px;border:1px solid var(--glass-border);background:var(--tint);color:var(--txt1);font-family:'Fira Code',monospace;font-size:12px;">
+          <option value="series">Series</option>
+          <option value="parallel">Parallel</option>
+        </select>
+        <button class="btn btn-sm btn-primary" onclick="PHYS.circuit()">Simulate</button>
+      </div>
+      <div id="circuitResult" style="font-family:'Fira Code',monospace;font-size:13px;color:var(--wire-on);margin-top:6px;"></div>
+      <div style="margin-top:8px;background:var(--bg1);border-radius:6px;border:1px solid var(--glass-border);padding:10px;font-size:12px;color:var(--txt2);font-family:'Fira Code',monospace;min-height:80px;" id="circuitDiagram"></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px;">Battery → resistors → current flows. Click Simulate to update.</div></div>`
+  }
+  function circuit(){
+    const V=parseFloat(document.getElementById('cv').value)||0;
+    const R1=parseFloat(document.getElementById('cr1').value)||1;
+    const R2=parseFloat(document.getElementById('cr2').value)||1;
+    const mode=document.getElementById('ccon').value;
+    const res=document.getElementById('circuitResult');
+    const diag=document.getElementById('circuitDiagram');
+    let req,I,V1,V2,I1,I2;
+    if(mode==='series'){
+      req=R1+R2;I=V/req;V1=I*R1;V2=I*R2;
+      res.innerHTML=`R_eq = ${R1} + ${R2} = ${req.toFixed(2)} Ω\nI = V/R_eq = ${V}/${req.toFixed(2)} = ${I.toFixed(3)} A\nV₁ = I·R₁ = ${V1.toFixed(2)} V\nV₂ = I·R₂ = ${V2.toFixed(2)} V\nP = VI = ${(V*I).toFixed(3)} W`
+      diag.innerHTML=`  ┌───[R₁ ${R1}Ω]───[R₂ ${R2}Ω]───┐\n  │                          │\n  └─────[+ V=${V}V -]─────────┘\n\nI = ${I.toFixed(3)} A  V₁ = ${V1.toFixed(2)}V  V₂ = ${V2.toFixed(2)}V`
+    }else{
+      req=1/(1/R1+1/R2);I1=V/R1;I2=V/R2;I=I1+I2;
+      res.innerHTML=`1/R_eq = 1/${R1} + 1/${R2} → R_eq = ${req.toFixed(2)} Ω\nI₁ = V/R₁ = ${I1.toFixed(3)} A\nI₂ = V/R₂ = ${I2.toFixed(3)} A\nI_total = ${I.toFixed(3)} A\nP = VI = ${(V*I).toFixed(3)} W`
+      diag.innerHTML=`     ┌──[R₁ ${R1}Ω]──┐\n     │              │\n  ───┤[+ V=${V}V -] ├───\n     │              │\n     └──[R₂ ${R2}Ω]──┘\n\nI₁ = ${I1.toFixed(3)} A  I₂ = ${I2.toFixed(3)} A  I_total = ${I.toFixed(3)} A`
+    }
+  }
+  function onShow(){if(!shown){shown=true;render()}}
+  return {mode,setMode,onShow,ohms,resistors,capacitors,circuit}
+})();
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  injectIcons();showTab('logic');
+  setTimeout(()=>{const frame=document.querySelector('.cpp-frame');if(frame){const parent=frame.parentElement;const rect=parent.getBoundingClientRect();const toolbarHeight=document.querySelector('.cpp-toolbar')?.offsetHeight||40;const avail=window.innerHeight-toolbarHeight-180;frame.style.minHeight=Math.max(350,avail)+'px'}},100)
+});
+window.setTheme=setTheme;window.setCustomTheme=setCustomTheme;window.toggleCRT=toggleCRT;
+window.showTab=showTab;window.switchLang=switchLang;window.showToast=showToast;
+window.LOGIC=LOGIC;window.PROB=PROB;window.ODE=ODE;window.DM=DM;window.PHYS=PHYS;
+console.log('🔬 EDUMOE Ultimate Simulators (FUE-aligned) loaded.');
+</script>
+</body>
+</html>

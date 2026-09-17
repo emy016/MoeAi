@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "check:language": "node --experimental-strip-types scripts/check-language.ts"
+    "check:language": "node --experimental-strip-types scripts/check-language.ts",
+    "port:legacy": "python3 scripts/port-legacy.py",
+    "check:port": "python3 scripts/check-port-fidelity.py http://localhost:3000"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
