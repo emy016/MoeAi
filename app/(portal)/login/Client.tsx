@@ -13,7 +13,9 @@ export default function Client() {
     setState("sending");
     const { error } = await supabaseBrowser().auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/moeai` },
+      // PKCE links carry a code that must be exchanged for a session before any
+      // page can see the user; /auth/callback does that, then forwards on.
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/moeai` },
     });
     if (error) {
       setState("error");

@@ -157,28 +157,120 @@
     }
 
     function askMoeAI() {
+      // ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────
+      // This picked a random line out of a canned list. It now streams from
+      // /api/moeai, the same endpoint the full tutor uses, so the answer is
+      // grounded in the student's own curriculum and library.
+      //
+      // Message text is set with textContent rather than interpolated into
+      // innerHTML: the original built HTML out of whatever was typed.
       const input = document.getElementById('moeaiInput');
       const msg = input.value.trim();
       if (!msg) return;
       const container = document.getElementById('moeaiMessages');
-      container.innerHTML += `<div class="msg user">${msg}</div>`;
+
+      const mine = document.createElement('div');
+      mine.className = 'msg user';
+      mine.textContent = msg;
+      container.appendChild(mine);
       input.value = '';
+
+      const reply = document.createElement('div');
+      reply.className = 'msg ai';
+      reply.textContent = '…';
+      container.appendChild(reply);
       container.scrollTop = container.scrollHeight;
 
-      // Simulate AI response
-      setTimeout(() => {
-        const responses = [
-          "That's a great question! Let me think about that for a moment...",
-          "Based on your curriculum, I'd recommend focusing on the examples in Lecture 3.",
-          "I can help you with that! Would you like a step-by-step explanation?",
-          "Interesting. Here's what the lecture notes say about that topic...",
-          "I've generated a practice question for you. Want to try it now?",
-        ];
-        const reply = responses[Math.floor(Math.random() * responses.length)];
-        container.innerHTML += `<div class="msg ai">${reply}</div>`;
-        container.scrollTop = container.scrollHeight;
-      }, 600);
+      (async () => {
+        try {
+          const res = await fetch('/api/moeai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, conversationId: EDUMOE_DASH_CHAT })
+          });
+
+          if (!res.ok || !res.body) {
+            let text = 'MoeAI is unavailable right now.';
+            try { const j = await res.json(); if (j && j.error) text = j.error; } catch (e) {}
+            reply.textContent = text;
+            return;
+          }
+
+          EDUMOE_DASH_CHAT = res.headers.get('x-conversation-id') || EDUMOE_DASH_CHAT;
+
+          const reader = res.body.getReader();
+          const dec = new TextDecoder();
+          let answer = '';
+          reply.textContent = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            answer += dec.decode(value, { stream: true });
+            reply.textContent = answer;
+            container.scrollTop = container.scrollHeight;
+          }
+          if (!answer) reply.textContent = 'No answer came back. Try again.';
+        } catch (e) {
+          reply.textContent = 'Could not reach MoeAI.';
+        }
+      })();
     }
+
+    let EDUMOE_DASH_CHAT = null;
+
+    // ── PORT PATCH ────────────────────────────────────────────────────────
+    // The stat pills, course bars and activity feed shipped with placeholder
+    // numbers. Fill them from /api/dashboard, which counts what the student
+    // actually did. Signed-out visitors keep the placeholders rather than
+    // being shown a wall of zeroes.
+    async function EDUMOE_DASH_HYDRATE() {
+      let d;
+      try {
+        const res = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (!res.ok) return;
+        d = await res.json();
+      } catch (e) { return; }
+      if (!d || !d.signedIn) return;
+
+      const nums = document.querySelectorAll('.stats-row .stat-pill .num');
+      const values = [d.stats.courses, d.stats.lecturesDone, d.stats.xp, d.stats.achievements];
+      nums.forEach((el, i) => {
+        if (values[i] === undefined || values[i] === null) return;
+        el.textContent = Number(values[i]).toLocaleString();
+      });
+
+      const items = document.querySelectorAll('.course-progress-item');
+      items.forEach((row, i) => {
+        const c = d.courseProgress[i];
+        if (!c) { row.style.display = 'none'; return; }
+        const name = row.querySelector('.cp-name');
+        const pct = row.querySelector('.cp-pct');
+        const fill = row.querySelector('.cp-bar .fill');
+        if (name) name.textContent = c.title;
+        if (pct) pct.textContent = c.percent + '%';
+        if (fill) fill.style.width = c.percent + '%';
+      });
+
+      const acts = document.querySelectorAll('.activity-item');
+      acts.forEach((row, i) => {
+        const a = d.activity[i];
+        if (!a) { row.style.display = 'none'; return; }
+        const text = row.querySelector('.act-text');
+        const time = row.querySelector('.act-time');
+        if (text) text.textContent = a.text;
+        if (time) time.textContent = EDUMOE_AGO(a.at);
+      });
+    }
+
+    function EDUMOE_AGO(iso) {
+      const secs = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+      if (secs < 90) return 'just now';
+      if (secs < 3600) return Math.round(secs / 60) + 'm ago';
+      if (secs < 86400) return Math.round(secs / 3600) + 'h ago';
+      return Math.round(secs / 86400) + 'd ago';
+    }
+
+    setTimeout(EDUMOE_DASH_HYDRATE, 0);
 
     function suggest(text) {
       document.getElementById('moeaiInput').value = text;

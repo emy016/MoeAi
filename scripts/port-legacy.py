@@ -334,7 +334,214 @@ MOEAI_CALL_PROVIDER = """async function callProvider(msgs,ctx){
 const MOEAI_SERVER_CHATS={};
 """
 
+
+RANKED_SAVE_ANCHOR = """      localStorage.setItem('edumoe_ranked_player', JSON.stringify(player));
+      localStorage.setItem('edumoe_ranked_leaderboard', JSON.stringify(leaderboardData));
+      localStorage.setItem('edumoe_ranked_history', JSON.stringify(matchHistory));
+      localStorage.setItem('edumoe_ranked_tournaments', JSON.stringify(tournaments));
+    }"""
+
+RANKED_SAVE_PATCHED = """      localStorage.setItem('edumoe_ranked_player', JSON.stringify(player));
+      localStorage.setItem('edumoe_ranked_leaderboard', JSON.stringify(leaderboardData));
+      localStorage.setItem('edumoe_ranked_history', JSON.stringify(matchHistory));
+      localStorage.setItem('edumoe_ranked_tournaments', JSON.stringify(tournaments));
+      EDUMOE_RANKED_PUSH();
+    }
+
+    // ── PORT PATCH (scripts/port-legacy.py) ──────────────────────────────
+    // Ranked was played entirely against bots, with the ladder kept in this
+    // browser. A rating only means something measured against other people,
+    // so the ladder now lives on the server: your result is reported after
+    // each match, and real students are merged into the board beside the bots.
+    let EDUMOE_RANKED_TIMER = null;
+
+    function EDUMOE_RANKED_PUSH() {
+      clearTimeout(EDUMOE_RANKED_TIMER);
+      EDUMOE_RANKED_TIMER = setTimeout(async () => {
+        try {
+          await fetch('/api/ranked', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              displayName: player.name,
+              rating: Math.round(player.elo),
+              wins: player.wins,
+              losses: player.losses,
+              draws: player.draws,
+              matches: player.wins + player.losses + player.draws,
+              bestStreak: player.bestStreak,
+              achievements: Object.keys(player.achievements || {})
+            })
+          });
+        } catch (e) {
+          // A failed sync must never interrupt a match. The next save retries.
+        }
+      }, 1200);
+    }
+
+    async function EDUMOE_RANKED_PULL() {
+      let rows = [];
+      try {
+        const res = await fetch('/api/ranked?limit=50', { cache: 'no-store' });
+        if (!res.ok) return;
+        rows = (await res.json()).leaderboard || [];
+      } catch (e) { return; }
+      if (!rows.length) return;
+
+      // Drop any humans from a previous pull, keep the bots, then merge.
+      leaderboardData = leaderboardData.filter(d => d.isBot || d.id === 'me');
+
+      for (const r of rows) {
+        if (r.is_me) continue;               // the local entry already represents you
+        leaderboardData.push({
+          id: 'u:' + r.user_id,
+          name: r.display_name || 'Student',
+          elo: r.rating,
+          wins: r.wins,
+          losses: r.losses,
+          draws: 0,
+          isBot: false,
+          matches: r.matches,
+          streak: 0
+        });
+      }
+
+      try { renderLeaderboard(); } catch (e) {}
+    }
+
+    // Pull once the page has finished its own initialisation.
+    setTimeout(EDUMOE_RANKED_PULL, 0);"""
+
+
+DASHBOARD_ASK = """function askMoeAI() {
+      // ── PORT PATCH (scripts/port-legacy.py) ────────────────────────────
+      // This picked a random line out of a canned list. It now streams from
+      // /api/moeai, the same endpoint the full tutor uses, so the answer is
+      // grounded in the student's own curriculum and library.
+      //
+      // Message text is set with textContent rather than interpolated into
+      // innerHTML: the original built HTML out of whatever was typed.
+      const input = document.getElementById('moeaiInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      const container = document.getElementById('moeaiMessages');
+
+      const mine = document.createElement('div');
+      mine.className = 'msg user';
+      mine.textContent = msg;
+      container.appendChild(mine);
+      input.value = '';
+
+      const reply = document.createElement('div');
+      reply.className = 'msg ai';
+      reply.textContent = '…';
+      container.appendChild(reply);
+      container.scrollTop = container.scrollHeight;
+
+      (async () => {
+        try {
+          const res = await fetch('/api/moeai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, conversationId: EDUMOE_DASH_CHAT })
+          });
+
+          if (!res.ok || !res.body) {
+            let text = 'MoeAI is unavailable right now.';
+            try { const j = await res.json(); if (j && j.error) text = j.error; } catch (e) {}
+            reply.textContent = text;
+            return;
+          }
+
+          EDUMOE_DASH_CHAT = res.headers.get('x-conversation-id') || EDUMOE_DASH_CHAT;
+
+          const reader = res.body.getReader();
+          const dec = new TextDecoder();
+          let answer = '';
+          reply.textContent = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            answer += dec.decode(value, { stream: true });
+            reply.textContent = answer;
+            container.scrollTop = container.scrollHeight;
+          }
+          if (!answer) reply.textContent = 'No answer came back. Try again.';
+        } catch (e) {
+          reply.textContent = 'Could not reach MoeAI.';
+        }
+      })();
+    }
+
+    let EDUMOE_DASH_CHAT = null;
+
+    // ── PORT PATCH ────────────────────────────────────────────────────────
+    // The stat pills, course bars and activity feed shipped with placeholder
+    // numbers. Fill them from /api/dashboard, which counts what the student
+    // actually did. Signed-out visitors keep the placeholders rather than
+    // being shown a wall of zeroes.
+    async function EDUMOE_DASH_HYDRATE() {
+      let d;
+      try {
+        const res = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (!res.ok) return;
+        d = await res.json();
+      } catch (e) { return; }
+      if (!d || !d.signedIn) return;
+
+      const nums = document.querySelectorAll('.stats-row .stat-pill .num');
+      const values = [d.stats.courses, d.stats.lecturesDone, d.stats.xp, d.stats.achievements];
+      nums.forEach((el, i) => {
+        if (values[i] === undefined || values[i] === null) return;
+        el.textContent = Number(values[i]).toLocaleString();
+      });
+
+      const items = document.querySelectorAll('.course-progress-item');
+      items.forEach((row, i) => {
+        const c = d.courseProgress[i];
+        if (!c) { row.style.display = 'none'; return; }
+        const name = row.querySelector('.cp-name');
+        const pct = row.querySelector('.cp-pct');
+        const fill = row.querySelector('.cp-bar .fill');
+        if (name) name.textContent = c.title;
+        if (pct) pct.textContent = c.percent + '%';
+        if (fill) fill.style.width = c.percent + '%';
+      });
+
+      const acts = document.querySelectorAll('.activity-item');
+      acts.forEach((row, i) => {
+        const a = d.activity[i];
+        if (!a) { row.style.display = 'none'; return; }
+        const text = row.querySelector('.act-text');
+        const time = row.querySelector('.act-time');
+        if (text) text.textContent = a.text;
+        if (time) time.textContent = EDUMOE_AGO(a.at);
+      });
+    }
+
+    function EDUMOE_AGO(iso) {
+      const secs = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+      if (secs < 90) return 'just now';
+      if (secs < 3600) return Math.round(secs / 60) + 'm ago';
+      if (secs < 86400) return Math.round(secs / 3600) + 'h ago';
+      return Math.round(secs / 86400) + 'd ago';
+    }
+
+    setTimeout(EDUMOE_DASH_HYDRATE, 0);
+
+    """
+
 SCRIPT_PATCHES = {
+    "ranked": [(
+        "report results to the shared leaderboard and merge real students into it",
+        re.compile(re.escape(RANKED_SAVE_ANCHOR)),
+        RANKED_SAVE_PATCHED,
+    )],
+    "dashboard": [(
+        "stream real answers from /api/moeai and fill the stats from /api/dashboard",
+        re.compile(r"function askMoeAI\(\) \{.*?\n    (?=function suggest\()", re.S),
+        DASHBOARD_ASK,
+    )],
     "moeai": [(
         "route the chat through /api/moeai instead of calling providers from the browser",
         re.compile(r"async function callProvider\(msgs,ctx\)\{.*?\n\}\n(?=async function send)", re.S),
@@ -420,6 +627,29 @@ RELINK = [
 ]
 
 
+# The original homepage's auth modals were finished but unwired: their submit
+# buttons said "connect to Supabase". These point them at the real endpoints.
+AUTH_WIRING = [
+    ("showToast('\U0001f511 Login demo \u2014 connect to Supabase'); closeModal('loginModal')",
+     "EDUMOE_LOGIN()"),
+    ("showToast('\u2705 Signup demo \u2014 connect to Supabase'); closeModal('signupModal')",
+     "EDUMOE_SIGNUP()"),
+    ("showToast('\U0001f511 Google sign-in \u2014 connect to Supabase')",
+     "EDUMOE_GOOGLE()"),
+]
+
+
+def wire_auth(markup: str):
+    """Replace the demo auth handlers with calls into the real ones."""
+    log = []
+    for old, new in AUTH_WIRING:
+        if old in markup:
+            count = markup.count(old)
+            markup = markup.replace(old, new)
+            log.append(f"{new} x{count}")
+    return markup, log
+
+
 def relink(markup: str):
     """Point dead nav links at the routes that now exist. Returns (markup, log)."""
     log = []
@@ -497,6 +727,8 @@ def emit(name: str):
 
     doc = split_document(source)
     markup, link_log = relink(doc["markup"])
+    markup, auth_log = wire_auth(markup)
+    link_log += [f"auth: {entry}" for entry in auth_log]
 
     parser = ToJSX()
     parser.feed(markup)

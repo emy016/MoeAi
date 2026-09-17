@@ -434,3 +434,77 @@ $$;
 -- handle_new_user() is a trigger function. It must never be reachable over the
 -- REST API, where a SECURITY DEFINER function is an escalation surface.
 revoke execute on function public.handle_new_user() from anon, authenticated, public;
+
+
+-- ============================================================================
+-- Cross-device state.
+--
+-- Every ported page keeps its working state in localStorage: course progress,
+-- quiz history, ranked rating, bookmarks, theme. That is the right place for
+-- them to read and write, and the wrong place for it to live — a student who
+-- opens the site on a phone would find an empty account.
+--
+-- Deliberately key/value: the pages own their own shapes, and redefining those
+-- shapes here would create a second definition to drift from.
+-- ============================================================================
+create table if not exists public.user_state (
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  key        text not null,
+  value      jsonb not null,
+  updated_at timestamptz default now(),
+  primary key (user_id, key)
+);
+alter table public.user_state enable row level security;
+drop policy if exists user_state_own on public.user_state;
+create policy user_state_own on public.user_state
+  for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ============================================================================
+-- Ranked. The one inherently cross-user table: a rating only means something
+-- measured against other students. Readable by every signed-in student,
+-- writable only by its owner.
+-- ============================================================================
+create table if not exists public.ranked_profiles (
+  user_id      uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null default 'Student',
+  rating       int  not null default 1000,
+  wins         int  not null default 0,
+  losses       int  not null default 0,
+  draws        int  not null default 0,
+  best_streak  int  not null default 0,
+  matches      int  not null default 0,
+  achievements jsonb not null default '[]'::jsonb,
+  updated_at   timestamptz default now(),
+  constraint ranked_rating_sane check (rating between 0 and 4000),
+  constraint ranked_counts_sane check (wins >= 0 and losses >= 0 and draws >= 0 and matches >= 0)
+);
+alter table public.ranked_profiles enable row level security;
+drop policy if exists ranked_read_all on public.ranked_profiles;
+create policy ranked_read_all on public.ranked_profiles
+  for select to authenticated using (true);
+drop policy if exists ranked_write_own on public.ranked_profiles;
+create policy ranked_write_own on public.ranked_profiles
+  for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create index if not exists ranked_leaderboard_idx
+  on public.ranked_profiles (rating desc, updated_at asc);
+
+-- The top players, plus the caller's own rank even when they are below the
+-- cut. One round trip instead of two.
+create or replace function public.leaderboard(max_rows int default 50)
+returns table (
+  user_id uuid, display_name text, rating int,
+  wins int, losses int, matches int, rank bigint, is_me boolean
+)
+language sql stable set search_path = public as $$
+  with ranked as (
+    select r.user_id, r.display_name, r.rating, r.wins, r.losses, r.matches,
+           rank() over (order by r.rating desc, r.updated_at asc) as rank
+    from public.ranked_profiles r
+  )
+  select ranked.user_id, ranked.display_name, ranked.rating, ranked.wins,
+         ranked.losses, ranked.matches, ranked.rank,
+         ranked.user_id = auth.uid() as is_me
+  from ranked
+  where ranked.rank <= greatest(1, least(max_rows, 200)) or ranked.user_id = auth.uid()
+  order by ranked.rank;
+$$;

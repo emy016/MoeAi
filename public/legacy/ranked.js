@@ -258,7 +258,72 @@
       localStorage.setItem('edumoe_ranked_leaderboard', JSON.stringify(leaderboardData));
       localStorage.setItem('edumoe_ranked_history', JSON.stringify(matchHistory));
       localStorage.setItem('edumoe_ranked_tournaments', JSON.stringify(tournaments));
+      EDUMOE_RANKED_PUSH();
     }
+
+    // ── PORT PATCH (scripts/port-legacy.py) ──────────────────────────────
+    // Ranked was played entirely against bots, with the ladder kept in this
+    // browser. A rating only means something measured against other people,
+    // so the ladder now lives on the server: your result is reported after
+    // each match, and real students are merged into the board beside the bots.
+    let EDUMOE_RANKED_TIMER = null;
+
+    function EDUMOE_RANKED_PUSH() {
+      clearTimeout(EDUMOE_RANKED_TIMER);
+      EDUMOE_RANKED_TIMER = setTimeout(async () => {
+        try {
+          await fetch('/api/ranked', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              displayName: player.name,
+              rating: Math.round(player.elo),
+              wins: player.wins,
+              losses: player.losses,
+              draws: player.draws,
+              matches: player.wins + player.losses + player.draws,
+              bestStreak: player.bestStreak,
+              achievements: Object.keys(player.achievements || {})
+            })
+          });
+        } catch (e) {
+          // A failed sync must never interrupt a match. The next save retries.
+        }
+      }, 1200);
+    }
+
+    async function EDUMOE_RANKED_PULL() {
+      let rows = [];
+      try {
+        const res = await fetch('/api/ranked?limit=50', { cache: 'no-store' });
+        if (!res.ok) return;
+        rows = (await res.json()).leaderboard || [];
+      } catch (e) { return; }
+      if (!rows.length) return;
+
+      // Drop any humans from a previous pull, keep the bots, then merge.
+      leaderboardData = leaderboardData.filter(d => d.isBot || d.id === 'me');
+
+      for (const r of rows) {
+        if (r.is_me) continue;               // the local entry already represents you
+        leaderboardData.push({
+          id: 'u:' + r.user_id,
+          name: r.display_name || 'Student',
+          elo: r.rating,
+          wins: r.wins,
+          losses: r.losses,
+          draws: 0,
+          isBot: false,
+          matches: r.matches,
+          streak: 0
+        });
+      }
+
+      try { renderLeaderboard(); } catch (e) {}
+    }
+
+    // Pull once the page has finished its own initialisation.
+    setTimeout(EDUMOE_RANKED_PULL, 0);
 
     // ============================================================
     //  QUESTION BANK
