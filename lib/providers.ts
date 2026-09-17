@@ -250,3 +250,41 @@ export async function streamChat(
   }
   throw new Error(`all providers failed — ${errors.join("; ")}`);
 }
+
+/**
+ * Non-streaming variant, for short internal calls where nobody is watching the
+ * tokens arrive — memory extraction, quiz generation. Drains the stream and
+ * returns the whole string.
+ */
+export async function completeChat(
+  messages: ChatMessage[],
+  opts: { maxTokens?: number } = {},
+): Promise<{ text: string; provider: string; model: string }> {
+  const result = await streamChat(messages, { maxTokens: opts.maxTokens ?? 800 });
+  const reader = result.stream.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    text += decoder.decode(value, { stream: true });
+  }
+  return { text, provider: result.provider, model: result.model };
+}
+
+/** Pull the first JSON object or array out of a model response. */
+export function parseJsonBlock<T>(raw: string): T | null {
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const body = (fenced ? fenced[1] : raw).trim();
+  const start = body.search(/[[{]/);
+  if (start === -1) return null;
+  const open = body[start];
+  const close = open === "[" ? "]" : "}";
+  const end = body.lastIndexOf(close);
+  if (end <= start) return null;
+  try {
+    return JSON.parse(body.slice(start, end + 1)) as T;
+  } catch {
+    return null;
+  }
+}

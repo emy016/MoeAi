@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/", label: "Home", icon: "M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" },
-  { href: "/courses", label: "Courses", icon: "M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 7h8M8 11h8" },
+  { href: "/library", label: "Library", icon: "M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 7h8M8 11h8" },
   { href: "/moeai", label: "MoeAI", icon: "M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z" },
   { href: "/quizzes", label: "Practice", icon: "M9 11l3 3 7-7M4 12a8 8 0 1 0 8-8" },
-  { href: "/ranked", label: "Ranked", icon: "M5 21V9m7 12V3m7 18v-7" },
+  { href: "/dashboard", label: "You", icon: "M5 21V9m7 12V3m7 18v-7" },
 ];
 
 export default function BottomBar() {

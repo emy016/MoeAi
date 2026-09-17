@@ -119,3 +119,32 @@ p  { color: var(--text-muted); line-height: 1.65; margin: 0 0 14px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Homepage-specific composition. Kept here rather than inline so the hero and
+   the card grid share one set of rhythm rules. */
+.hero { padding: 40px 28px; margin-bottom: 20px; }
+@media (min-width: 768px) { .hero { padding: 56px 44px; } }
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.hero .lede { font-size: 1.06rem; max-width: 62ch; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+
+.pillar { display: grid; gap: 10px; align-content: start; }
+.pillar h2 { font-size: 1.1rem; }
+.pillar :global(a) { justify-self: start; margin-top: 4px; }
+
+.band {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.band p { margin: 0; max-width: 62ch; }
