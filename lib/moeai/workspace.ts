@@ -13,10 +13,37 @@ export const modes: { id: Mode; label: string; description: string }[] = [
  *  recognise the paragraph, not enough to re-host somebody's lecture. */
 export type Citation = { title: string; ref: string; source: string; excerpt: string };
 import { normalizeSubject, type Subject } from "./subjects";
+import { CalendarKind, type CalendarObject, type Kind } from "./calendar";
+const KINDS = new Set<Kind>(Object.values(CalendarKind));
 export type Message = { id: string; role: "user" | "assistant"; content: string; sources?: string[]; citations?: Citation[]; status?: "error" | "stopped" };
 export type Chat = { id: string; title: string; messages: Message[]; updated: number; mode: Mode };
 export type LibraryFile = { id: string; title: string; content: string; scope: "semester" | "student" | "tutor" | "faculty"; course: string; added: number };
-export type StudyEvent = { id: string; title: string; date: string; done: boolean };
+/**
+ * The planner's events are calendar objects now — see lib/moeai/calendar.ts.
+ * The old shape ({ date }) is still in people's browsers, so it is migrated on
+ * read rather than discarded: a stored deadline keeps its title and its time
+ * and gains the kind it always was.
+ */
+export type StudyEvent = CalendarObject;
+type LegacyEvent = { id: string; title: string; date: string; done?: boolean };
+
+function migrateEvent(raw: LegacyEvent | CalendarObject): CalendarObject | null {
+  if (!raw || typeof raw.id !== "string" || typeof raw.title !== "string") return null;
+  if ("start" in raw && typeof raw.start === "string" && Number.isFinite(Date.parse(raw.start))) {
+    return { ...raw, kind: KINDS.has(raw.kind) ? raw.kind : CalendarKind.EVENT };
+  }
+  const legacy = raw as LegacyEvent;
+  if (!Number.isFinite(Date.parse(legacy.date))) return null;
+  return {
+    id: legacy.id,
+    title: legacy.title,
+    // Everything the old planner held was something with a due time.
+    kind: CalendarKind.ASSIGNMENT_DUE,
+    start: new Date(legacy.date).toISOString(),
+    point: true,
+    done: Boolean(legacy.done),
+  };
+}
 export type Settings = { name: string; language: string; detail: string; memory: string; proactive: boolean; theme: string };
 /**
  * `subjects` holds only the courses the student added — the eight seeded ones
@@ -37,7 +64,7 @@ export function loadWorkspace(): Workspace {
     return {
       chats: data.chats.filter((c: Chat) => typeof c.id === "string" && typeof c.title === "string" && Array.isArray(c.messages) && modes.some(m => m.id === c.mode)).slice(0, 40).map((c: Chat) => ({ ...c, messages: c.messages.filter(m => m && typeof m.content === "string" && ["user", "assistant"].includes(m.role)).slice(-80) })),
       files: data.files.filter((f: LibraryFile) => typeof f.id === "string" && typeof f.title === "string" && typeof f.content === "string" && ["student", "tutor"].includes(f.scope)).slice(0, 40),
-      events: data.events.filter((e: StudyEvent) => typeof e.id === "string" && typeof e.title === "string" && Number.isFinite(Date.parse(e.date))).slice(0, 100),
+      events: data.events.map(migrateEvent).filter((e: CalendarObject | null): e is CalendarObject => Boolean(e)).slice(0, 100),
       settings: { ...defaults, ...Object.fromEntries(Object.entries(data.settings || {}).filter(([k, v]) => k in defaults && typeof v === typeof defaults[k as keyof Settings])) },
       notebook: typeof data.notebook === "string" ? data.notebook.slice(0, 50000) : "",
       dismissed: Array.isArray(data.dismissed) ? data.dismissed.filter((v: unknown) => typeof v === "string").slice(-100) : [],

@@ -459,3 +459,88 @@
   .mx-app .mx-lecture-ask { opacity: 1; }
   .mx-app .mx-semester { gap: 18px; }
 }
+
+/* ─── The week ──────────────────────────────────────────────────────────────
+   Ported from the app's calendar: a Monday-first strip whose markers follow
+   the rule that a span marks only its first and last day, an all-day dock,
+   and a proportional day timeline. */
+.mx-app .mx-planner { display: grid; gap: 18px; align-content: start; padding-bottom: 20px; }
+.mx-app .mx-week-nav { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--mx-muted); }
+
+.mx-app .mx-week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.mx-app .mx-day-pill {
+  display: grid; gap: 3px; justify-items: center; padding: 10px 4px 8px;
+  border: 1px solid var(--mx-border); border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015); color: var(--mx-muted);
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s, background 0.18s;
+}
+.mx-app .mx-day-pill:active { transform: scale(0.97); }
+.mx-app .mx-day-pill small { font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.mx-app .mx-day-pill strong { font-size: 16px; font-weight: 550; color: var(--mx-text); }
+.mx-app .mx-day-pill.today strong { color: var(--mx-accent); }
+.mx-app .mx-day-pill.selected { border-color: rgba(var(--mx-accent-rgb), 0.55); background: rgba(var(--mx-accent-rgb), 0.08); }
+.mx-app .mx-day-markers { display: flex; gap: 3px; height: 5px; }
+.mx-app .mx-day-markers i { width: 5px; height: 5px; border-radius: 50%; background: var(--mx-muted); }
+
+/* One colour per kind, used by the markers, the blocks and the picker, so a
+   deadline looks like a deadline everywhere it appears. */
+.mx-app [data-kind="assignmentDue"] { --kind: #f43f5e; }
+.mx-app [data-kind="exam"] { --kind: #f97316; }
+.mx-app [data-kind="lecture"] { --kind: #38bdf8; }
+.mx-app [data-kind="event"] { --kind: #a855f7; }
+.mx-app [data-kind="assignmentSubmitted"] { --kind: #4ade80; }
+.mx-app [data-kind="assignmentUploaded"] { --kind: #fbbf24; }
+.mx-app .mx-day-markers i[data-kind] { background: var(--kind, var(--mx-muted)); }
+
+.mx-app .mx-day-view { display: grid; gap: 12px; }
+.mx-app .mx-day-view header { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.mx-app .mx-day-view header h2 { margin: 0; font-size: 17px; letter-spacing: -0.02em; }
+.mx-app .mx-allday-dock {
+  display: grid; gap: 7px; padding: 12px 14px;
+  border: 1px solid var(--mx-border); border-radius: 12px; background: rgba(255, 255, 255, 0.012);
+}
+.mx-app .mx-allday-dock p { margin: 0; font-size: 11.5px; }
+
+.mx-app .mx-timeline {
+  /* Twenty-four hours is taller than any screen, so the day scrolls inside its
+     own frame and opens on the first thing that happens. */
+  position: relative; max-height: 440px; overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid var(--mx-border); border-radius: 12px; background: rgba(255, 255, 255, 0.01);
+}
+.mx-app .mx-timeline-inner { position: relative; }
+.mx-app .mx-timeline-hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--mx-border); }
+.mx-app .mx-timeline-hour span {
+  position: absolute; top: 2px; left: 8px; font-size: 9px;
+  font-family: "Fira Code", ui-monospace, monospace; color: var(--mx-muted); opacity: 0.6;
+}
+.mx-app .mx-timeline-block {
+  position: absolute; left: 58px; right: 10px; display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 9px; overflow: hidden;
+  background: color-mix(in srgb, var(--kind, var(--mx-accent)) 16%, transparent);
+  border-left: 3px solid var(--kind, var(--mx-accent));
+  color: var(--mx-text);
+}
+.mx-app .mx-timeline-block svg { flex: none; color: var(--kind, var(--mx-accent)); }
+.mx-app .mx-timeline-block strong { font-size: 12px; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mx-app .mx-timeline-block span { font-size: 10px; color: var(--mx-muted); white-space: nowrap; }
+.mx-app .mx-timeline-block .mx-icon { margin-left: auto; opacity: 0; }
+.mx-app .mx-timeline-block:hover .mx-icon { opacity: 1; }
+.mx-app .mx-timeline-block.done { opacity: 0.55; }
+.mx-app .mx-timeline-block.done strong { text-decoration: line-through; }
+
+.mx-app .mx-kind-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.mx-app .mx-kind-picker button {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 11.5px;
+  border: 1px solid var(--mx-border); border-radius: 999px; background: none; color: var(--mx-muted);
+}
+.mx-app .mx-kind-picker button svg { color: var(--kind, var(--mx-muted)); }
+.mx-app .mx-kind-picker button.active {
+  color: var(--mx-text); border-color: var(--kind, var(--mx-accent));
+  background: color-mix(in srgb, var(--kind, var(--mx-accent)) 14%, transparent);
+}
+.mx-app .mx-event[data-kind] .mx-source-check { color: var(--kind, var(--mx-muted)); }
+@media (max-width: 620px) {
+  .mx-app .mx-week-strip { gap: 4px; }
+  .mx-app .mx-day-pill { padding: 8px 2px 6px; }
+  .mx-app .mx-timeline-block { left: 46px; right: 6px; }
+}
