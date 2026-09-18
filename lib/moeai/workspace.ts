@@ -44,7 +44,14 @@ function migrateEvent(raw: LegacyEvent | CalendarObject): CalendarObject | null 
     done: Boolean(legacy.done),
   };
 }
-export type Settings = { name: string; language: string; detail: string; memory: string; proactive: boolean; theme: string };
+/**
+ * `textSize`, `textWeight` and `motion` are the app's accessibility settings,
+ * ported: the same three controls, the same scales. The web had none of them
+ * and relied on the browser's own zoom, which resizes the chrome too.
+ */
+export type Settings = { name: string; language: string; detail: string; memory: string; proactive: boolean; theme: string; textSize: string; textWeight: string; motion: boolean };
+/** The app's four steps, as multipliers on the workspace's base size. */
+export const TEXT_SIZES: Record<string, number> = { Small: 0.92, Default: 1, Large: 1.12, "Extra large": 1.26 };
 /**
  * `subjects` holds only the courses the student added — the eight seeded ones
  * live in code, so they can be corrected without migrating anyone's storage.
@@ -53,7 +60,7 @@ export type Settings = { name: string; language: string; detail: string; memory:
  * shared course material.
  */
 export type Workspace = { chats: Chat[]; files: LibraryFile[]; events: StudyEvent[]; settings: Settings; notebook: string; dismissed: string[]; subjects: Subject[]; completions: Record<string, boolean> };
-export const defaults: Settings = { name: "", language: "Auto · match me", detail: "Balanced", memory: "", proactive: true, theme: "ruby" };
+export const defaults: Settings = { name: "", language: "Auto · match me", detail: "Balanced", memory: "", proactive: true, theme: "ruby", textSize: "Default", textWeight: "Regular", motion: true };
 export const starterFiles: LibraryFile[] = readings.map((item, i) => ({ id: `edumoe-${i}`, title: item.title, content: item.summary, scope: "semester", course: item.code, added: 0 }));
 export function emptyWorkspace(): Workspace { return { chats: [], files: [], events: [], settings: { ...defaults }, notebook: "", dismissed: [], subjects: [], completions: {} }; }
 export const storageKey = "moeai-workspace-v2";

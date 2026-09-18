@@ -544,3 +544,25 @@
   .mx-app .mx-day-pill { padding: 8px 2px 6px; }
   .mx-app .mx-timeline-block { left: 46px; right: 6px; }
 }
+
+/* ─── Reading preferences ───────────────────────────────────────────────────
+   The app's three accessibility controls, ported. Text scales from one
+   variable so the chrome keeps its proportions; motion off stops the things
+   that move without stopping the things that respond. */
+.mx-app { font-size: calc(13px * var(--mx-text-scale, 1)); }
+.mx-app .mx-markdown { font-size: calc(13px * var(--mx-text-scale, 1)); }
+.mx-app .mx-user-text { font-size: calc(13.5px * var(--mx-text-scale, 1)); }
+.mx-app .mx-composer textarea { font-size: calc(13.5px * var(--mx-text-scale, 1)); }
+.mx-app[data-moe-weight="bold"] .mx-markdown,
+.mx-app[data-moe-weight="bold"] .mx-user-text,
+.mx-app[data-moe-weight="bold"] .mx-lecture-body strong,
+.mx-app[data-moe-weight="bold"] .mx-course-top span { font-weight: 600; }
+.mx-app[data-moe-weight="bold"] .mx-markdown strong { font-weight: 750; }
+.mx-app[data-moe-motion="off"] .mx-progress-fill,
+.mx-app[data-moe-motion="off"] .mx-ring circle,
+.mx-app[data-moe-motion="off"] .mx-course-card,
+.mx-app[data-moe-motion="off"] .mx-day-pill { transition: none; }
+.mx-app[data-moe-motion="off"] .mx-course-card:active,
+.mx-app[data-moe-motion="off"] .mx-day-pill:active { transform: none; }
+.mx-app[data-moe-motion="off"] .mx-dictation .mx-dot,
+.mx-app[data-moe-motion="off"] .mx-thinking span { animation: none; }
