@@ -25,6 +25,12 @@ export async function GET() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return Response.json({ rooms: [], organizations: [], signedIn: false });
 
+  // A student who signs in with a university address belongs to that
+  // university. The check runs here rather than at sign-up so it also catches
+  // accounts created before their institution was verified.
+  const { data: claimed } = await sb.rpc("claim_verified_org");
+  const claim = Array.isArray(claimed) ? claimed[0] : null;
+
   const [{ data: rooms }, { data: orgs }] = await Promise.all([
     sb.rpc("my_rooms"),
     sb.from("organizations").select("id, name, slug, verified").eq("verified", true).limit(50),
@@ -34,6 +40,9 @@ export async function GET() {
     signedIn: true,
     rooms: rooms ?? [],
     organizations: orgs ?? [],
+    // Only announced the first time, so it reads as news rather than as a banner.
+    joinedOrg: claim?.newly_joined ? { id: claim.org_id, name: claim.org_name } : null,
+    verifiedOrg: claim ? { id: claim.org_id, name: claim.org_name } : null,
   });
 }
 

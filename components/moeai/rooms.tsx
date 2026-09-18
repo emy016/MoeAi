@@ -25,10 +25,14 @@ export interface Room {
   is_owner: boolean;
 }
 
+export type Org = { id: string; name: string };
+
 export function useRooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [active, setActive] = useState<Room | null>(null);
   const [signedIn, setSignedIn] = useState(false);
+  const [org, setOrg] = useState<Org | null>(null);
+  const [justJoined, setJustJoined] = useState<Org | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -37,6 +41,8 @@ export function useRooms() {
       const json = await res.json();
       setSignedIn(Boolean(json.signedIn));
       setRooms(json.rooms ?? []);
+      setOrg(json.verifiedOrg ?? null);
+      if (json.joinedOrg) setJustJoined(json.joinedOrg);
       // Keep the current selection if it survived the refresh.
       setActive((current) =>
         current ? (json.rooms ?? []).find((r: Room) => r.id === current.id) ?? null : null,
@@ -48,11 +54,11 @@ export function useRooms() {
 
   useEffect(() => { load(); }, [load]);
 
-  return { rooms, active, setActive, signedIn, reload: load };
+  return { rooms, active, setActive, signedIn, org, justJoined, clearJoined: () => setJustJoined(null), reload: load };
 }
 
 export function RoomSwitcher({
-  rooms, active, onSelect, signedIn, onChanged, notify,
+  rooms, active, onSelect, signedIn, onChanged, notify, intent, onIntentHandled,
 }: {
   rooms: Room[];
   active: Room | null;
@@ -60,9 +66,19 @@ export function RoomSwitcher({
   signedIn: boolean;
   onChanged: () => void;
   notify: (message: string) => void;
+  /** Set by the welcome card, so picking a role opens the matching form. */
+  intent?: "join" | "create" | null;
+  onIntentHandled?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"list" | "join" | "create">("list");
+
+  useEffect(() => {
+    if (!intent) return;
+    setMode(intent);
+    setOpen(true);
+    onIntentHandled?.();
+  }, [intent, onIntentHandled]);
   const [code, setCode] = useState("");
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
