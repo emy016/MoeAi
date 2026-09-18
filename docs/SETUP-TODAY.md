@@ -44,6 +44,33 @@ build time, so the existing build will not pick them up.
 
 Without it, the sign-in emails point at localhost.
 
+## 4b · Check the wiring before you walk it (10 seconds)
+
+Open `https://<your-deployment>/api/health`. It reports what is present, never
+what it is — booleans and lengths only, nothing that survives a screenshot.
+
+```json
+{
+  "ok": true,
+  "canAnswer": true,
+  "providers": { "gemini": true, "groq": true, "geminiBackup": false },
+  "personality": { "source": "file", "characters": 17709, "ok": true },
+  "securitySpecCharacters": 12296,
+  "supabase": { "configured": true, "serviceRole": true }
+}
+```
+
+What to look at:
+
+- **`canAnswer: false`** — no provider key reached the deployment. The tutor
+  cannot reply at all. Recheck the variable names and redeploy.
+- **`personality.ok: false`** — this is the quiet one. MoeAI would still answer,
+  in a generic assistant voice, with nothing on screen to say the voice was
+  lost. If it ever reads false, the personality file did not reach the
+  serverless bundle. `personality.characters` should be around 17,700.
+- **`supabase.configured: false`** — the tutor works, but with no rooms, no
+  memory and no retrieval. Fine for a quick test, not for the demo.
+
 ## 5 · Walk it (3 min)
 
 1. Open the site. No yellow banner.

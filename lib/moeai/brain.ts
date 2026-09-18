@@ -4,8 +4,49 @@ import path from "node:path";
 import { contextPrompt, parseContext, type BrainContext } from "./context";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
+
+/**
+ * MoeAI's voice, written by hand and worth protecting.
+ *
+ * It is read off disk rather than imported so it can be edited without a
+ * rebuild, which means Next has to be told to trace it into the serverless
+ * bundle (see outputFileTracingIncludes in next.config.ts). If that ever stops
+ * working the tutor would answer in a generic assistant voice and nothing
+ * would say so, so a missing file is a loud failure here, and
+ * `personalityStatus()` lets a health check confirm it loaded.
+ */
+let cached: string | null = null;
+let failure: string | null = null;
+
+export const PERSONALITY_PATH = "lib/moeai/personality.md";
+
 async function personality() {
-  return process.env.MOEAI_SYSTEM_PROMPT || await readFile(path.join(process.cwd(), "lib/moeai/personality.md"), "utf8");
+  const override = process.env.MOEAI_SYSTEM_PROMPT;
+  if (override) return override;
+  if (cached) return cached;
+  try {
+    const text = await readFile(path.join(process.cwd(), PERSONALITY_PATH), "utf8");
+    if (text.trim().length < 400) throw new Error(`${PERSONALITY_PATH} is present but nearly empty`);
+    cached = text;
+    failure = null;
+    return text;
+  } catch (error) {
+    failure = error instanceof Error ? error.message : String(error);
+    throw new Error(`MoeAI personality could not be loaded from ${PERSONALITY_PATH}: ${failure}`);
+  }
+}
+
+/** For the health check: is the voice actually loaded, and how much of it? */
+export async function personalityStatus() {
+  if (process.env.MOEAI_SYSTEM_PROMPT) {
+    return { source: "env" as const, characters: process.env.MOEAI_SYSTEM_PROMPT.length, ok: true, error: null };
+  }
+  try {
+    const text = await personality();
+    return { source: "file" as const, characters: text.length, ok: true, error: null };
+  } catch {
+    return { source: "file" as const, characters: 0, ok: false, error: failure };
+  }
 }
 
 async function systemPrompt(context: BrainContext, extra = "") {
