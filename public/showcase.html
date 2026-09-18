@@ -291,6 +291,26 @@
       .mark-ring { animation: none; }
       .mark-svg path { stroke-dashoffset: 0; animation: none; }
     }
+    /* ─── THE SPHERE (raw WebGL, ported from the EduMoe homepage) ───── */
+    .sphere-band { position: relative; width: min(900px, calc(100% - 40px)); margin: 0 auto; padding: 8px 0 24px; text-align: center; }
+    .sphere-stage { position: relative; width: min(640px, 86vw); aspect-ratio: 1; margin: 0 auto; }
+    .sphere-caption { margin: 0 auto; max-width: 46ch; color: var(--txt3); font-size: 0.9rem; }
+    .sg-grid-bg {
+      position: absolute; inset: -20%; pointer-events: none; z-index: 2;
+      background-image:
+        linear-gradient(var(--glass-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+      background-size: 34px 34px;
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
+      animation: sg-grid-drift 22s linear infinite;
+      opacity: 0.6;
+    }
+    @keyframes sg-grid-drift { from { background-position: 0 0, 0 0; } to { background-position: 34px 34px, 34px 34px; } }
+    .sg-canvas-host { position: absolute; inset: 0; z-index: 3; overflow: hidden; }
+    .sg-canvas-host canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+    /* Below this width the sphere costs more than it gives, so the page simply drops it. */
+    @media (max-width: 700px) { .sphere-band { display: none; } }
   </style>
 </head>
 <body>
@@ -340,6 +360,12 @@
       <div><b>3</b><span>languages, per message</span></div>
     </div>
   </header>
+
+  <!-- ─── THE SPHERE ────────────────────────────────────────── -->
+  <section class="sphere-band" aria-label="MoeAI, visualised">
+    <div class="sphere-stage" id="sphereStage"><div class="sg-grid-bg"></div></div>
+    <p class="sphere-caption">Every lecture, every equation, every snippet you were handed — circling one place, instead of scattered across eight folders and a group chat.</p>
+  </section>
 
   <!-- ─── THE PROBLEM ───────────────────────────────────────── -->
   <section class="band">
@@ -540,5 +566,6 @@
       document.querySelectorAll('.band, .close').forEach(function (el) { el.classList.add('reveal'); io.observe(el); });
     }
   </script>
+  <script src="/assets/sphere-gallery.js" defer></script>
 </body>
 </html>
