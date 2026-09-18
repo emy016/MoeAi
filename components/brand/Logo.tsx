@@ -1,8 +1,11 @@
 /**
  * The MoeAI mark, drawn in code.
  *
- * Two stroked triangles that cross to form an M, over a cyan → magenta → amber
- * gradient with a neon bloom — the logo, but as geometry rather than a JPEG.
+ * One continuous zigzag — up, down, up, down — outlined rather than filled, so
+ * what you see is the band's two edges with the dark between them. The gradient
+ * runs straight across: cyan at the left foot, magenta at the first peak, red
+ * in the valley, amber at the right foot.
+ *
  * Being code means it stays sharp at any size, weighs about 2 KB instead of
  * 90 KB, inherits the page's theme, and can be animated.
  *
@@ -12,6 +15,14 @@
 import { useId } from "react";
 
 type Animation = "none" | "draw" | "pulse" | "orbit";
+
+/** Outer contour, then the inner contour walked back — one closed path. */
+const MARK = "M 2.9 101.1 L 37.5 20.1 L 60.2 66.8 L 82.7 20.1 L 116.1 100.6 L 102.4 94.9 L 82.3 34.3 L 60.2 81.0 L 37.8 34.3 L 16.7 95.6 Z";
+
+const STOPS: [string, string][] = [
+  ["0%", "#22d3ee"], ["16%", "#3b82f6"], ["32%", "#d946ef"],
+  ["50%", "#f43f5e"], ["68%", "#f97316"], ["100%", "#fde047"],
+];
 
 export function Logo({
   size = 48,
@@ -41,14 +52,11 @@ export function Logo({
     >
       <title>{title}</title>
       <defs>
-        <linearGradient id={grad} x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="34%" stopColor="#c026d3" />
-          <stop offset="62%" stopColor="#f43f5e" />
-          <stop offset="100%" stopColor="#fbbf24" />
+        <linearGradient id={grad} x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+          {STOPS.map(([offset, color]) => <stop key={offset} offset={offset} stopColor={color} />)}
         </linearGradient>
         <filter id={glow} x="-45%" y="-45%" width="190%" height="190%">
-          <feGaussianBlur stdDeviation="3.4" result="blur" />
+          <feGaussianBlur stdDeviation="2.4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="blur" />
@@ -57,18 +65,15 @@ export function Logo({
         </filter>
       </defs>
 
-      {/* Left and right strokes cross in the middle; together they read as M. */}
-      <g
+      <path
         fill="none"
         stroke={`url(#${grad})`}
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="3.4"
+        strokeLinejoin="miter"
+        strokeMiterlimit="12"
         filter={`url(#${glow})`}
-      >
-        <path d="M8 110 L38 16 L68 110 Z" />
-        <path d="M52 110 L82 16 L112 110 Z" />
-      </g>
+        d={MARK}
+      />
     </svg>
   );
 }

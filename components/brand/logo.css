@@ -2,16 +2,15 @@
    pages can use the same classes with an inline copy of the SVG. */
 
 .moe-mark path {
-  /* Long enough to cover either triangle's perimeter. */
-  stroke-dasharray: 320;
+  /* The closed contour's perimeter, rounded up. */
+  stroke-dasharray: 560;
 }
 
 /* Draws itself once, like a neon tube warming up. */
 .moe-draw path {
-  stroke-dashoffset: 320;
+  stroke-dashoffset: 560;
   animation: moe-draw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.moe-draw path:nth-child(2) { animation-delay: 0.22s; }
 @keyframes moe-draw { to { stroke-dashoffset: 0; } }
 
 /* Breathes. For the header, where it should be alive but not distracting. */

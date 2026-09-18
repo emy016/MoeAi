@@ -282,9 +282,8 @@
     .mark-ring.two { inset: 13%; animation-duration: 17s; animation-direction: reverse; opacity: 0.66; }
     .mark-svg { position: relative; width: 112px; height: 112px;
                 filter: drop-shadow(0 0 20px var(--accent-glow)); }
-    .mark-svg path { stroke-dasharray: 320; stroke-dashoffset: 320;
+    .mark-svg path { stroke-dasharray: 560; stroke-dashoffset: 560;
                      animation: mark-draw 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards; }
-    .mark-svg path:nth-child(2) { animation-delay: 0.4s; }
     @keyframes mark-draw { to { stroke-dashoffset: 0; } }
     @keyframes mark-spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) {
@@ -332,14 +331,12 @@
       <div class="mark-ring two"></div>
       <svg class="mark-svg" viewBox="0 0 120 120">
         <defs>
-          <linearGradient id="hm" x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#38bdf8"/><stop offset="34%" stop-color="#c026d3"/>
-            <stop offset="62%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#fbbf24"/>
-          </linearGradient>
+          <linearGradient id="hm" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#22d3ee"/><stop offset="16%" stop-color="#3b82f6"/><stop offset="32%" stop-color="#d946ef"/><stop offset="50%" stop-color="#f43f5e"/><stop offset="68%" stop-color="#f97316"/><stop offset="100%" stop-color="#fde047"/>
+                  </linearGradient>
         </defs>
-        <g fill="none" stroke="url(#hm)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 110 L38 16 L68 110 Z"/><path d="M52 110 L82 16 L112 110 Z"/>
-        </g>
+        <path fill="none" stroke="url(#hm)" stroke-width="3.4" stroke-linejoin="miter" stroke-miterlimit="12"
+                      d="M 2.9 101.1 L 37.5 20.1 L 60.2 66.8 L 82.7 20.1 L 116.1 100.6 L 102.4 94.9 L 82.3 34.3 L 60.2 81.0 L 37.8 34.3 L 16.7 95.6 Z"/>
       </svg>
     </div>
     <span class="eyebrow">MOEAI · BY EDUMOE</span>
