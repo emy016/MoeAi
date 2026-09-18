@@ -216,3 +216,15 @@
 .mx-app .mx-diagram.pending .mx-diagram-canvas { opacity: 0.55; transition: opacity 0.25s; }
 .mx-app .mx-diagram-fallback pre { padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.8; margin: 0; }
 .mx-app .mx-diagram-fallback small { display: block; padding: 0 16px 14px; color: var(--mx-muted); font-size: 10px; }
+
+/* Karnaugh map. A small grid, deliberately square, so the blocks of ones read as blocks. */
+.mx-app .mx-kmap { margin: 18px 0 4px; display: grid; gap: 8px; }
+.mx-app .mx-kmap-grid { display: table; width: auto; font-family: "Fira Code", ui-monospace, monospace; }
+.mx-app .mx-kmap-grid th, .mx-app .mx-kmap-grid td {
+  text-align: center; padding: 0; width: 44px; height: 40px; border: 1px solid var(--mx-border);
+}
+.mx-app .mx-kmap-grid thead th:first-child { font-size: 9px; letter-spacing: 0.04em; }
+.mx-app .mx-kmap-grid td.mx-one {
+  color: var(--mx-accent); background: rgba(var(--mx-accent-rgb), 0.12); font-weight: 600;
+}
+.mx-app .mx-kmap small { color: var(--mx-muted); font-size: 10px; }

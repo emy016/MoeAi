@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Calculator, Check, Code2, Download, FunctionSquare, GitBranch, NotebookPen, Pause, Play, RotateCcw, Timer, X } from "lucide-react";
 import { Markdown } from "./markdown";
 import { downloadText } from "@/lib/moeai/workspace";
+import type { Analysis } from "@/lib/moeai/logic";
 export type Tool = "calculator" | "graph" | "code" | "logic" | "notebook" | "focus";
 export const toolItems = [
   { id: "calculator" as Tool, label: "Calculator", hint: "Evaluate & differentiate", icon: Calculator },
   { id: "graph" as Tool, label: "Graph plotter", hint: "See the function", icon: FunctionSquare },
   { id: "code" as Tool, label: "Code studio", hint: "Write, run, understand", icon: Code2 },
-  { id: "logic" as Tool, label: "Truth table", hint: "Test Boolean expressions", icon: GitBranch },
+  { id: "logic" as Tool, label: "Logic & K-map", hint: "Table, map, minimal form", icon: GitBranch },
   { id: "notebook" as Tool, label: "Notebook", hint: "Keep the important parts", icon: NotebookPen },
   { id: "focus" as Tool, label: "Focus timer", hint: "One thing at a time", icon: Timer },
 ];
@@ -19,15 +20,34 @@ export default function ToolPanel({ tool, onClose, onAsk, notebook, onNotebook }
 function MathTool({type,onAsk}: {type: "calculator" | "graph" | "logic";onAsk:(text:string)=>void}) {
   const [input,setInput] = useState(type === "graph" ? "sin(x)" : type === "logic" ? "(A and B) or C" : "(2^8 - 1) / 5");
   const [result,setResult] = useState(""); const [error,setError] = useState(""); const [busy,setBusy] = useState(false);
-  const [points,setPoints] = useState<{x:number;y:number|null}[]>([]); const [rows,setRows] = useState<{A:boolean;B:boolean;C:boolean;value:boolean}[]>([]);
-  async function run(derivative = false) { setError(""); setBusy(true); try { const math = await import("@/lib/moeai/math");
-    if(type === "graph") { setPoints(math.graphPoints(input)); setResult(`y = ${input}`); }
-    else if(type === "logic") { setRows(math.truthTable(input)); setResult(input); }
-    else setResult(derivative ? math.differentiate(input) : math.calculate(input));
-  } catch(e) { setError(e instanceof Error ? e.message : "Check the expression."); setResult(""); setPoints([]); setRows([]); } finally { setBusy(false); } }
+  const [points,setPoints] = useState<{x:number;y:number|null}[]>([]); const [logic,setLogic] = useState<Analysis|null>(null);
+  async function run(derivative = false) { setError(""); setBusy(true); try {
+    if(type === "logic") { const { analyse } = await import("@/lib/moeai/logic"); const analysis = analyse(input); setLogic(analysis); setResult(analysis.sop); }
+    else { const math = await import("@/lib/moeai/math");
+      if(type === "graph") { setPoints(math.graphPoints(input)); setResult(`y = ${input}`); }
+      else setResult(derivative ? math.differentiate(input) : math.calculate(input)); }
+  } catch(e) { setError(e instanceof Error ? e.message : "Check the expression."); setResult(""); setPoints([]); setLogic(null); } finally { setBusy(false); } }
   let path = ""; let connected = false; let previous = 0;
   for (const p of points) { if(p.y === null){connected=false;continue;} const y=150-p.y*14; path += `${connected && Math.abs(y-previous)<100 ? "L":"M"}${150+p.x*14},${y} `; connected=true;previous=y; }
-  return <><p className="mx-muted">{type === "graph" ? "Plot a real-valued function. Use x as the variable." : type === "logic" ? "Use A, B, C with and, or, not, xor and parentheses." : "A deterministic calculator. Angles are in radians. Use x for derivatives."}</p><label className="mx-field">{type === "graph" ? "f(x)" : "Expression"}<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")run();}} maxLength={300}/></label><div className="mx-inline"><button className="mx-primary" onClick={()=>run()} disabled={busy}>{busy ? "Calculating…" : type === "graph" ? "Plot function" : type === "logic" ? "Build truth table" : "Calculate"}</button>{type === "calculator" && <button className="mx-secondary" disabled={busy} onClick={()=>run(true)}>d/dx</button>}</div>{error && <p className="mx-error" role="alert">{error}</p>}{type === "graph" && <div className="mx-graph"><svg viewBox="0 0 300 300" role="img" aria-label={result || "Graph canvas from minus ten to ten"}><defs><pattern id="graph-grid" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M 14 0 L 0 0 0 14" fill="none" stroke="currentColor" opacity=".1"/></pattern></defs><rect width="300" height="300" fill="url(#graph-grid)"/><path d="M10 150H290 M150 10V290" stroke="currentColor" opacity=".35"/><text x="275" y="168">x</text><text x="158" y="18">y</text><text x="8" y="166">−10</text><text x="276" y="146">10</text><path d={path} stroke="var(--mx-accent)" fill="none" strokeWidth="2.5"/></svg><small>Window: x ∈ [−10, 10], y ∈ [−10, 10]</small></div>}{rows.length>0 && <table className="mx-table"><thead><tr>{["A","B","C","Output"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{[r.A,r.B,r.C,r.value].map((v,j)=><td key={j} className={j===3&&v?"mx-one":""}>{Number(v)}</td>)}</tr>)}</tbody></table>}{result && <div className="mx-result"><span className="mx-eyebrow">RESULT</span><p>{result}</p><button className="mx-text-button" onClick={()=>onAsk(`Explain this ${type} result: ${input} → ${result}${rows.length ? "\n"+JSON.stringify(rows):""}`)}>Explain with Moe <ArrowUpRight size={14}/></button></div>}<div className="mx-tool-examples"><span className="mx-eyebrow">TRY AN EXPRESSION</span>{(type==="graph"?["x^2 / 5", "sin(x)", "cos(x) * x"]:type==="logic"?["A xor B", "not (A and B)", "(A and B) or C"]:["sqrt(144) + 2^3", "sin(pi / 2)", "x^3 + 2*x"]).map(ex=><button key={ex} onClick={()=>setInput(ex)}>{ex}<ArrowUpRight size={13}/></button>)}</div></>;
+  return <><p className="mx-muted">{type === "graph" ? "Plot a real-valued function. Use x as the variable." : type === "logic" ? "Use up to four variables — A, B, C, D — with and, or, not, xor and parentheses. You get the table, the Karnaugh map, and the minimal sum of products." : "A deterministic calculator. Angles are in radians. Use x for derivatives."}</p><label className="mx-field">{type === "graph" ? "f(x)" : "Expression"}<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")run();}} maxLength={300}/></label><div className="mx-inline"><button className="mx-primary" onClick={()=>run()} disabled={busy}>{busy ? "Calculating…" : type === "graph" ? "Plot function" : type === "logic" ? "Analyse expression" : "Calculate"}</button>{type === "calculator" && <button className="mx-secondary" disabled={busy} onClick={()=>run(true)}>d/dx</button>}</div>{error && <p className="mx-error" role="alert">{error}</p>}{type === "graph" && <div className="mx-graph"><svg viewBox="0 0 300 300" role="img" aria-label={result || "Graph canvas from minus ten to ten"}><defs><pattern id="graph-grid" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M 14 0 L 0 0 0 14" fill="none" stroke="currentColor" opacity=".1"/></pattern></defs><rect width="300" height="300" fill="url(#graph-grid)"/><path d="M10 150H290 M150 10V290" stroke="currentColor" opacity=".35"/><text x="275" y="168">x</text><text x="158" y="18">y</text><text x="8" y="166">−10</text><text x="276" y="146">10</text><path d={path} stroke="var(--mx-accent)" fill="none" strokeWidth="2.5"/></svg><small>Window: x ∈ [−10, 10], y ∈ [−10, 10]</small></div>}{logic && <LogicResult analysis={logic}/>}{result && <div className="mx-result"><span className="mx-eyebrow">{type === "logic" ? "MINIMAL SUM OF PRODUCTS" : "RESULT"}</span><p>{type === "logic" ? `F = ${result}` : result}</p><button className="mx-text-button" onClick={()=>onAsk(type === "logic" ? `Walk me through simplifying this Boolean expression step by step, using the Karnaugh map groupings.\n\nF = ${input}\nMinimal form: ${result}\nMinterms: ${logic?.minterms.join(", ") || "none"} over ${logic?.variables.join(", ")}` : `Explain this ${type} result: ${input} → ${result}`)}>Explain with Moe <ArrowUpRight size={14}/></button></div>}<div className="mx-tool-examples"><span className="mx-eyebrow">TRY AN EXPRESSION</span>{(type==="graph"?["x^2 / 5", "sin(x)", "cos(x) * x"]:type==="logic"?["A xor B", "not (A and B)", "(A and B) or (C and D)"]:["sqrt(144) + 2^3", "sin(pi / 2)", "x^3 + 2*x"]).map(ex=><button key={ex} onClick={()=>setInput(ex)}>{ex}<ArrowUpRight size={13}/></button>)}</div></>;
+}
+
+/** The table and the map say the same thing two ways. Students who cannot see it in
+ *  the table often see it immediately in the map, which is the whole point of a map. */
+function LogicResult({analysis}:{analysis:Analysis}) {
+  const {variables, rows, kmap} = analysis;
+  const bits = (code:number,width:number) => code.toString(2).padStart(width,"0");
+  return <>
+    <table className="mx-table"><thead><tr>{[...variables,"F"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>
+      {rows.map((row,i)=><tr key={i}>{[...row.values,row.value].map((v,j)=><td key={j} className={j===variables.length&&v?"mx-one":""}>{Number(v)}</td>)}</tr>)}
+    </tbody></table>
+    {kmap && <div className="mx-kmap"><span className="mx-eyebrow">KARNAUGH MAP</span>
+      <table className="mx-table mx-kmap-grid"><thead><tr><th>{kmap.rowVars.join("")}\{kmap.colVars.join("")}</th>{kmap.colCodes.map(c=><th key={c}>{bits(c,kmap.colVars.length)}</th>)}</tr></thead><tbody>
+        {kmap.cells.map((row,r)=><tr key={r}><th>{bits(kmap.rowCodes[r],kmap.rowVars.length)}</th>{row.map(cell=><td key={cell.index} className={cell.value?"mx-one":""} title={`m${cell.index}`}>{Number(cell.value)}</td>)}</tr>)}
+      </tbody></table>
+      <small>Neighbouring cells differ in one variable, so a block of ones is a term you can simplify away.</small>
+    </div>}
+  </>;
 }
 const SAMPLES = {
   javascript: 'const numbers = [1, 2, 3, 4, 5];\nconst squares = numbers.map(n => n * n);\nconsole.log(squares);',

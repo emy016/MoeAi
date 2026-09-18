@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check:language": "node --experimental-strip-types scripts/check-language.ts",
-    "verify": "npm run check:language && npm run build"
+    "verify": "npm run check:language && npm run check:logic && npm run build",
+    "check:logic": "node --experimental-strip-types scripts/check-logic.ts"
   },
   "dependencies": {
     "@heroui/react": "3.2.4",
