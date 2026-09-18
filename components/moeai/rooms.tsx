@@ -198,3 +198,41 @@ export function RoomSwitcher({
     </div>
   );
 }
+
+
+/**
+ * Server-side nudges.
+ *
+ * The workspace already suggests things from what it can see on this device —
+ * an exam in the calendar, a weak topic in local attempts. This adds what only
+ * the account knows: misconceptions recorded from quizzes, material published
+ * in a room and never opened, a stretch of days away.
+ */
+export interface Nudge {
+  id: string;
+  kind: string;
+  body: string;
+  action_url: string | null;
+}
+
+export function useNudges() {
+  const [nudges, setNudges] = useState<Nudge[]>([]);
+
+  useEffect(() => {
+    fetch("/api/nudges", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { nudges: [] }))
+      .then((j) => setNudges(j.nudges ?? []))
+      .catch(() => {});
+  }, []);
+
+  const dismiss = useCallback((id: string) => {
+    setNudges((list) => list.filter((n) => n.id !== id));
+    fetch("/api/nudges", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }).catch(() => {});
+  }, []);
+
+  return { nudges, dismiss };
+}
