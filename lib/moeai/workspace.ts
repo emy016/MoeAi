@@ -9,7 +9,10 @@ export const modes: { id: Mode; label: string; description: string }[] = [
   { id: "library", label: "Library mode", description: "Answers grounded in your selected sources" },
   { id: "quiz", label: "Quiz me", description: "One question, then your turn" },
 ];
-export type Message = { id: string; role: "user" | "assistant"; content: string; sources?: string[]; status?: "error" | "stopped" };
+/** A passage the answer was built on. `excerpt` is short on purpose: enough to
+ *  recognise the paragraph, not enough to re-host somebody's lecture. */
+export type Citation = { title: string; ref: string; source: string; excerpt: string };
+export type Message = { id: string; role: "user" | "assistant"; content: string; sources?: string[]; citations?: Citation[]; status?: "error" | "stopped" };
 export type Chat = { id: string; title: string; messages: Message[]; updated: number; mode: Mode };
 export type LibraryFile = { id: string; title: string; content: string; scope: "semester" | "student" | "tutor" | "faculty"; course: string; added: number };
 export type StudyEvent = { id: string; title: string; date: string; done: boolean };

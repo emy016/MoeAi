@@ -253,3 +253,35 @@
 .mx-app .mx-message.user:focus-within .mx-message-actions { opacity: 1; }
 .mx-app .mx-message.user .mx-message-actions button { display: flex; align-items: center; gap: 5px; font-size: 10px; }
 @media (prefers-reduced-motion: reduce) { .mx-app .mx-dictation .mx-dot { animation: none; } }
+
+/* Citations. Collapsed by default — the answer is the point — but one click
+   away, with the passage that was actually retrieved, so a wrong citation is
+   visible rather than hidden behind a plausible title. */
+.mx-app .mx-citations { margin: 10px 0 2px; }
+.mx-app .mx-citations-toggle {
+  display: flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px;
+  border: 1px solid var(--mx-border); border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02); color: var(--mx-muted); font-size: 11px;
+}
+.mx-app .mx-citations-toggle:hover { color: var(--mx-text); border-color: rgba(var(--mx-accent-rgb), 0.35); }
+.mx-app .mx-citations.open .mx-citations-toggle svg:last-child { transform: rotate(180deg); }
+.mx-app .mx-citations-toggle svg:last-child { transition: transform 0.18s; }
+.mx-app .mx-citations-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.mx-app .mx-citations-list > li > button {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 8px 10px;
+  border-radius: 9px; background: none; text-align: left; color: var(--mx-muted);
+}
+.mx-app .mx-citations-list > li > button:hover { background: rgba(255, 255, 255, 0.03); }
+.mx-app .mx-citations-list strong { display: block; color: var(--mx-text); font-size: 12px; font-weight: 550; }
+.mx-app .mx-citations-list small { font-size: 10px; color: var(--mx-muted); }
+.mx-app .mx-citation-index {
+  flex: none; width: 18px; height: 18px; border-radius: 5px; margin-top: 1px;
+  display: grid; place-items: center; font-size: 10px;
+  background: rgba(var(--mx-accent-rgb), 0.14); color: var(--mx-accent);
+}
+.mx-app .mx-citations blockquote {
+  margin: 2px 0 8px 38px; padding: 9px 12px; border-left: 2px solid rgba(var(--mx-accent-rgb), 0.4);
+  background: rgba(255, 255, 255, 0.02); border-radius: 0 8px 8px 0;
+  color: #c3b6c9; font-size: 11.5px; line-height: 1.75;
+}
+.mx-app .mx-citations blockquote svg { opacity: 0.5; margin-right: 6px; vertical-align: -1px; }

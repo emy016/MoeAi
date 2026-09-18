@@ -161,6 +161,9 @@ export async function POST(req: NextRequest) {
   // This adds the shared curriculum and anything in their server-side library.
   const extra: string[] = [];
   let grounded = 0;
+  /** What the answer was built on, so the workspace can show it and the student
+   *  can go read the passage rather than take MoeAI's word for it. */
+  const citations: { title: string; ref: string; source: string; excerpt: string }[] = [];
   if (sb && userId) {
     try {
       const { data } = await sb.rpc("search_material", {
@@ -169,6 +172,15 @@ export async function POST(req: NextRequest) {
       const rows = (data ?? []) as { source: string; ref: string; title: string; content: string }[];
       if (rows.length) {
         grounded = rows.length;
+        for (const row of rows) {
+          citations.push({
+            title: row.title,
+            ref: row.ref,
+            source: row.source,
+            // Enough to recognise the passage, not enough to re-host the lecture.
+            excerpt: row.content.replace(/\s+/g, " ").slice(0, 420).trim(),
+          });
+        }
         extra.push(
           [
             "# COURSE MATERIAL (retrieved from this student's curriculum and library)",
@@ -236,11 +248,14 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream<Uint8Array>({
     async start(ctrl) {
       try {
+        // Citations lead, so the workspace can show what it is reading from
+        // while the answer is still arriving.
+        if (citations.length) ctrl.enqueue(encoder.encode(JSON.stringify({ citations }) + "\n"));
         for await (const delta of streamReply(messages, context, controller.signal, extra.join("\n\n"))) {
           answer += delta;
           ctrl.enqueue(encoder.encode(JSON.stringify({ delta }) + "\n"));
         }
-        ctrl.enqueue(encoder.encode(JSON.stringify({ done: true }) + "\n"));
+        ctrl.enqueue(encoder.encode(JSON.stringify({ done: true, grounded: citations.length }) + "\n"));
       } catch (err) {
         const message =
           err instanceof Error && err.message === "PROVIDERS_UNAVAILABLE"
