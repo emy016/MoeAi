@@ -12,15 +12,23 @@ export const modes: { id: Mode; label: string; description: string }[] = [
 /** A passage the answer was built on. `excerpt` is short on purpose: enough to
  *  recognise the paragraph, not enough to re-host somebody's lecture. */
 export type Citation = { title: string; ref: string; source: string; excerpt: string };
+import { normalizeSubject, type Subject } from "./subjects";
 export type Message = { id: string; role: "user" | "assistant"; content: string; sources?: string[]; citations?: Citation[]; status?: "error" | "stopped" };
 export type Chat = { id: string; title: string; messages: Message[]; updated: number; mode: Mode };
 export type LibraryFile = { id: string; title: string; content: string; scope: "semester" | "student" | "tutor" | "faculty"; course: string; added: number };
 export type StudyEvent = { id: string; title: string; date: string; done: boolean };
 export type Settings = { name: string; language: string; detail: string; memory: string; proactive: boolean; theme: string };
-export type Workspace = { chats: Chat[]; files: LibraryFile[]; events: StudyEvent[]; settings: Settings; notebook: string; dismissed: string[] };
+/**
+ * `subjects` holds only the courses the student added — the eight seeded ones
+ * live in code, so they can be corrected without migrating anyone's storage.
+ * `completions` is keyed "subjectId:lectureId" and is kept apart from the
+ * lectures for the same reason: ticking a lecture off must never mean editing
+ * shared course material.
+ */
+export type Workspace = { chats: Chat[]; files: LibraryFile[]; events: StudyEvent[]; settings: Settings; notebook: string; dismissed: string[]; subjects: Subject[]; completions: Record<string, boolean> };
 export const defaults: Settings = { name: "", language: "Auto · match me", detail: "Balanced", memory: "", proactive: true, theme: "ruby" };
 export const starterFiles: LibraryFile[] = readings.map((item, i) => ({ id: `edumoe-${i}`, title: item.title, content: item.summary, scope: "semester", course: item.code, added: 0 }));
-export function emptyWorkspace(): Workspace { return { chats: [], files: [], events: [], settings: { ...defaults }, notebook: "", dismissed: [] }; }
+export function emptyWorkspace(): Workspace { return { chats: [], files: [], events: [], settings: { ...defaults }, notebook: "", dismissed: [], subjects: [], completions: {} }; }
 export const storageKey = "moeai-workspace-v2";
 export function loadWorkspace(): Workspace {
   try {
@@ -33,6 +41,12 @@ export function loadWorkspace(): Workspace {
       settings: { ...defaults, ...Object.fromEntries(Object.entries(data.settings || {}).filter(([k, v]) => k in defaults && typeof v === typeof defaults[k as keyof Settings])) },
       notebook: typeof data.notebook === "string" ? data.notebook.slice(0, 50000) : "",
       dismissed: Array.isArray(data.dismissed) ? data.dismissed.filter((v: unknown) => typeof v === "string").slice(-100) : [],
+      subjects: Array.isArray(data.subjects)
+        ? data.subjects.filter((s: Subject) => s && typeof s.id === "string" && typeof s.name === "string").slice(0, 30).map(normalizeSubject)
+        : [],
+      completions: data.completions && typeof data.completions === "object" && !Array.isArray(data.completions)
+        ? Object.fromEntries(Object.entries(data.completions).filter(([, v]) => v === true).slice(0, 2000)) as Record<string, boolean>
+        : {},
     };
   } catch { return emptyWorkspace(); }
 }

@@ -357,3 +357,105 @@
 }
 .mx-app .mx-onboarding-next small { font-size: 11px; color: var(--mx-muted); line-height: 1.6; }
 .mx-app .mx-onboarding-next a.mx-primary { text-decoration: none; }
+
+/* ─── Courses ───────────────────────────────────────────────────────────────
+   The semester dashboard, ported from the mobile app: one ring for everything,
+   a grid of course cards, and a course opens into its lectures. */
+.mx-app .mx-courses { display: grid; gap: 22px; align-content: start; padding-bottom: 20px; }
+
+.mx-app .mx-ring { position: relative; display: grid; place-items: center; flex: none; }
+.mx-app .mx-ring svg { position: absolute; inset: 0; }
+.mx-app .mx-ring-copy { position: relative; display: grid; gap: 3px; justify-items: center; text-align: center; padding: 0 22px; }
+.mx-app .mx-ring-copy strong { font-size: 29px; font-weight: 600; letter-spacing: -0.03em; color: var(--mx-text); }
+.mx-app .mx-ring-copy span { font-size: 10.5px; color: var(--mx-muted); }
+
+.mx-app .mx-semester {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  padding: 22px 24px; border: 1px solid var(--mx-border); border-radius: 16px;
+  background: linear-gradient(150deg, rgba(var(--mx-accent-rgb), 0.05), transparent 62%), rgba(255, 255, 255, 0.015);
+}
+.mx-app .mx-semester-copy { flex: 1 1 260px; display: grid; gap: 8px; }
+.mx-app .mx-semester-copy p { margin: 0; font-size: 13px; line-height: 1.75; color: #d3c8d8; }
+
+.mx-app .mx-progress-track {
+  flex: 1; height: 5px; border-radius: 999px; background: var(--mx-border); overflow: hidden;
+}
+.mx-app .mx-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, rgba(var(--mx-accent-rgb), 0.55), var(--mx-accent));
+  transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mx-app .mx-course-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(214px, 1fr)); }
+.mx-app .mx-course-card {
+  display: grid; gap: 10px; padding: 15px 16px 13px; text-align: left;
+  border: 1px solid var(--mx-border); border-radius: 14px;
+  background: rgba(255, 255, 255, 0.018); color: var(--mx-muted);
+  /* The app's press feedback, which is what ElasticPressable is doing. */
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s, background 0.18s;
+}
+.mx-app .mx-course-card:hover { border-color: rgba(var(--mx-accent-rgb), 0.32); background: rgba(255, 255, 255, 0.03); }
+.mx-app .mx-course-card:active { transform: scale(0.975); }
+.mx-app .mx-course-card.open { border-color: rgba(var(--mx-accent-rgb), 0.55); background: rgba(var(--mx-accent-rgb), 0.06); }
+.mx-app .mx-course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mx-app .mx-course-top span { font-size: 13.5px; font-weight: 550; color: var(--mx-text); line-height: 1.35; }
+.mx-app .mx-course-top svg { flex: none; color: var(--mx-muted); margin-top: 1px; }
+.mx-app .mx-course-card.open .mx-course-top svg { color: var(--mx-accent); }
+.mx-app .mx-course-bottom { display: flex; align-items: center; gap: 10px; }
+.mx-app .mx-course-bottom strong { font-size: 11.5px; font-weight: 600; color: var(--mx-text); }
+.mx-app .mx-course-card small { font-size: 10.5px; color: var(--mx-muted); }
+.mx-app .mx-course-add { align-content: center; justify-items: start; gap: 5px; border-style: dashed; }
+.mx-app .mx-course-add span { font-size: 13px; color: var(--mx-text); font-weight: 550; }
+
+.mx-app .mx-course-form { display: grid; gap: 10px; max-width: 420px; }
+
+.mx-app .mx-lectures {
+  display: grid; gap: 14px; padding: 20px 22px;
+  border: 1px solid var(--mx-border); border-radius: 16px; background: rgba(255, 255, 255, 0.012);
+}
+.mx-app .mx-lectures header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.mx-app .mx-lectures header h2 { margin: 4px 0 0; font-size: 17px; letter-spacing: -0.02em; }
+.mx-app .mx-lecture-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: lecture; }
+.mx-app .mx-lecture-list li {
+  display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 10px;
+}
+.mx-app .mx-lecture-list li:hover { background: rgba(255, 255, 255, 0.025); }
+.mx-app .mx-lecture-list li.done .mx-lecture-body strong { color: var(--mx-muted); text-decoration: line-through; text-decoration-color: rgba(var(--mx-accent-rgb), 0.5); }
+.mx-app .mx-lecture-check {
+  flex: none; width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center;
+  border: 1px solid var(--mx-border); background: none; color: var(--mx-muted); font-size: 10.5px;
+}
+.mx-app .mx-lecture-list li.done .mx-lecture-check {
+  border-color: transparent; background: rgba(var(--mx-accent-rgb), 0.18); color: var(--mx-accent);
+}
+.mx-app .mx-lecture-body { flex: 1; display: grid; gap: 5px; min-width: 0; }
+.mx-app .mx-lecture-body strong { font-size: 13px; font-weight: 500; color: var(--mx-text); }
+.mx-app .mx-lecture-meta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.mx-app .mx-lecture-meta .mx-progress-track { max-width: 120px; }
+.mx-app .mx-lecture-meta small { font-size: 10px; color: var(--mx-muted); }
+.mx-app .mx-lecture-file {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px;
+  border: 1px solid var(--mx-border); font-size: 9.5px; color: var(--mx-muted);
+}
+.mx-app .mx-lecture-ask {
+  flex: none; display: flex; align-items: center; gap: 5px; padding: 6px 11px; font-size: 11px;
+  border: 1px solid var(--mx-border); border-radius: 999px; color: var(--mx-muted); background: none;
+  opacity: 0; transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+.mx-app .mx-lecture-list li:hover .mx-lecture-ask,
+.mx-app .mx-lecture-list li:focus-within .mx-lecture-ask { opacity: 1; }
+.mx-app .mx-lecture-ask:hover { color: var(--mx-text); border-color: rgba(var(--mx-accent-rgb), 0.4); }
+.mx-app .mx-lecture-add { display: flex; gap: 8px; align-items: center; }
+.mx-app .mx-lecture-add input {
+  flex: 1; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--mx-border);
+  background: rgba(255, 255, 255, 0.02); color: var(--mx-text); font-size: 12.5px;
+}
+.mx-app .mx-lecture-collapse {
+  justify-self: start; display: flex; align-items: center; gap: 6px; padding: 6px 0;
+  background: none; color: var(--mx-muted); font-size: 11.5px;
+}
+.mx-app .mx-lecture-collapse:hover { color: var(--mx-text); }
+@media (max-width: 620px) {
+  .mx-app .mx-lecture-ask { opacity: 1; }
+  .mx-app .mx-semester { gap: 18px; }
+}
