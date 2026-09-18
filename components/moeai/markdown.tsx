@@ -7,6 +7,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import { Check, Copy, Download, Terminal } from "lucide-react";
 import { downloadText } from "@/lib/moeai/workspace";
+import { Diagram } from "./diagram";
 
 function plain(children: ReactNode): string { return Children.toArray(children).map(child => isValidElement<{children?: ReactNode}>(child) ? plain(child.props.children) : String(child)).join(""); }
 function CodeBlock({ children }: { children?: ReactNode }) {
@@ -14,6 +15,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   const text = plain(children);
   const element = Children.toArray(children).find(isValidElement);
   const language = isValidElement<{className?: string}>(element) ? element.props.className?.match(/language-(\w+)/)?.[1] || "code" : "code";
+  if (language === "mermaid") return <Diagram code={text}/>;
   return <div className="mx-code"><div className="mx-code-bar"><span><Terminal size={13}/>{language}</span><div><button aria-label="Copy code" onClick={async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { setCopied(false); } }}>{copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? "Copied" : "Copy"}</button><button aria-label="Download code" onClick={() => downloadText(`snippet.${({javascript:"js",typescript:"ts",python:"py",cpp:"cpp"} as Record<string,string>)[language] || "txt"}`, text, "text/plain")}><Download size={14}/></button></div></div><pre>{children}</pre></div>;
 }
 export const Markdown = memo(function Markdown({ text }: { text: string }) {

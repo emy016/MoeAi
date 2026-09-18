@@ -29,21 +29,55 @@ function MathTool({type,onAsk}: {type: "calculator" | "graph" | "logic";onAsk:(t
   for (const p of points) { if(p.y === null){connected=false;continue;} const y=150-p.y*14; path += `${connected && Math.abs(y-previous)<100 ? "L":"M"}${150+p.x*14},${y} `; connected=true;previous=y; }
   return <><p className="mx-muted">{type === "graph" ? "Plot a real-valued function. Use x as the variable." : type === "logic" ? "Use A, B, C with and, or, not, xor and parentheses." : "A deterministic calculator. Angles are in radians. Use x for derivatives."}</p><label className="mx-field">{type === "graph" ? "f(x)" : "Expression"}<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")run();}} maxLength={300}/></label><div className="mx-inline"><button className="mx-primary" onClick={()=>run()} disabled={busy}>{busy ? "Calculating…" : type === "graph" ? "Plot function" : type === "logic" ? "Build truth table" : "Calculate"}</button>{type === "calculator" && <button className="mx-secondary" disabled={busy} onClick={()=>run(true)}>d/dx</button>}</div>{error && <p className="mx-error" role="alert">{error}</p>}{type === "graph" && <div className="mx-graph"><svg viewBox="0 0 300 300" role="img" aria-label={result || "Graph canvas from minus ten to ten"}><defs><pattern id="graph-grid" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M 14 0 L 0 0 0 14" fill="none" stroke="currentColor" opacity=".1"/></pattern></defs><rect width="300" height="300" fill="url(#graph-grid)"/><path d="M10 150H290 M150 10V290" stroke="currentColor" opacity=".35"/><text x="275" y="168">x</text><text x="158" y="18">y</text><text x="8" y="166">−10</text><text x="276" y="146">10</text><path d={path} stroke="var(--mx-accent)" fill="none" strokeWidth="2.5"/></svg><small>Window: x ∈ [−10, 10], y ∈ [−10, 10]</small></div>}{rows.length>0 && <table className="mx-table"><thead><tr>{["A","B","C","Output"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{[r.A,r.B,r.C,r.value].map((v,j)=><td key={j} className={j===3&&v?"mx-one":""}>{Number(v)}</td>)}</tr>)}</tbody></table>}{result && <div className="mx-result"><span className="mx-eyebrow">RESULT</span><p>{result}</p><button className="mx-text-button" onClick={()=>onAsk(`Explain this ${type} result: ${input} → ${result}${rows.length ? "\n"+JSON.stringify(rows):""}`)}>Explain with Moe <ArrowUpRight size={14}/></button></div>}<div className="mx-tool-examples"><span className="mx-eyebrow">TRY AN EXPRESSION</span>{(type==="graph"?["x^2 / 5", "sin(x)", "cos(x) * x"]:type==="logic"?["A xor B", "not (A and B)", "(A and B) or C"]:["sqrt(144) + 2^3", "sin(pi / 2)", "x^3 + 2*x"]).map(ex=><button key={ex} onClick={()=>setInput(ex)}>{ex}<ArrowUpRight size={13}/></button>)}</div></>;
 }
+const SAMPLES = {
+  javascript: 'const numbers = [1, 2, 3, 4, 5];\nconst squares = numbers.map(n => n * n);\nconsole.log(squares);',
+  python: 'def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        yield a\n        a, b = b, a + b\n\nprint(list(fib(10)))',
+  typescript: 'type Student = { name: string; year: number };\nconst moe: Student = { name: "Moe", year: 1 };\nconsole.log(moe);',
+  cpp: '#include <iostream>\nint main() {\n    std::cout << "Hello, EduMoe" << std::endl;\n    return 0;\n}',
+};
+const PYTHON_MIRRORS = ["https://cdn.jsdelivr.net/pyodide/v0.29.5/full/", "https://cdn.jsdelivr.net/npm/pyodide@0.29.5/", "https://unpkg.com/pyodide@0.29.5/"];
 function CodeStudio({onAsk}:{onAsk:(text:string)=>void}) {
-  const [language,setLanguage] = useState("javascript"); const [code,setCode] = useState('const numbers = [1, 2, 3, 4, 5];\nconst squares = numbers.map(n => n * n);\nconsole.log(squares);');
-  const [output,setOutput] = useState(""); const [running,setRunning] = useState(false); const frame = useRef<HTMLIFrameElement>(null); const cleanup = useRef<()=>void>(()=>{});
+  const [language,setLanguage] = useState("javascript");
+  const [code,setCode] = useState(SAMPLES.javascript);
+  const [output,setOutput] = useState(""); const [running,setRunning] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null); const cleanup = useRef<()=>void>(()=>{});
   useEffect(()=>()=>cleanup.current(),[]);
+  const runnable = language === "javascript" || language === "python";
+
+  /** Both runtimes live in the same sandboxed frame and speak the same three
+   *  messages: a line of output, __MOE_CLEAR__ to drop the loading chatter,
+   *  and __MOE_DONE__ to say the program ended. */
   function run() {
-    if(!frame.current || running)return; setRunning(true);setOutput(""); const token = crypto.randomUUID();
+    if(!frame.current || running || !runnable) return;
+    setRunning(true); setOutput("");
+    const token = crypto.randomUUID();
+    const python = language === "python";
+    const source = JSON.stringify(code).replace(/</g,"\\u003c");
     const workerCode = `const console={log:(...args)=>postMessage(args.map(x=>typeof x==='string'?x:JSON.stringify(x)).join(' ')),error:(...args)=>postMessage(args.join(' ')),warn:(...args)=>postMessage(args.join(' '))};\ntry {\n${code}\n} catch(e) { postMessage('Error: '+e.message); }\npostMessage('__MOE_DONE__');`;
-    const script = `const send=(value)=>parent.postMessage({token:${JSON.stringify(token)},output:value},'*');const worker=new Worker(URL.createObjectURL(new Blob([${JSON.stringify(workerCode).replace(/</g,"\\u003c")}],{type:'text/javascript'})));worker.onmessage=e=>send(e.data);worker.onerror=e=>send('Error: '+e.message);`;
-    const onMessage=(event:MessageEvent)=>{if(event.source!==frame.current?.contentWindow||event.data?.token!==token)return; if(event.data.output === "__MOE_DONE__") {finish();return;} if(typeof event.data.output==="string")setOutput(previous=>(previous+event.data.output+"\n").slice(0,15000));};
-    const timeout=setTimeout(()=>{setOutput(p=>p+"\nExecution stopped after 3 seconds.");finish();},3000);
+    const send = `const send=(value)=>parent.postMessage({token:${JSON.stringify(token)},output:value},'*');`;
+    const script = python
+      ? `${send}const CODE=${source};const MIRRORS=${JSON.stringify(PYTHON_MIRRORS)};
+async function boot(){for(const base of MIRRORS){try{await new Promise((ok,no)=>{const s=document.createElement('script');s.src=base+'pyodide.js';s.onload=ok;s.onerror=()=>no(new Error('unreachable'));document.head.appendChild(s);});return await loadPyodide({indexURL:base});}catch(e){}}throw new Error('The Python runtime could not be downloaded. Check your connection and try again.');}
+(async()=>{try{send('Downloading the Python runtime. The first run takes a moment.');const py=await boot();py.setStdout({batched:send});py.setStderr({batched:send});send('__MOE_CLEAR__');await py.runPythonAsync(CODE);}catch(e){const message=e&&e.message?String(e.message):String(e);send('__MOE_CLEAR__');send(message.split('\\n').slice(-8).join('\\n'));}send('__MOE_DONE__');})();`
+      : `${send}const worker=new Worker(URL.createObjectURL(new Blob([${JSON.stringify(workerCode).replace(/</g,"\\u003c")}],{type:'text/javascript'})));worker.onmessage=e=>send(e.data);worker.onerror=e=>send('Error: '+e.message);`;
+    const policy = python
+      ? "default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; connect-src https://cdn.jsdelivr.net https://unpkg.com; worker-src blob:"
+      : "default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob:; worker-src blob:; connect-src 'none'";
+    const onMessage=(event:MessageEvent)=>{
+      if(event.source!==frame.current?.contentWindow||event.data?.token!==token)return;
+      if(event.data.output === "__MOE_DONE__"){finish();return;}
+      if(event.data.output === "__MOE_CLEAR__"){setOutput("");return;}
+      if(typeof event.data.output==="string")setOutput(previous=>(previous+event.data.output+"\n").slice(0,15000));
+    };
+    const limit = python ? 60000 : 3000;
+    const timeout=setTimeout(()=>{setOutput(p=>p+`\nExecution stopped after ${limit/1000} seconds.`);finish();},limit);
     function finish(){clearTimeout(timeout);window.removeEventListener("message",onMessage);setRunning(false);if(frame.current)frame.current.srcdoc="";}
-    cleanup.current=()=>{clearTimeout(timeout);window.removeEventListener("message",onMessage);};window.addEventListener("message",onMessage);
-    frame.current.srcdoc=`<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob:; worker-src blob:; connect-src 'none'"><script>${script}<\/script>`;
+    cleanup.current=()=>{clearTimeout(timeout);window.removeEventListener("message",onMessage);};
+    window.addEventListener("message",onMessage);
+    frame.current.srcdoc=`<!doctype html><meta http-equiv="Content-Security-Policy" content="${policy}"><script>${script}<\/script>`;
   }
-  return <><p className="mx-muted">Run JavaScript in an isolated browser sandbox. Use Moe to explain or debug C++, Python, and TypeScript.</p><label className="mx-field">Language<select value={language} onChange={e=>setLanguage(e.target.value)}>{["javascript","typescript","cpp","python"].map(l=><option key={l}>{l}</option>)}</select></label><textarea className="mx-code-editor" aria-label="Code editor" spellCheck={false} value={code} onChange={e=>setCode(e.target.value)} maxLength={20000}/><div className="mx-inline">{language === "javascript" && <button className="mx-primary" onClick={run} disabled={running}><Play size={14}/>{running?"Running…":"Run code"}</button>}<button className="mx-secondary" onClick={()=>onAsk(`Help me understand and debug this code. Do not claim you ran it.\n\n\`\`\`${language}\n${code}\n\`\`\``)}>Ask Moe</button><button className="mx-icon" aria-label="Download code" onClick={()=>downloadText(`code.${language==="javascript"?"js":language==="python"?"py":language==="typescript"?"ts":"cpp"}`,code,"text/plain")}><Download size={16}/></button></div><div className="mx-console"><span className="mx-eyebrow">CONSOLE</span><pre>{output || "Output appears here when you run JavaScript."}</pre></div><iframe ref={frame} sandbox="allow-scripts" title="Isolated JavaScript runtime" hidden/></>;
+
+  return <><p className="mx-muted">Run JavaScript and Python right here, in a sandbox with no network and no access to your account. Ask Moe to explain or debug C++ and TypeScript.</p><label className="mx-field">Language<select value={language} onChange={e=>{const next=e.target.value;if(code===SAMPLES[language as keyof typeof SAMPLES])setCode(SAMPLES[next as keyof typeof SAMPLES]??code);setLanguage(next);setOutput("");}}>{["javascript","python","typescript","cpp"].map(l=><option key={l}>{l}</option>)}</select></label><textarea className="mx-code-editor" aria-label="Code editor" spellCheck={false} value={code} onChange={e=>setCode(e.target.value)} maxLength={20000}/><div className="mx-inline">{runnable && <button className="mx-primary" onClick={run} disabled={running}><Play size={14}/>{running?"Running…":`Run ${language === "python" ? "Python" : "code"}`}</button>}<button className="mx-secondary" onClick={()=>onAsk(`Help me understand and debug this code. Do not claim you ran it.\n\n\`\`\`${language}\n${code}\n\`\`\``)}>Ask Moe</button><button className="mx-icon" aria-label="Download code" onClick={()=>downloadText(`code.${language==="javascript"?"js":language==="python"?"py":language==="typescript"?"ts":"cpp"}`,code,"text/plain")}><Download size={16}/></button></div><div className="mx-console"><span className="mx-eyebrow">CONSOLE</span><pre>{output || (runnable ? "Output appears here when you run your code." : "Running is available for JavaScript and Python. Ask Moe about this one.")}</pre></div><iframe ref={frame} sandbox="allow-scripts" title="Isolated code runtime" hidden/></>;
 }
 function Notebook({text,onChange}:{text:string;onChange:(text:string)=>void}) { const [preview,setPreview]=useState(false); return <><div className="mx-inline"><button className="mx-secondary" onClick={()=>setPreview(!preview)}>{preview?"Edit notes":"Preview Markdown"}</button><button className="mx-icon" aria-label="Export notebook" onClick={()=>downloadText("moeai-notebook.md",text)}><Download size={16}/></button></div>{preview?<Markdown text={text || "*Your notebook is empty.*"}/>:<textarea className="mx-notebook" aria-label="Notebook" value={text} onChange={e=>onChange(e.target.value)} placeholder={"# Things that clicked\n\nSave explanations from chat, or write your own notes.\n\nMath works here too: $E = mc^2$"} maxLength={50000}/>}<p className="mx-muted"><Check size={12}/> Saved on this device</p></>; }
 function FocusTimer() {

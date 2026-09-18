@@ -194,3 +194,25 @@
   font-family: "Fira Code", ui-monospace, monospace;
   font-size: 27px; letter-spacing: 0.17em; color: var(--mx-text);
 }
+
+/* Diagrams. Mermaid draws its own SVG; we only give it a frame that matches code blocks. */
+.mx-app .mx-diagram, .mx-app .mx-diagram-fallback {
+  margin: 16px 0; border: 1px solid #322c3c; border-radius: 11px;
+  overflow: hidden; background: #0a0a11; max-width: 100%; direction: ltr;
+}
+.mx-app .mx-diagram-bar {
+  padding: 9px 13px; border-bottom: 1px solid #ffffff08; background: #16131d;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: #928298;
+}
+.mx-app .mx-diagram-bar > span, .mx-app .mx-diagram-bar > div { display: flex; align-items: center; gap: 7px; }
+.mx-app .mx-diagram-bar button { display: flex; align-items: center; background: none; color: #9985a4; padding: 2px; }
+.mx-app .mx-diagram-bar button:disabled { opacity: 0.4; }
+.mx-app .mx-diagram-canvas { padding: 18px; overflow-x: auto; display: flex; justify-content: center; }
+.mx-app .mx-diagram-canvas svg { max-width: 100%; height: auto; }
+.mx-app .mx-diagram-canvas.placeholder {
+  color: var(--mx-muted); font-size: 11px; gap: 8px; align-items: center; min-height: 72px;
+}
+.mx-app .mx-diagram.pending .mx-diagram-canvas { opacity: 0.55; transition: opacity 0.25s; }
+.mx-app .mx-diagram-fallback pre { padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.8; margin: 0; }
+.mx-app .mx-diagram-fallback small { display: block; padding: 0 16px 14px; color: var(--mx-muted); font-size: 10px; }
