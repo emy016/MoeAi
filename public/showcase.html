@@ -265,6 +265,32 @@
     .foot small { color: var(--txt3); font-size: 0.76rem; }
 
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+    /* ─── HERO MARK ────────────────────────────────────────────────────
+       The logo drawn in code, so it is sharp at any size and can animate.
+       Two stroked triangles crossing to form the M, with nodes orbiting the
+       plane they sit on. */
+    .mark-stage { position: relative; width: 190px; height: 190px; margin: 0 auto 34px;
+                  display: grid; place-items: center; }
+    .mark-glow { position: absolute; inset: 14%; border-radius: 50%;
+                 background: radial-gradient(circle, var(--glow), transparent 68%); filter: blur(22px); }
+    .mark-ring { position: absolute; inset: 0; border-radius: 50%;
+                 border: 1px solid var(--glass-border); animation: mark-spin 26s linear infinite; }
+    .mark-ring::after { content: ""; position: absolute; top: -4px; left: 50%; width: 7px; height: 7px;
+                        margin-left: -3.5px; border-radius: 50%; background: var(--accent2);
+                        box-shadow: 0 0 14px var(--accent-glow); }
+    .mark-ring.two { inset: 13%; animation-duration: 17s; animation-direction: reverse; opacity: 0.66; }
+    .mark-svg { position: relative; width: 112px; height: 112px;
+                filter: drop-shadow(0 0 20px var(--accent-glow)); }
+    .mark-svg path { stroke-dasharray: 320; stroke-dashoffset: 320;
+                     animation: mark-draw 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards; }
+    .mark-svg path:nth-child(2) { animation-delay: 0.4s; }
+    @keyframes mark-draw { to { stroke-dashoffset: 0; } }
+    @keyframes mark-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .mark-ring { animation: none; }
+      .mark-svg path { stroke-dashoffset: 0; animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -280,6 +306,22 @@
 
   <!-- ─── HERO ──────────────────────────────────────────────── -->
   <header class="hero">
+    <div class="mark-stage" aria-hidden="true">
+      <div class="mark-glow"></div>
+      <div class="mark-ring"></div>
+      <div class="mark-ring two"></div>
+      <svg class="mark-svg" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="hm" x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#38bdf8"/><stop offset="34%" stop-color="#c026d3"/>
+            <stop offset="62%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#fbbf24"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke="url(#hm)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 110 L38 16 L68 110 Z"/><path d="M52 110 L82 16 L112 110 Z"/>
+        </g>
+      </svg>
+    </div>
     <span class="eyebrow">MOEAI · BY EDUMOE</span>
     <h1>The tutor that knows<br><em>your</em> syllabus.</h1>
     <p class="lede">

@@ -462,6 +462,80 @@
     @media (max-width: 1024px) { .hero { grid-template-columns: 1fr; padding-top: 100px; } .hero-visual { height: 420px; order: -1; } .nav-links { display: none; } .stats-bar { grid-template-columns: repeat(2, 1fr); } .subjects-grid { grid-template-columns: repeat(2, 1fr); } .footer-grid { grid-template-columns: 1fr 1fr; } .bottom-tab-bar { display: flex; } body { padding-bottom: 68px; } }
     @media (max-width: 700px) { .hero-stats { grid-template-columns: 1fr 1fr; } .stats-bar { grid-template-columns: 1fr; padding: 32px 20px; gap: 16px; } .float-win { display: none; } .hero-visual { display: none; } .hero { padding-top: 88px; min-height: auto; } .features-grid { grid-template-columns: 1fr; } .subjects-grid { grid-template-columns: 1fr; } .navbar { padding: 8px 14px; gap: 6px; } .nav-auth-btn span { display: none; } .nav-logo-name { font-size: 15px; } .cta-section { padding: 32px 20px; } .cta-section h2 { font-size: 26px; } .bottom-tab-bar { padding: 4px 0 8px; } .tab-item i { font-size: 18px; } .tab-item { font-size: 8px; padding: 2px 8px; } .modal-box { padding: 28px 20px; } .footer-grid { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; text-align: center; } }
     @media (max-width: 450px) { .topbar { padding: 8px 10px; } .brand { font-size: 15px; } .brand-mark { width: 28px; height: 28px; font-size: 12px; } .btn-back span { display: none; } .theme-switcher { gap: 2px; padding: 2px 3px; } .theme-dot { width: 10px; height: 10px; } .custom-color-wrap { width: 14px; height: 14px; } }
+
+    /* ─── 3D BOOK ──────────────────────────────────────────────────────
+       Pure CSS transforms, no WebGL and no library. It costs nothing to
+       load, keeps compositing on the GPU, and stops entirely for anyone
+       who has asked for reduced motion. */
+    .book-stage { position: relative; width: 100%; height: 100%; display: grid; place-items: center;
+                  perspective: 1600px; perspective-origin: 50% 42%; }
+    .book { position: relative; width: 210px; height: 290px; transform-style: preserve-3d;
+            animation: book-turn 22s cubic-bezier(0.42, 0, 0.58, 1) infinite; }
+    .book-face { position: absolute; inset: 0; border-radius: 4px 9px 9px 4px; backface-visibility: hidden; }
+
+    /* Front cover: the brand, catching light from the upper left. */
+    .book-cover {
+      background:
+        linear-gradient(118deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 42%),
+        linear-gradient(160deg, var(--bg3) 0%, var(--bg2) 58%, #07070b 100%);
+      border: 1px solid var(--glass-border2);
+      box-shadow: inset -22px 0 34px -26px #000, inset 2px 0 0 rgba(255,255,255,0.07);
+      transform: translateZ(19px);
+      display: grid; align-content: center; justify-items: center; gap: 15px; padding: 26px;
+    }
+    .book-cover .book-mark { filter: drop-shadow(0 0 16px var(--accent-glow)); }
+    .book-title { font-family: var(--font-display); font-size: 21px; font-weight: 700;
+                  letter-spacing: 0.14em; color: var(--txt1); }
+    .book-rule { width: 46px; height: 2px; border-radius: 2px;
+                 background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+    .book-sub { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.24em;
+                color: var(--txt3); text-align: center; line-height: 1.9; }
+
+    .book-back {
+      background: linear-gradient(160deg, var(--bg2), #06060a);
+      border: 1px solid var(--glass-border);
+      transform: translateZ(-19px) rotateY(180deg);
+    }
+
+    /* Spine and fore-edge close the solid. */
+    .book-spine {
+      position: absolute; top: 0; bottom: 0; left: 0; width: 38px;
+      background: linear-gradient(90deg, #05050a, var(--bg3) 48%, #05050a);
+      border-radius: 4px 0 0 4px;
+      transform: rotateY(-90deg) translateZ(19px); transform-origin: left center;
+      display: grid; place-items: center;
+    }
+    .book-spine span { font-family: var(--font-display); font-size: 10px; letter-spacing: 0.22em;
+                       color: var(--txt2); writing-mode: vertical-rl; transform: rotate(180deg); }
+
+    /* Paper: a few sheets, so the edge reads as a block rather than a slab. */
+    .book-pages { position: absolute; top: 5px; bottom: 5px; right: 0; width: 36px;
+                  transform: rotateY(90deg) translateZ(172px); transform-origin: right center;
+                  background: repeating-linear-gradient(90deg, #efe6e9 0 2px, #cdbfc6 2px 3px);
+                  border-radius: 0 3px 3px 0; }
+    .book-leaf { position: absolute; inset: 6px 12px 6px 22px; border-radius: 2px 6px 6px 2px;
+                 background: linear-gradient(120deg, #f6eff2, #d9ccd3);
+                 box-shadow: 0 1px 0 rgba(0,0,0,0.16); }
+    .book-leaf.l2 { transform: translateZ(14px) rotateY(-1.6deg); opacity: 0.92; }
+    .book-leaf.l3 { transform: translateZ(9px)  rotateY(-0.8deg); opacity: 0.85; }
+
+    /* Contact shadow, so it sits in the scene instead of floating over it. */
+    .book-shadow { position: absolute; bottom: -34px; left: 50%; width: 220px; height: 26px;
+                   transform: translateX(-50%) rotateX(78deg); border-radius: 50%;
+                   background: radial-gradient(ellipse, rgba(0,0,0,0.6), transparent 72%);
+                   filter: blur(11px); }
+
+    @keyframes book-turn {
+      0%   { transform: rotateY(-26deg) rotateX(9deg) translateY(0); }
+      50%  { transform: rotateY(26deg)  rotateX(5deg) translateY(-14px); }
+      100% { transform: rotateY(-26deg) rotateX(9deg) translateY(0); }
+    }
+    .book-stage:hover .book { animation-play-state: paused; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .book { animation: none; transform: rotateY(-18deg) rotateX(7deg); }
+    }
+    @media (max-width: 700px) { .book-stage { display: none; } }
   </style>
 </head>
 <body>
@@ -554,13 +628,31 @@
     <div class="hero-visual">
       <div class="orbit-container" id="orbitContainer">
         <div class="sg-grid-bg"></div>
-        <div class="orb-shell">
-          <div class="orb-ring"></div>
-          <div class="orb-body">
-            <img src="moepfp.jpg" alt="Moemen" class="orb-img" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'orb-placeholder\'><i class=\'ic\' data-ic=\'user\'></i></div>';" />
-            <div class="orb-gloss"></div>
+        <div class="book-stage">
+          <div class="book">
+            <div class="book-face book-cover">
+              <svg class="book-mark" width="52" height="52" viewBox="0 0 120 120" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bkg" x1="0" y1="120" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#38bdf8"/><stop offset="34%" stop-color="#c026d3"/>
+                    <stop offset="62%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#fbbf24"/>
+                  </linearGradient>
+                </defs>
+                <g fill="none" stroke="url(#bkg)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 110 L38 16 L68 110 Z"/><path d="M52 110 L82 16 L112 110 Z"/>
+                </g>
+              </svg>
+              <div class="book-title">EDUMOE</div>
+              <div class="book-rule"></div>
+              <div class="book-sub">SMALL NOTES<br/>BRIGHTER FUTURES</div>
+            </div>
+            <div class="book-spine"><span>EDUMOE · MOEAI</span></div>
+            <div class="book-pages"></div>
+            <div class="book-leaf l2"></div>
+            <div class="book-leaf l3"></div>
+            <div class="book-face book-back"></div>
           </div>
-          <div class="orb-particles"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
+          <div class="book-shadow"></div>
         </div>
       </div>
     </div>
