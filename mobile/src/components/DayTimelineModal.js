@@ -84,7 +84,9 @@ const TimelineDay = React.memo(function TimelineDay({ day, objects, eventAreaWid
           ...group[0],
           id: `deadline-group-${new Date(group[0].start).getTime()}`,
           title: group.map((entry) => entry.title).join(' · '),
-          description: t('dummyDescription'),
+          // Several deadlines land on the same minute: say how many, rather
+          // than showing one item's description for all of them.
+          description: t('deadlinesTogether', { count: group.length }),
         };
         const top = (minutesIntoDay(object.start) / 60) * Calendar.HOUR_HEIGHT;
         const deadlineHeight = Math.max(40, Math.ceil(17 * fontScale * 2 + 10));

@@ -16,3 +16,6 @@ const fromConfig = Constants?.expoConfig?.extra?.apiBaseUrl;
 const fromEnv = typeof process !== 'undefined' ? process.env?.EXPO_PUBLIC_MOEAI_API_URL : undefined;
 
 export const API_BASE_URL = String(fromEnv || fromConfig || 'https://moe-ai-sable.vercel.app').replace(/\/+$/, '');
+
+/** Where EduMoe's students already are. */
+export const TELEGRAM_URL = 'https://t.me/CS_Epic_Save';

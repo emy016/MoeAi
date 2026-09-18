@@ -47,7 +47,7 @@
  * ---------------------------------------------------------------------
  */
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, Easing, StyleSheet } from 'react-native';
+import { Animated, Easing, Linking, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeIcon, BookOpenIcon, CpuChipIcon, UserGroupIcon, PlusIcon } from 'react-native-heroicons/outline';
 import {
@@ -60,6 +60,7 @@ import { TabBar, IconSize } from '../constants/layout';
 import TabBarButton from './TabBarButton';
 import ElasticPressable from '../components/ElasticPressable';
 import { usePreferences } from '../context/AppPreferences';
+import { TELEGRAM_URL } from '../ai/config';
 
 // Route name -> { outline icon, solid icon, label }. This is the ONLY
 // place icon/label config lives — keep it in sync with RootNavigator.js.
@@ -275,8 +276,10 @@ function CustomTabBar({ index: tabIndex, onSelect }) {
             style={styles.fabPress}
             pressableStyle={[styles.fab, { backgroundColor: colors.accent, shadowColor: colors.black }]}
             onPress={() => {
-              // TODO: wire this up to the Community "create" flow (new
-              // post / new thread / new study group — TBD by product).
+              // Posting happens where the students already are. Until EduMoe
+              // hosts its own feed, this opens the Telegram channel rather
+              // than a composer with nowhere to send to.
+              Linking.openURL(TELEGRAM_URL).catch(() => {});
             }}
             accessibilityRole="button"
             accessibilityLabel={t('createPost')}

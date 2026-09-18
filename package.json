@@ -12,10 +12,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check:language": "node --experimental-strip-types scripts/check-language.ts",
-    "verify": "npm run check:language && npm run check:logic && npm run check:subjects && npm run check:markdown && npm run build",
+    "verify": "npm run check:language && npm run check:logic && npm run check:subjects && npm run check:markdown && npm run check:mobile && npm run build",
     "check:logic": "node --experimental-strip-types scripts/check-logic.ts",
     "check:markdown": "node scripts/check-markdown.mjs",
-    "check:subjects": "node --experimental-strip-types scripts/check-subjects.ts"
+    "check:subjects": "node --experimental-strip-types scripts/check-subjects.ts",
+    "check:mobile": "node scripts/check-mobile-strings.mjs"
   },
   "dependencies": {
     "@heroui/react": "3.2.4",
