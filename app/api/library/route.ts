@@ -25,15 +25,20 @@ function bad(status: number, message: string) {
 }
 
 /** List the caller's documents. */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return bad(401, "Not signed in.");
 
-  const { data, error } = await sb
+  // RLS already limits this to the caller's own documents plus those in rooms
+  // they belong to, so a student sees their lecturer's material listed here.
+  const roomId = new URL(req.url).searchParams.get("room");
+  let query = sb
     .from("documents")
-    .select("id, title, source_kind, source_url, char_count, created_at")
+    .select("id, title, source_kind, source_url, char_count, created_at, room_id")
     .order("created_at", { ascending: false });
+  if (roomId) query = query.eq("room_id", roomId);
+  const { data, error } = await query;
 
   if (error) return bad(500, "Could not load your library.");
   return Response.json({ documents: data ?? [] });
@@ -58,6 +63,7 @@ export async function POST(req: NextRequest) {
   let title = "";
   let body = "";
   let sourceKind: "text" | "pdf" = "text";
+  let roomId: string | null = null;
 
   const contentType = req.headers.get("content-type") ?? "";
 
@@ -74,8 +80,9 @@ export async function POST(req: NextRequest) {
     body = text;
     title = String(form.get("title") || file.name).slice(0, 200);
     sourceKind = file.name.toLowerCase().endsWith(".pdf") ? "pdf" : "text";
+    roomId = (form.get("roomId") as string) || null;
   } else {
-    let json: { title?: string; content?: string };
+    let json: { title?: string; content?: string; roomId?: string };
     try {
       json = await req.json();
     } catch {
@@ -83,6 +90,7 @@ export async function POST(req: NextRequest) {
     }
     body = (json.content ?? "").trim();
     title = (json.title ?? "").trim().slice(0, 200) || "Untitled note";
+    roomId = json.roomId ?? null;
   }
 
   if (!body.trim()) return bad(422, "No readable text was found in that.");
@@ -111,11 +119,19 @@ export async function POST(req: NextRequest) {
   }
   if (!library) return bad(500, "Could not open your library.");
 
+  // Publishing into a room is a teacher's action. Without this check any
+  // member could inject material that MoeAI would then teach to the class.
+  if (roomId) {
+    const { data: canTeach } = await sb.rpc("is_room_teacher", { room: roomId });
+    if (!canTeach) return bad(403, "Only this room's teacher can add material to it.");
+  }
+
   const { data: doc, error: docError } = await sb
     .from("documents")
     .insert({
       library_id: library.id,
       owner_id: user.id,
+      room_id: roomId,
       title,
       source_kind: sourceKind,
       char_count: body.length,
@@ -129,6 +145,7 @@ export async function POST(req: NextRequest) {
     chunks.map((content, idx) => ({
       document_id: doc.id,
       owner_id: user.id,
+      room_id: roomId,
       idx,
       content,
     })),

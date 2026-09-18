@@ -1,0 +1,176 @@
+/**
+ * MoeAI reading theme.
+ *
+ * Layered over workspace.css rather than replacing it — that file is 31 KB of
+ * working layout across 548 selectors, and rewriting it to change how it reads
+ * would be trading a working app for a prettier diff.
+ *
+ * What changes and why:
+ *
+ *   Calm, warm dark instead of near-black with a hot pink. Students read this
+ *   at 1am; the surface should recede and the text should carry.
+ *
+ *   Bigger type. 13px is a dashboard size, not a reading size. Explanations of
+ *   pointers are prose, so 15px with a long line-height and a measure that
+ *   caps around 70 characters.
+ *
+ *   The assistant's answers lose their container. A reply that sits in a
+ *   bubble reads like a notification; the same words on the page read like an
+ *   explanation. Only the student's own messages keep a surface, so the
+ *   conversation still has a shape.
+ */
+
+.mx-app {
+  /* Warm dark. The neutrals carry a little red so the whole thing stops
+     looking like a terminal and starts looking like paper at night. */
+  --mx-bg: #16141a;
+  --mx-panel: #1c1a21;
+  --mx-text: #f2ece9;
+  --mx-muted: #a59ba4;
+  --mx-border: rgba(240, 226, 233, 0.09);
+  --mx-accent: #f4667f;
+  --mx-accent-rgb: 244, 102, 127;
+
+  /* The reading column. Roughly 70 characters at this size — past that the
+     eye loses the start of the next line. */
+  --mx-measure: 46rem;
+
+  font-size: 15px;
+}
+
+.mx-app[data-moe-theme="violet"] { --mx-accent: #b79bff; --mx-accent-rgb: 183, 155, 255; }
+.mx-app[data-moe-theme="ocean"]  { --mx-accent: #5ad8e6; --mx-accent-rgb: 90, 216, 230; }
+.mx-app[data-moe-theme="amber"]  { --mx-accent: #f2b45f; --mx-accent-rgb: 242, 180, 95; }
+
+/* A quieter rail, so attention sits in the conversation. */
+.mx-app .mx-sidebar {
+  width: 248px;
+  background: linear-gradient(175deg, #1a171f, #141318 60%);
+}
+
+/* One centred column, generous top and bottom air. */
+.mx-app .mx-messages {
+  max-width: var(--mx-measure);
+  padding: 40px 28px 24px;
+}
+.mx-app .mx-message { gap: 16px; margin-bottom: 38px; }
+
+/* Prose, not chat. */
+.mx-app .mx-message-body { font-size: 15px; line-height: 1.78; }
+.mx-app .mx-message-body p { margin: 0 0 1.05em; }
+.mx-app .mx-message-body h1,
+.mx-app .mx-message-body h2,
+.mx-app .mx-message-body h3 { margin: 1.6em 0 0.6em; line-height: 1.3; }
+.mx-app .mx-message-body ul,
+.mx-app .mx-message-body ol { margin: 0 0 1.05em; padding-inline-start: 1.35em; }
+.mx-app .mx-message-body li { margin-bottom: 0.4em; }
+
+/* The student's own words keep a surface so the thread has rhythm. */
+.mx-app .mx-message.user .mx-message-body { flex: 0 1 auto; }
+.mx-app .mx-user-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--mx-text);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--mx-border);
+  border-radius: 16px 16px 16px 5px;
+  padding: 12px 16px;
+}
+
+/* A composer that looks like somewhere to think, not a search box. */
+.mx-app .mx-composer-area { max-width: var(--mx-measure); margin: 0 auto; width: 100%; }
+.mx-app .mx-composer {
+  background: linear-gradient(180deg, rgba(42, 37, 46, 0.72), rgba(28, 26, 33, 0.95));
+  border: 1px solid rgba(240, 226, 233, 0.13);
+  border-radius: 22px;
+  padding: 16px 16px 11px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+.mx-app .mx-composer textarea { font-size: 15px; line-height: 1.6; }
+.mx-app .mx-composer:focus-within { border-color: rgba(var(--mx-accent-rgb), 0.42); }
+
+/* Code and maths are read as carefully as the prose around them. */
+.mx-app .mx-message-body pre { border-radius: 14px; font-size: 13.5px; line-height: 1.65; }
+.mx-app .mx-message-body code { font-size: 0.92em; }
+
+/* Arabic and Franco sit beside English in the same answer, so mixed runs need
+   isolating or the punctuation jumps to the wrong end of the line. */
+.mx-app .mx-message-body,
+.mx-app .mx-user-text { unicode-bidi: plaintext; }
+
+@media (max-width: 720px) {
+  .mx-app { font-size: 14.5px; }
+  .mx-app .mx-messages { padding: 24px 16px 16px; }
+  .mx-app .mx-message { gap: 11px; margin-bottom: 28px; }
+}
+
+/* ── Room switcher ──────────────────────────────────────────────────────
+   Which course you are studying is the single most important piece of state
+   in the app — it decides what MoeAI knows — so it sits directly under "New
+   conversation" rather than behind a settings dialog. */
+.mx-app .mx-rooms { position: relative; margin-bottom: 10px; }
+
+.mx-app .mx-room-trigger {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 13px; text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--mx-border);
+}
+.mx-app .mx-room-trigger:hover { background: rgba(255, 255, 255, 0.07); }
+.mx-app .mx-room-trigger svg { color: var(--mx-accent); }
+.mx-app .mx-room-trigger span { display: grid; gap: 1px; min-width: 0; }
+.mx-app .mx-room-trigger strong {
+  font-size: 13px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mx-app .mx-room-trigger small { font-size: 11px; color: var(--mx-muted); }
+
+.mx-app .mx-room-panel {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30;
+  padding: 7px; border-radius: 15px;
+  background: #221f28; border: 1px solid rgba(240, 226, 233, 0.13);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+  max-height: 60vh; overflow-y: auto;
+}
+
+.mx-app .mx-room-item {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: 11px; text-align: left; background: transparent;
+}
+.mx-app .mx-room-item:hover { background: rgba(255, 255, 255, 0.06); }
+.mx-app .mx-room-item > span { flex: 1; min-width: 0; display: grid; gap: 1px; font-size: 13px; }
+.mx-app .mx-room-item small { font-size: 11px; color: var(--mx-muted); }
+.mx-app .mx-room-item svg:last-child { color: var(--mx-accent); }
+
+.mx-app .mx-room-empty {
+  margin: 4px; padding: 12px; font-size: 12px; line-height: 1.6;
+  color: var(--mx-muted); background: rgba(255, 255, 255, 0.03); border-radius: 11px;
+}
+
+.mx-app .mx-room-actions { display: grid; gap: 3px; margin-top: 5px;
+                           border-top: 1px solid var(--mx-border); padding-top: 5px; }
+.mx-app .mx-room-actions button {
+  display: flex; align-items: center; gap: 8px; padding: 9px 11px;
+  border-radius: 11px; font-size: 12.5px; color: var(--mx-muted); background: transparent;
+}
+.mx-app .mx-room-actions button:hover { background: rgba(255, 255, 255, 0.06); color: var(--mx-text); }
+
+.mx-app .mx-room-form { display: grid; gap: 11px; padding: 11px; }
+.mx-app .mx-room-form header { display: flex; align-items: center; justify-content: space-between; }
+.mx-app .mx-room-form header button { background: transparent; color: var(--mx-muted); padding: 3px; }
+.mx-app .mx-room-form label { display: grid; gap: 5px; font-size: 12px; color: var(--mx-muted); }
+.mx-app .mx-room-form label span { opacity: 0.65; }
+.mx-app .mx-room-form input {
+  padding: 10px 12px; border-radius: 11px; font-size: 14px;
+  background: rgba(0, 0, 0, 0.26); border: 1px solid var(--mx-border); color: var(--mx-text);
+}
+/* Join codes are read aloud and typed in a hurry — give them room. */
+.mx-app .mx-room-form input[placeholder="ABC-123"] {
+  font-family: "Fira Code", ui-monospace, monospace;
+  letter-spacing: 0.16em; text-transform: uppercase; text-align: center; font-size: 16px;
+}
+.mx-app .mx-room-hint { font-size: 11.5px; line-height: 1.6; color: var(--mx-muted); margin: 0; }
+.mx-app .mx-room-submit {
+  padding: 11px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #1a1016;
+  background: linear-gradient(135deg, var(--mx-accent), rgba(var(--mx-accent-rgb), 0.78));
+}

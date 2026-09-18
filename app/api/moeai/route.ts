@@ -125,6 +125,11 @@ export async function POST(req: NextRequest) {
   }
 
   const context = parseContext(raw?.context);
+  // The workspace sends which room the student is studying in, so answers
+  // come from that course rather than everything they have ever uploaded.
+  const roomId = typeof (raw as { roomId?: unknown })?.roomId === "string"
+    ? (raw as { roomId: string }).roomId
+    : null;
   const question = messages[messages.length - 1].content;
 
   // ── Who is asking, if anyone ───────────────────────────────────────────
@@ -158,7 +163,9 @@ export async function POST(req: NextRequest) {
   let grounded = 0;
   if (sb && userId) {
     try {
-      const { data } = await sb.rpc("search_material", { q: question, scope: null, max_results: 4 });
+      const { data } = await sb.rpc("search_material", {
+        q: question, scope: null, max_results: 4, room: roomId,
+      });
       const rows = (data ?? []) as { source: string; ref: string; title: string; content: string }[];
       if (rows.length) {
         grounded = rows.length;
