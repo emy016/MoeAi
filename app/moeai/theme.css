@@ -228,3 +228,28 @@
   color: var(--mx-accent); background: rgba(var(--mx-accent-rgb), 0.12); font-weight: 600;
 }
 .mx-app .mx-kmap small { color: var(--mx-muted); font-size: 10px; }
+
+/* Dictation. The microphone only appears where the browser can actually hear. */
+.mx-app .mx-mic.live { color: var(--mx-accent); background: rgba(var(--mx-accent-rgb), 0.12); }
+.mx-app .mx-dictation {
+  display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 10px;
+  border: 1px solid var(--mx-border); border-radius: 999px;
+  font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mx-muted);
+}
+.mx-app .mx-dictation .mx-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--mx-accent);
+  animation: mx-listening 1.3s ease-in-out infinite;
+}
+@keyframes mx-listening { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+.mx-app .mx-dictation button {
+  padding: 3px 9px; border-radius: 999px; font-size: 10px; color: var(--mx-muted);
+  background: none; border: 1px solid transparent;
+}
+.mx-app .mx-dictation button.active {
+  color: var(--mx-text); border-color: var(--mx-border); background: rgba(255, 255, 255, 0.04);
+}
+.mx-app .mx-message.user .mx-message-actions { opacity: 0; transition: opacity 0.16s; }
+.mx-app .mx-message.user:hover .mx-message-actions,
+.mx-app .mx-message.user:focus-within .mx-message-actions { opacity: 1; }
+.mx-app .mx-message.user .mx-message-actions button { display: flex; align-items: center; gap: 5px; font-size: 10px; }
+@media (prefers-reduced-motion: reduce) { .mx-app .mx-dictation .mx-dot { animation: none; } }
