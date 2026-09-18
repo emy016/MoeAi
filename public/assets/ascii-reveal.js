@@ -13,7 +13,7 @@
 (function () {
   const RAMP = " .:-=+*#%@";
   const DEFAULTS = {
-    fit: "contain", focusY: 50, columns: 120, contrast: 150,
+    fit: "contain", focusY: 50, columns: 120, contrast: 15,
     invert: false, colorMode: "image", inkColor: "#FFFFFF",
     revealSize: 78, revealSoftness: 30,
   };
@@ -91,9 +91,12 @@
           const i = (r * cols + c) * 4;
           const rr = data[i], gg = data[i + 1], bb = data[i + 2];
           let lum = (0.299 * rr + 0.587 * gg + 0.114 * bb) / 255;
-          // The source is a lit object on near-black, so most cells would fall
-          // into the ramp's blank end. Lift the midtones before the contrast
-          // pass or the art reads as a handful of scattered dots.
+          // The artwork was cut out onto true black. At a low contrast setting
+          // even zero maps into the ramp, which would fill the empty frame with
+          // dots, so cells with no light in them are left blank.
+          if (lum <= 0.012) continue;
+          // What is left is a lit object, whose midtones need a lift before the
+          // contrast pass or the art reads as a handful of scattered marks.
           lum = Math.pow(lum, 0.62);
           lum = (lum - 0.5) * punch + 0.5;
           if (o.invert) lum = 1 - lum;
@@ -190,6 +193,7 @@
         src: canvas.dataset.asciiSrc,
         columns: Number(canvas.dataset.asciiColumns) || DEFAULTS.columns,
         revealSize: Number(canvas.dataset.asciiReveal) || DEFAULTS.revealSize,
+        contrast: canvas.dataset.asciiContrast ? Number(canvas.dataset.asciiContrast) : DEFAULTS.contrast,
       });
     });
   }

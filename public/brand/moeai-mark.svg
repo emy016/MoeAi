@@ -2,15 +2,17 @@
   <title>MoeAI</title>
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#22d3ee"/><stop offset="16%" stop-color="#3b82f6"/>
-      <stop offset="32%" stop-color="#d946ef"/><stop offset="50%" stop-color="#f43f5e"/>
-      <stop offset="68%" stop-color="#f97316"/><stop offset="100%" stop-color="#fde047"/>
+      <stop offset="0%" stop-color="#22d3ee"/><stop offset="15%" stop-color="#3b82f6"/>
+      <stop offset="30%" stop-color="#d946ef"/><stop offset="50%" stop-color="#fb1e4e"/>
+      <stop offset="70%" stop-color="#f97316"/><stop offset="100%" stop-color="#fde047"/>
     </linearGradient>
-    <filter id="b" x="-45%" y="-45%" width="190%" height="190%">
-      <feGaussianBlur stdDeviation="2.4" result="s"/>
+    <filter id="b" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.7" result="s"/>
       <feMerge><feMergeNode in="s"/><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <path fill="none" stroke="url(#g)" stroke-width="3.4" stroke-linejoin="miter" stroke-miterlimit="12" filter="url(#b)"
-    d="M 2.9 101.1 L 37.5 20.1 L 60.2 66.8 L 82.7 20.1 L 116.1 100.6 L 102.4 94.9 L 82.3 34.3 L 60.2 81.0 L 37.8 34.3 L 16.7 95.6 Z"/>
+  <g fill="none" stroke="url(#g)" stroke-width="2.4" stroke-linejoin="miter" stroke-miterlimit="8" filter="url(#b)">
+    <path d="M 9.3 95.6 L 37.8 25.2 L 58.0 64.8 Z M 0.3 106.4 L 37.0 11.2 L 66.4 67.2 Z"/>
+    <path d="M 62.0 64.8 L 82.2 25.2 L 110.7 95.6 Z M 53.6 67.2 L 83.0 11.2 L 119.7 106.4 Z"/>
+  </g>
 </svg>

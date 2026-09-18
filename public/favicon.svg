@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <title>MoeAI</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee"/><stop offset="15%" stop-color="#3b82f6"/>
+      <stop offset="30%" stop-color="#d946ef"/><stop offset="50%" stop-color="#fb1e4e"/>
+      <stop offset="70%" stop-color="#f97316"/><stop offset="100%" stop-color="#fde047"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="#08080d"/>
+  <!-- At 16px the paired lines merge, so the favicon draws the outer contour only. -->
+  <g fill="none" stroke="url(#g)" stroke-width="7" stroke-linejoin="miter" stroke-miterlimit="8"
+     transform="translate(60 62) scale(0.78) translate(-60 -60)">
+    <path d="M 0.3 106.4 L 37.0 11.2 L 66.4 67.2 Z"/>
+    <path d="M 53.6 67.2 L 83.0 11.2 L 119.7 106.4 Z"/>
+  </g>
+</svg>
