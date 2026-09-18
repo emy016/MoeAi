@@ -11,6 +11,7 @@
  */
 import { personalityStatus } from "@/lib/moeai/brain";
 import { isConfigured } from "@/lib/env";
+import { acceptedNames, keyCounts, PROVIDER_NAMES } from "@/lib/keys";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -31,12 +32,11 @@ export async function GET() {
     security = 0;
   }
 
-  const providers = {
-    gemini: present("GEMINI_API_KEY"),
-    groq: present("GROQ_API_KEY"),
-    geminiBackup: present("GEMINI_BACKUP_API_KEY"),
-  };
-  const canAnswer = Object.values(providers).some(Boolean);
+  // How many keys each provider has, never what they are. Counts rather than
+  // booleans because rotation is the point: one Gemini key and three are very
+  // different positions to be in on a free tier.
+  const providers = keyCounts();
+  const canAnswer = Object.values(providers).some(count => count > 0);
 
   return Response.json({
     ok: canAnswer && voice.ok,
@@ -52,6 +52,8 @@ export async function GET() {
       serviceRole: present("SUPABASE_SERVICE_ROLE_KEY"),
     },
     cronSecret: present("CRON_SECRET"),
+    // What to set, if a provider above reads zero. Every name here is read.
+    acceptedKeyNames: Object.fromEntries(PROVIDER_NAMES.map(p => [p, acceptedNames(p)])),
     checkedAt: new Date().toISOString(),
   }, { headers: { "cache-control": "no-store" } });
 }

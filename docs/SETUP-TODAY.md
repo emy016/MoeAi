@@ -23,14 +23,19 @@ For each row: type the Name, paste the Value, tick **Production** *and*
 
 | Name | Value |
 |---|---|
-| `GROQ_API_KEY` | your `gsk_…` key |
-| `OPENROUTER_API_KEY` | your `sk-or-v1-…` key |
-| `GEMINI_API_KEY` | the new `AIza…` key from step 1 |
+| `GEMINI_API_KEYS` | the new `AIza…` key from step 1 |
+| `GROQ_API_KEYS` | your `gsk_…` key |
+| `OPENROUTER_API_KEYS` | your `sk-or-v1-…` key |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://nyrbrsftqqqqompqxxbk.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Settings → API → **anon public** |
 | `SUPABASE_SERVICE_ROLE_KEY` | same page → **service_role** (secret) |
 | `CRON_SECRET` | any long random string you invent |
 | `NEXT_PUBLIC_SITE_URL` | `https://moe-ai-sable.vercel.app` |
+
+Note the **plural** names. Each one can hold several keys separated by commas —
+`AIza…one,AIza…two` — and MoeAI moves to the next when one is exhausted, which
+is how a free tier survives a demo. The singular names (`GEMINI_API_KEY`) also
+work and mean the same thing; use whichever, or both.
 
 ## 3 · Redeploy (1 min)
 

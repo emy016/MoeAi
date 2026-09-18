@@ -2,6 +2,7 @@
 // makes importing this from a client component a BUILD error rather than a
 // silent leak of those keys into the browser bundle.
 import "server-only";
+import { providerKeys, type Provider as KeyProvider } from "./keys";
 /**
  * AI provider chain with multi-key rotation and streaming.
  *
@@ -30,16 +31,14 @@ const COOLDOWN_MS = 60_000;
 /** key -> timestamp until which it is considered rate-limited. */
 const cooldown = new Map<string, number>();
 
-function keysFor(env: string): string[] {
-  return (process.env[env] ?? "")
-    .split(",")
-    .map((k) => k.trim())
-    .filter(Boolean);
+/** Both the plural and the singular name, comma-split. See lib/keys.ts. */
+function keysFor(provider: KeyProvider): string[] {
+  return providerKeys(provider);
 }
 
-function usableKeys(env: string): string[] {
+function usableKeys(provider: KeyProvider): string[] {
   const now = Date.now();
-  const all = keysFor(env);
+  const all = keysFor(provider);
   const warm = all.filter((k) => (cooldown.get(k) ?? 0) < now);
   // If every key is cooling down, try them anyway rather than failing outright.
   return warm.length ? warm : all;
@@ -123,7 +122,7 @@ async function callGemini(
     }));
 
   let lastError = "no gemini key";
-  for (const key of usableKeys("GEMINI_API_KEYS")) {
+  for (const key of usableKeys("gemini")) {
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent` +
       `?alt=sse&key=${encodeURIComponent(key)}`;
@@ -206,7 +205,7 @@ const PROVIDERS: Record<string, Provider> = {
     callOpenAICompatible(
       "groq",
       "https://api.groq.com/openai/v1/chat/completions",
-      "GROQ_API_KEYS",
+      "groq",
       process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
       m, t, {}, d,
     ),
@@ -215,7 +214,7 @@ const PROVIDERS: Record<string, Provider> = {
     callOpenAICompatible(
       "openrouter",
       "https://openrouter.ai/api/v1/chat/completions",
-      "OPENROUTER_API_KEYS",
+      "openrouter",
       process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free",
       m, t,
       {
