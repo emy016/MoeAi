@@ -21,31 +21,78 @@
  */
 
 .mx-app {
-  /* Warm dark. The neutrals carry a little red so the whole thing stops
-     looking like a terminal and starts looking like paper at night. */
-  --mx-bg: #16141a;
-  --mx-panel: #1c1a21;
-  --mx-text: #f2ece9;
-  --mx-muted: #a59ba4;
-  --mx-border: rgba(240, 226, 233, 0.09);
-  --mx-accent: #f4667f;
-  --mx-accent-rgb: 244, 102, 127;
+  /* The palette is the mobile app's, token for token — DarkColors and the
+     accent presets out of mobile/src/constants/colors.js. Two products that
+     share a name should share a surface, and his neutrals are already the
+     right ones: warm, low-chroma, and readable at 1am without glare. */
+  --mx-bg: #181920;
+  --mx-panel: #23252c;
+  --mx-raise: #2e3036;          /* his cardButton: what sits on a card */
+  --mx-text: #f5f4f2;
+  --mx-muted: #8d8f95;
+  --mx-secondary: #b9b9be;
+  --mx-border: #35373e;
+  --mx-track: #55575f;
+  --mx-accent: #eb6674;         /* his red preset */
+  --mx-accent-rgb: 235, 102, 116;
 
   /* The reading column. Roughly 70 characters at this size — past that the
      eye loses the start of the next line. */
   --mx-measure: 46rem;
 
+  /* Subtle surfaces are a wash of the *opposite* of the background, so they
+     read as a lift in dark and as a recess in light. Defining them once is
+     what makes a light mode possible over a stylesheet written for dark. */
+  --mx-wash: var(--mx-wash);
+  --mx-wash-2: var(--mx-wash-2);
+  --mx-wash-3: var(--mx-wash-3);
+  --mx-ink: var(--mx-ink);            /* code and canvas surfaces */
+  --mx-prose: #ded2e2;          /* body copy inside an answer */
+
   font-size: 15px;
+  color-scheme: dark;
 }
 
-.mx-app[data-moe-theme="violet"] { --mx-accent: #b79bff; --mx-accent-rgb: 183, 155, 255; }
-.mx-app[data-moe-theme="ocean"]  { --mx-accent: #5ad8e6; --mx-accent-rgb: 90, 216, 230; }
-.mx-app[data-moe-theme="amber"]  { --mx-accent: #f2b45f; --mx-accent-rgb: 242, 180, 95; }
+/* His five accents, named as the workspace names them. */
+.mx-app[data-moe-theme="violet"] { --mx-accent: #8766eb; --mx-accent-rgb: 135, 102, 235; }
+.mx-app[data-moe-theme="ocean"]  { --mx-accent: #668ceb; --mx-accent-rgb: 102, 140, 235; }
+.mx-app[data-moe-theme="amber"]  { --mx-accent: #eb8a66; --mx-accent-rgb: 235, 138, 102; }
+.mx-app[data-moe-theme="forest"] { --mx-accent: #66c98d; --mx-accent-rgb: 102, 201, 141; }
 
-/* A quieter rail, so attention sits in the conversation. */
+/* ─── Light ─────────────────────────────────────────────────────────────────
+   His LightColors, which the web never had. Not an inversion: the surfaces are
+   warm and slightly violet, the accents darken so they still carry against
+   white, and the same hierarchy survives — background behind card behind the
+   thing that sits on a card. */
+.mx-app[data-moe-mode="light"] {
+  --mx-bg: #f4f1f8;
+  --mx-panel: #ffffff;
+  --mx-raise: #ece8f1;
+  --mx-text: #24212a;
+  --mx-muted: #817a89;
+  --mx-secondary: #595461;
+  --mx-border: #ded8e7;
+  --mx-track: #c9c2d0;
+  --mx-accent: #c53f51;
+  --mx-accent-rgb: 197, 63, 81;
+  --mx-wash: rgba(36, 33, 42, 0.035);
+  --mx-wash-2: rgba(36, 33, 42, 0.06);
+  --mx-wash-3: rgba(36, 33, 42, 0.10);
+  --mx-ink: #ffffff;
+  --mx-prose: #322e3a;
+  color-scheme: light;
+}
+.mx-app[data-moe-mode="light"][data-moe-theme="violet"] { --mx-accent: #6841c6; --mx-accent-rgb: 104, 65, 198; }
+.mx-app[data-moe-mode="light"][data-moe-theme="ocean"]  { --mx-accent: #3d68c7; --mx-accent-rgb: 61, 104, 199; }
+.mx-app[data-moe-mode="light"][data-moe-theme="amber"]  { --mx-accent: #c65f3b; --mx-accent-rgb: 198, 95, 59; }
+.mx-app[data-moe-mode="light"][data-moe-theme="forest"] { --mx-accent: #31985b; --mx-accent-rgb: 49, 152, 91; }
+
+/* A quieter rail, so attention sits in the conversation. Nearly the same
+   value as the canvas, separated by a hairline rather than by contrast. */
 .mx-app .mx-sidebar {
   width: 248px;
-  background: linear-gradient(175deg, #1a171f, #141318 60%);
+  background: var(--mx-bg);
+  border-right: 1px solid var(--mx-border);
 }
 
 /* One centred column, generous top and bottom air. */
@@ -71,7 +118,7 @@
   font-size: 15px;
   line-height: 1.7;
   color: var(--mx-text);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--mx-wash-2);
   border: 1px solid var(--mx-border);
   border-radius: 16px 16px 16px 5px;
   padding: 12px 16px;
@@ -84,7 +131,7 @@
   border: 1px solid rgba(240, 226, 233, 0.13);
   border-radius: 22px;
   padding: 16px 16px 11px;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32), inset 0 1px 0 var(--mx-wash-2);
 }
 .mx-app .mx-composer textarea { font-size: 15px; line-height: 1.6; }
 .mx-app .mx-composer:focus-within { border-color: rgba(var(--mx-accent-rgb), 0.42); }
@@ -113,10 +160,10 @@
 .mx-app .mx-room-trigger {
   width: 100%; display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: 13px; text-align: left;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--mx-wash-2);
   border: 1px solid var(--mx-border);
 }
-.mx-app .mx-room-trigger:hover { background: rgba(255, 255, 255, 0.07); }
+.mx-app .mx-room-trigger:hover { background: var(--mx-wash-3); }
 .mx-app .mx-room-trigger svg { color: var(--mx-accent); }
 .mx-app .mx-room-trigger span { display: grid; gap: 1px; min-width: 0; }
 .mx-app .mx-room-trigger strong {
@@ -137,14 +184,14 @@
   width: 100%; display: flex; align-items: center; gap: 10px;
   padding: 9px 11px; border-radius: 11px; text-align: left; background: transparent;
 }
-.mx-app .mx-room-item:hover { background: rgba(255, 255, 255, 0.06); }
+.mx-app .mx-room-item:hover { background: var(--mx-wash-3); }
 .mx-app .mx-room-item > span { flex: 1; min-width: 0; display: grid; gap: 1px; font-size: 13px; }
 .mx-app .mx-room-item small { font-size: 11px; color: var(--mx-muted); }
 .mx-app .mx-room-item svg:last-child { color: var(--mx-accent); }
 
 .mx-app .mx-room-empty {
   margin: 4px; padding: 12px; font-size: 12px; line-height: 1.6;
-  color: var(--mx-muted); background: rgba(255, 255, 255, 0.03); border-radius: 11px;
+  color: var(--mx-muted); background: var(--mx-wash-2); border-radius: 11px;
 }
 
 .mx-app .mx-room-actions { display: grid; gap: 3px; margin-top: 5px;
@@ -153,7 +200,7 @@
   display: flex; align-items: center; gap: 8px; padding: 9px 11px;
   border-radius: 11px; font-size: 12.5px; color: var(--mx-muted); background: transparent;
 }
-.mx-app .mx-room-actions button:hover { background: rgba(255, 255, 255, 0.06); color: var(--mx-text); }
+.mx-app .mx-room-actions button:hover { background: var(--mx-wash-3); color: var(--mx-text); }
 
 .mx-app .mx-room-form { display: grid; gap: 11px; padding: 11px; }
 .mx-app .mx-room-form header { display: flex; align-items: center; justify-content: space-between; }
@@ -186,7 +233,7 @@
 .mx-app .mx-join-card {
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
   margin: 20px 0 26px; padding: 16px 20px; border-radius: 16px;
-  background: linear-gradient(135deg, rgba(var(--mx-accent-rgb), 0.12), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(135deg, rgba(var(--mx-accent-rgb), 0.12), var(--mx-wash-2));
   border: 1px solid rgba(var(--mx-accent-rgb), 0.24);
 }
 .mx-app .mx-join-card div { display: grid; gap: 4px; }
@@ -197,16 +244,16 @@
 
 /* Diagrams. Mermaid draws its own SVG; we only give it a frame that matches code blocks. */
 .mx-app .mx-diagram, .mx-app .mx-diagram-fallback {
-  margin: 16px 0; border: 1px solid #322c3c; border-radius: 11px;
-  overflow: hidden; background: #0a0a11; max-width: 100%; direction: ltr;
+  margin: 16px 0; border: 1px solid var(--mx-border); border-radius: 11px;
+  overflow: hidden; background: var(--mx-ink); max-width: 100%; direction: ltr;
 }
 .mx-app .mx-diagram-bar {
-  padding: 9px 13px; border-bottom: 1px solid #ffffff08; background: #16131d;
+  padding: 9px 13px; border-bottom: 1px solid #ffffff08; background: var(--mx-panel);
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 10px; color: #928298;
+  font-size: 10px; color: var(--mx-muted);
 }
 .mx-app .mx-diagram-bar > span, .mx-app .mx-diagram-bar > div { display: flex; align-items: center; gap: 7px; }
-.mx-app .mx-diagram-bar button { display: flex; align-items: center; background: none; color: #9985a4; padding: 2px; }
+.mx-app .mx-diagram-bar button { display: flex; align-items: center; background: none; color: var(--mx-muted); padding: 2px; }
 .mx-app .mx-diagram-bar button:disabled { opacity: 0.4; }
 .mx-app .mx-diagram-canvas { padding: 18px; overflow-x: auto; display: flex; justify-content: center; }
 .mx-app .mx-diagram-canvas svg { max-width: 100%; height: auto; }
@@ -246,7 +293,7 @@
   background: none; border: 1px solid transparent;
 }
 .mx-app .mx-dictation button.active {
-  color: var(--mx-text); border-color: var(--mx-border); background: rgba(255, 255, 255, 0.04);
+  color: var(--mx-text); border-color: var(--mx-border); background: var(--mx-wash-2);
 }
 .mx-app .mx-message.user .mx-message-actions { opacity: 0; transition: opacity 0.16s; }
 .mx-app .mx-message.user:hover .mx-message-actions,
@@ -261,7 +308,7 @@
 .mx-app .mx-citations-toggle {
   display: flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px;
   border: 1px solid var(--mx-border); border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02); color: var(--mx-muted); font-size: 11px;
+  background: var(--mx-wash); color: var(--mx-muted); font-size: 11px;
 }
 .mx-app .mx-citations-toggle:hover { color: var(--mx-text); border-color: rgba(var(--mx-accent-rgb), 0.35); }
 .mx-app .mx-citations.open .mx-citations-toggle svg:last-child { transform: rotate(180deg); }
@@ -271,7 +318,7 @@
   display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 8px 10px;
   border-radius: 9px; background: none; text-align: left; color: var(--mx-muted);
 }
-.mx-app .mx-citations-list > li > button:hover { background: rgba(255, 255, 255, 0.03); }
+.mx-app .mx-citations-list > li > button:hover { background: var(--mx-wash-2); }
 .mx-app .mx-citations-list strong { display: block; color: var(--mx-text); font-size: 12px; font-weight: 550; }
 .mx-app .mx-citations-list small { font-size: 10px; color: var(--mx-muted); }
 .mx-app .mx-citation-index {
@@ -281,8 +328,8 @@
 }
 .mx-app .mx-citations blockquote {
   margin: 2px 0 8px 38px; padding: 9px 12px; border-left: 2px solid rgba(var(--mx-accent-rgb), 0.4);
-  background: rgba(255, 255, 255, 0.02); border-radius: 0 8px 8px 0;
-  color: #c3b6c9; font-size: 11.5px; line-height: 1.75;
+  background: var(--mx-wash); border-radius: 0 8px 8px 0;
+  color: var(--mx-prose); font-size: 11.5px; line-height: 1.75;
 }
 .mx-app .mx-citations blockquote svg { opacity: 0.5; margin-right: 6px; vertical-align: -1px; }
 
@@ -290,7 +337,7 @@
    width is harder to read than one that stays put. */
 .mx-app .mx-surface {
   margin: 14px 0 4px; border: 1px solid var(--mx-border); border-radius: 12px;
-  background: radial-gradient(ellipse at 50% 40%, rgba(var(--mx-accent-rgb), 0.06), transparent 70%), #0a0a11;
+  background: radial-gradient(ellipse at 50% 40%, rgba(var(--mx-accent-rgb), 0.06), transparent 70%), var(--mx-ink);
   overflow: hidden;
 }
 .mx-app .mx-surface canvas {
@@ -303,7 +350,7 @@
 .mx-app .mx-simulators { display: flex; flex-direction: column; min-height: 0; height: 100%; padding-bottom: 14px; }
 .mx-app .mx-simulator-frame {
   position: relative; flex: 1; min-height: 420px; margin-top: 4px;
-  border: 1px solid var(--mx-border); border-radius: 14px; overflow: hidden; background: #08080d;
+  border: 1px solid var(--mx-border); border-radius: 14px; overflow: hidden; background: var(--mx-ink);
 }
 .mx-app .mx-simulator-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
 .mx-app .mx-simulator-loading {
@@ -315,7 +362,7 @@
 .mx-app .mx-simulator-asks button {
   display: flex; align-items: center; gap: 6px; padding: 7px 13px; font-size: 11.5px;
   border: 1px solid var(--mx-border); border-radius: 999px; color: var(--mx-muted);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--mx-wash);
 }
 .mx-app .mx-simulator-asks button:hover { color: var(--mx-text); border-color: rgba(var(--mx-accent-rgb), 0.35); }
 
@@ -324,7 +371,7 @@
 .mx-app .mx-onboarding {
   position: relative; margin: 0 0 26px; padding: 22px 24px 24px;
   border: 1px solid var(--mx-border); border-radius: 16px;
-  background: linear-gradient(160deg, rgba(var(--mx-accent-rgb), 0.05), transparent 60%), rgba(255, 255, 255, 0.015);
+  background: linear-gradient(160deg, rgba(var(--mx-accent-rgb), 0.05), transparent 60%), var(--mx-wash);
 }
 .mx-app .mx-onboarding-close { position: absolute; top: 12px; right: 12px; }
 .mx-app .mx-onboarding h2 { margin: 6px 0 4px; font-size: 21px; letter-spacing: -0.02em; }
@@ -339,7 +386,7 @@
 .mx-app .mx-onboarding-roles button {
   display: grid; gap: 3px; padding: 14px 15px; text-align: left;
   border: 1px solid var(--mx-border); border-radius: 12px;
-  background: rgba(255, 255, 255, 0.015); color: var(--mx-muted);
+  background: var(--mx-wash); color: var(--mx-muted);
 }
 .mx-app .mx-onboarding-roles button svg { color: var(--mx-muted); margin-bottom: 4px; }
 .mx-app .mx-onboarding-roles button strong { color: var(--mx-text); font-size: 13px; font-weight: 550; }
@@ -350,10 +397,10 @@
 }
 .mx-app .mx-onboarding-roles button.active svg { color: var(--mx-accent); }
 .mx-app .mx-onboarding-next { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--mx-border); display: grid; gap: 12px; }
-.mx-app .mx-onboarding-next p { margin: 0; font-size: 13px; line-height: 1.75; color: #d3c8d8; }
+.mx-app .mx-onboarding-next p { margin: 0; font-size: 13px; line-height: 1.75; color: var(--mx-prose); }
 .mx-app .mx-onboarding-next code {
   font-family: "Fira Code", ui-monospace, monospace; font-size: 0.9em;
-  padding: 2px 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.06); color: var(--mx-text);
+  padding: 2px 6px; border-radius: 5px; background: var(--mx-wash-3); color: var(--mx-text);
 }
 .mx-app .mx-onboarding-next small { font-size: 11px; color: var(--mx-muted); line-height: 1.6; }
 .mx-app .mx-onboarding-next a.mx-primary { text-decoration: none; }
@@ -372,10 +419,10 @@
 .mx-app .mx-semester {
   display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
   padding: 22px 24px; border: 1px solid var(--mx-border); border-radius: 16px;
-  background: linear-gradient(150deg, rgba(var(--mx-accent-rgb), 0.05), transparent 62%), rgba(255, 255, 255, 0.015);
+  background: linear-gradient(150deg, rgba(var(--mx-accent-rgb), 0.05), transparent 62%), var(--mx-wash);
 }
 .mx-app .mx-semester-copy { flex: 1 1 260px; display: grid; gap: 8px; }
-.mx-app .mx-semester-copy p { margin: 0; font-size: 13px; line-height: 1.75; color: #d3c8d8; }
+.mx-app .mx-semester-copy p { margin: 0; font-size: 13px; line-height: 1.75; color: var(--mx-prose); }
 
 .mx-app .mx-progress-track {
   flex: 1; height: 5px; border-radius: 999px; background: var(--mx-border); overflow: hidden;
@@ -390,11 +437,11 @@
 .mx-app .mx-course-card {
   display: grid; gap: 10px; padding: 15px 16px 13px; text-align: left;
   border: 1px solid var(--mx-border); border-radius: 14px;
-  background: rgba(255, 255, 255, 0.018); color: var(--mx-muted);
+  background: var(--mx-wash); color: var(--mx-muted);
   /* The app's press feedback, which is what ElasticPressable is doing. */
   transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s, background 0.18s;
 }
-.mx-app .mx-course-card:hover { border-color: rgba(var(--mx-accent-rgb), 0.32); background: rgba(255, 255, 255, 0.03); }
+.mx-app .mx-course-card:hover { border-color: rgba(var(--mx-accent-rgb), 0.32); background: var(--mx-wash-2); }
 .mx-app .mx-course-card:active { transform: scale(0.975); }
 .mx-app .mx-course-card.open { border-color: rgba(var(--mx-accent-rgb), 0.55); background: rgba(var(--mx-accent-rgb), 0.06); }
 .mx-app .mx-course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -411,7 +458,7 @@
 
 .mx-app .mx-lectures {
   display: grid; gap: 14px; padding: 20px 22px;
-  border: 1px solid var(--mx-border); border-radius: 16px; background: rgba(255, 255, 255, 0.012);
+  border: 1px solid var(--mx-border); border-radius: 16px; background: var(--mx-wash);
 }
 .mx-app .mx-lectures header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .mx-app .mx-lectures header h2 { margin: 4px 0 0; font-size: 17px; letter-spacing: -0.02em; }
@@ -419,7 +466,7 @@
 .mx-app .mx-lecture-list li {
   display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 10px;
 }
-.mx-app .mx-lecture-list li:hover { background: rgba(255, 255, 255, 0.025); }
+.mx-app .mx-lecture-list li:hover { background: var(--mx-wash); }
 .mx-app .mx-lecture-list li.done .mx-lecture-body strong { color: var(--mx-muted); text-decoration: line-through; text-decoration-color: rgba(var(--mx-accent-rgb), 0.5); }
 .mx-app .mx-lecture-check {
   flex: none; width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center;
@@ -448,7 +495,7 @@
 .mx-app .mx-lecture-add { display: flex; gap: 8px; align-items: center; }
 .mx-app .mx-lecture-add input {
   flex: 1; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--mx-border);
-  background: rgba(255, 255, 255, 0.02); color: var(--mx-text); font-size: 12.5px;
+  background: var(--mx-wash); color: var(--mx-text); font-size: 12.5px;
 }
 .mx-app .mx-lecture-collapse {
   justify-self: start; display: flex; align-items: center; gap: 6px; padding: 6px 0;
@@ -471,7 +518,7 @@
 .mx-app .mx-day-pill {
   display: grid; gap: 3px; justify-items: center; padding: 10px 4px 8px;
   border: 1px solid var(--mx-border); border-radius: 12px;
-  background: rgba(255, 255, 255, 0.015); color: var(--mx-muted);
+  background: var(--mx-wash); color: var(--mx-muted);
   transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s, background 0.18s;
 }
 .mx-app .mx-day-pill:active { transform: scale(0.97); }
@@ -497,7 +544,7 @@
 .mx-app .mx-day-view header h2 { margin: 0; font-size: 17px; letter-spacing: -0.02em; }
 .mx-app .mx-allday-dock {
   display: grid; gap: 7px; padding: 12px 14px;
-  border: 1px solid var(--mx-border); border-radius: 12px; background: rgba(255, 255, 255, 0.012);
+  border: 1px solid var(--mx-border); border-radius: 12px; background: var(--mx-wash);
 }
 .mx-app .mx-allday-dock p { margin: 0; font-size: 11.5px; }
 
@@ -505,7 +552,7 @@
   /* Twenty-four hours is taller than any screen, so the day scrolls inside its
      own frame and opens on the first thing that happens. */
   position: relative; max-height: 440px; overflow-y: auto; overscroll-behavior: contain;
-  border: 1px solid var(--mx-border); border-radius: 12px; background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--mx-border); border-radius: 12px; background: var(--mx-wash);
 }
 .mx-app .mx-timeline-inner { position: relative; }
 .mx-app .mx-timeline-hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--mx-border); }
@@ -566,3 +613,148 @@
 .mx-app[data-moe-motion="off"] .mx-day-pill:active { transform: none; }
 .mx-app[data-moe-motion="off"] .mx-dictation .mx-dot,
 .mx-app[data-moe-motion="off"] .mx-thinking span { animation: none; }
+
+/* ─── Light mode over a stylesheet written for dark ─────────────────────────
+   workspace.css is 31 KB of working layout with its darks baked in. Rather
+   than rewrite it, the handful of surfaces that actually carry the mode are
+   redirected at the tokens. Everything built on --mx-* follows on its own. */
+.mx-app[data-moe-mode="light"] { background: var(--mx-bg); color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-ambient { opacity: 0.35; }
+.mx-app[data-moe-mode="light"] .mx-main,
+.mx-app[data-moe-mode="light"] .mx-header,
+.mx-app[data-moe-mode="light"] .mx-thread,
+.mx-app[data-moe-mode="light"] .mx-main-body { background: var(--mx-bg); color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-composer,
+.mx-app[data-moe-mode="light"] .mx-tool-panel,
+.mx-app[data-moe-mode="light"] .mx-popover,
+.mx-app[data-moe-mode="light"] .mx-settings {
+  background: var(--mx-panel); border-color: var(--mx-border); color: var(--mx-text);
+}
+.mx-app[data-moe-mode="light"] .mx-composer textarea,
+.mx-app[data-moe-mode="light"] .mx-field input,
+.mx-app[data-moe-mode="light"] .mx-field select,
+.mx-app[data-moe-mode="light"] .mx-field textarea,
+.mx-app[data-moe-mode="light"] .mx-notebook,
+.mx-app[data-moe-mode="light"] .mx-code-editor {
+  background: var(--mx-panel); color: var(--mx-text); border-color: var(--mx-border);
+}
+.mx-app[data-moe-mode="light"] .mx-markdown,
+.mx-app[data-moe-mode="light"] .mx-message-body { color: var(--mx-prose); }
+.mx-app[data-moe-mode="light"] .mx-markdown h1,
+.mx-app[data-moe-mode="light"] .mx-markdown h2,
+.mx-app[data-moe-mode="light"] .mx-markdown h3,
+.mx-app[data-moe-mode="light"] .mx-markdown strong,
+.mx-app[data-moe-mode="light"] .mx-message-author { color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-markdown code {
+  background: var(--mx-raise); border-color: var(--mx-border); color: #9a2b3c;
+}
+.mx-app[data-moe-mode="light"] .mx-code,
+.mx-app[data-moe-mode="light"] .mx-diagram,
+.mx-app[data-moe-mode="light"] .mx-diagram-fallback,
+.mx-app[data-moe-mode="light"] .mx-surface,
+.mx-app[data-moe-mode="light"] .mx-console pre {
+  background: var(--mx-raise); border-color: var(--mx-border); color: var(--mx-text);
+}
+.mx-app[data-moe-mode="light"] .mx-code pre,
+.mx-app[data-moe-mode="light"] .mx-code pre code,
+.mx-app[data-moe-mode="light"] .mx-diagram-fallback pre { color: #2c2833; }
+.mx-app[data-moe-mode="light"] .mx-code-bar,
+.mx-app[data-moe-mode="light"] .mx-diagram-bar { background: var(--mx-wash-2); color: var(--mx-muted); }
+.mx-app[data-moe-mode="light"] .mx-message.user .mx-message-body,
+.mx-app[data-moe-mode="light"] .mx-user-text { color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-message-avatar > span {
+  background: var(--mx-raise); border-color: var(--mx-border); color: var(--mx-secondary);
+}
+.mx-app[data-moe-mode="light"] .mx-nav button,
+.mx-app[data-moe-mode="light"] .mx-icon,
+.mx-app[data-moe-mode="light"] .mx-muted,
+.mx-app[data-moe-mode="light"] .mx-eyebrow { color: var(--mx-muted); }
+.mx-app[data-moe-mode="light"] .mx-nav button.active { color: var(--mx-text); background: var(--mx-wash-2); }
+.mx-app[data-moe-mode="light"] .mx-secondary {
+  background: var(--mx-raise); color: var(--mx-text); border-color: var(--mx-border);
+}
+/* KaTeX and highlight.js both ship their own colours for a dark page. */
+.mx-app[data-moe-mode="light"] .mx-markdown .katex { color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-markdown .katex-display { background: var(--mx-wash); }
+.mx-app[data-moe-mode="light"] .hljs { color: #2c2833; }
+.mx-app[data-moe-mode="light"] .hljs-keyword,
+.mx-app[data-moe-mode="light"] .hljs-built_in { color: #7c3aed; }
+.mx-app[data-moe-mode="light"] .hljs-string { color: #2e7d4f; }
+.mx-app[data-moe-mode="light"] .hljs-number,
+.mx-app[data-moe-mode="light"] .hljs-literal { color: #b45309; }
+.mx-app[data-moe-mode="light"] .hljs-comment { color: #857e8d; font-style: italic; }
+.mx-app[data-moe-mode="light"] .hljs-title,
+.mx-app[data-moe-mode="light"] .hljs-function { color: #1d4ed8; }
+
+/* The accent swatches carry his preset colours, so the dot you pick is the
+   colour you get — and the fifth one exists now. */
+.mx-app .mx-themes button[data-color="ruby"]   { background: #eb6674; }
+.mx-app .mx-themes button[data-color="violet"] { background: #8766eb; }
+.mx-app .mx-themes button[data-color="ocean"]  { background: #668ceb; }
+.mx-app .mx-themes button[data-color="amber"]  { background: #eb8a66; }
+.mx-app .mx-themes button[data-color="forest"] { background: #66c98d; }
+.mx-app .mx-themes button { border-color: var(--mx-panel) !important; }
+.mx-app .mx-themes button[aria-pressed="true"] { outline-color: var(--mx-accent); }
+
+/* ─── The answer reads as prose ─────────────────────────────────────────────
+   A turn does not need a portrait and a badge every time; a small line of
+   attribution is enough, and the space it frees goes to the text. */
+.mx-app .mx-message-author { font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--mx-muted); margin: 3px 0 13px; }
+.mx-app .mx-message-author > span { display: none; }
+.mx-app .mx-message-avatar { width: 22px; opacity: 0.85; }
+.mx-app .mx-message.user .mx-message-avatar > span { background: var(--mx-raise); border-color: var(--mx-border); color: var(--mx-secondary); }
+.mx-app .mx-markdown h1,
+.mx-app .mx-markdown h2,
+.mx-app .mx-markdown h3 {
+  /* A different voice for a heading than for the sentence under it. */
+  font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: -0.02em;
+  margin-top: 1.7em;
+}
+.mx-app .mx-markdown > :first-child { margin-top: 0; }
+.mx-app .mx-markdown blockquote { border-left-color: var(--mx-accent); background: var(--mx-wash); }
+
+/* Everything in the rail and the empty state was written as light-on-dark. In
+   light mode those become white on near-white, so they are redirected at the
+   tokens too. Found by walking the rendered page for text under 3:1 against
+   its own background, rather than by looking at it. */
+.mx-app[data-moe-mode="light"] .mx-sidebar,
+.mx-app[data-moe-mode="light"] .mx-sidebar * { color: var(--mx-secondary); }
+.mx-app[data-moe-mode="light"] .mx-brand,
+.mx-app[data-moe-mode="light"] .mx-brand span,
+.mx-app[data-moe-mode="light"] .mx-nav button.active,
+.mx-app[data-moe-mode="light"] .mx-chat-item.active,
+.mx-app[data-moe-mode="light"] .mx-welcome h1,
+.mx-app[data-moe-mode="light"] .mx-conversation-title h1,
+.mx-app[data-moe-mode="light"] .mx-view-title h1,
+.mx-app[data-moe-mode="light"] .mx-view-title h2 { color: var(--mx-text); }
+.mx-app[data-moe-mode="light"] .mx-brand small,
+.mx-app[data-moe-mode="light"] .mx-welcome-copy,
+.mx-app[data-moe-mode="light"] .mx-view-title p,
+.mx-app[data-moe-mode="light"] .mx-composer-footnote { color: var(--mx-muted); }
+.mx-app[data-moe-mode="light"] .mx-starters button,
+.mx-app[data-moe-mode="light"] .mx-followups button,
+.mx-app[data-moe-mode="light"] .mx-chat-item,
+.mx-app[data-moe-mode="light"] .mx-search input { color: var(--mx-secondary); }
+.mx-app[data-moe-mode="light"] .mx-starters button span { color: var(--mx-text); }
+/* The one thing that stays white: text on a filled accent. */
+.mx-app[data-moe-mode="light"] .mx-new-chat,
+.mx-app[data-moe-mode="light"] .mx-new-chat *,
+.mx-app[data-moe-mode="light"] .mx-primary,
+.mx-app[data-moe-mode="light"] .mx-send { color: #ffffff; }
+.mx-app[data-moe-mode="light"] .mx-starters button,
+.mx-app[data-moe-mode="light"] .mx-followups button,
+.mx-app[data-moe-mode="light"] .mx-chat-item { border-color: var(--mx-border); }
+.mx-app[data-moe-mode="light"] .mx-chat-item.active { background: var(--mx-wash-2); }
+.mx-app[data-moe-mode="light"] .mx-beta {
+  color: #ffffff; background: var(--mx-accent); border-color: transparent;
+}
+.mx-app[data-moe-mode="light"] .mx-live,
+.mx-app[data-moe-mode="light"] .mx-mode-trigger,
+.mx-app[data-moe-mode="light"] .mx-composer-right span { color: var(--mx-secondary); }
+.mx-app[data-moe-mode="light"] .mx-mode-trigger { background: var(--mx-raise); }
+/* Tables carry data, so their headers should be legible rather than decorative. */
+.mx-app .mx-markdown th, .mx-app .mx-table th { color: var(--mx-secondary); background: var(--mx-wash); }
+.mx-app .mx-markdown td, .mx-app .mx-table td { color: var(--mx-prose); }
+.mx-app .mx-markdown th, .mx-app .mx-markdown td,
+.mx-app .mx-table th, .mx-app .mx-table td { border-bottom-color: var(--mx-border); }
