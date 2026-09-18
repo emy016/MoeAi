@@ -25,6 +25,8 @@ function normalizeMessage(message) {
     // Streaming state. Never persisted as true: see the save effect below.
     pending: Boolean(message?.pending),
     failed: Boolean(message?.failed),
+    /** Passages the answer was built on, when it was grounded in course material. */
+    citations: Array.isArray(message?.citations) ? message.citations.slice(0, 6) : [],
   };
 }
 
@@ -141,17 +143,33 @@ export function useLectureChatStore() {
       messages,
       context: { lecture: lectureTitle || null, course: subjectTitle || null, source: 'mobile' },
       signal: controller?.signal,
-    }, (_delta, full) => patchMessage(key, threadId, assistantMessage.id, { text: full }))
+    },
+      (_delta, full) => patchMessage(key, threadId, assistantMessage.id, { text: full }),
+      (citations) => patchMessage(key, threadId, assistantMessage.id, { citations }))
       .then((full) => patchMessage(key, threadId, assistantMessage.id, { text: full, pending: false }))
       // A refusal MoeAI actually sent (a spend cap, an outage) is worth showing
       // word for word; a transport failure reads better in the app's own voice.
-      .catch((error) => patchMessage(key, threadId, assistantMessage.id, {
-        text: (error?.fromServer && error.message) || unavailableText || 'MoeAI could not be reached.',
-        pending: false,
-        failed: true,
-      }))
+      .catch((error) => {
+        // Stopping on purpose is not a failure: keep what arrived.
+        const cancelled = error?.message === 'Cancelled.';
+        patchMessage(key, threadId, assistantMessage.id, cancelled
+          ? { pending: false }
+          : {
+              text: (error?.fromServer && error.message) || unavailableText || 'MoeAI could not be reached.',
+              pending: false,
+              failed: true,
+            });
+      })
       .then(() => { delete streamRef.current[assistantMessage.id]; });
   }, [patchMessage]);
+
+  /** Stops one reply mid-sentence, keeping whatever text already arrived. */
+  const stopReply = useCallback((messageId) => {
+    const controller = streamRef.current[messageId];
+    if (!controller) return;
+    try { controller.abort(); } catch (_) {}
+    delete streamRef.current[messageId];
+  }, []);
 
   /** Drops every in-flight reply. Called when the app unmounts the store. */
   const cancelStreams = useCallback(() => {
@@ -191,5 +209,5 @@ export function useLectureChatStore() {
     setChats((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${subjectId}:`))));
   }, []);
 
-  return { chats, ready, startChat, sendMessage, cancelStreams, renameChat, togglePinChat, removeLectureChats, removeSubjectChats };
+  return { chats, ready, startChat, sendMessage, stopReply, cancelStreams, renameChat, togglePinChat, removeLectureChats, removeSubjectChats };
 }

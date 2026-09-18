@@ -20,10 +20,11 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Bars3Icon, CameraIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, XMarkIcon } from 'react-native-heroicons/solid';
+import { Bars3Icon, CameraIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, StopIcon, XMarkIcon } from 'react-native-heroicons/solid';
 import { ClipboardDocumentIcon } from 'react-native-heroicons/outline';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MarkdownText from '../chat/MarkdownText';
+import Citations from '../chat/Citations';
 import useHoldToDictate from '../chat/useHoldToDictate';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
 import ElasticPressable from '../components/ElasticPressable';
@@ -92,6 +93,7 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
             : <View style={message.files?.length ? styles.messageAfterFiles : null}>
                 <MarkdownText text={message.text} colors={colors} type={type} isRTL={isRTL} baseColor={colors.textPrimary} />
               </View>)}
+          {!user && !message.pending && <Citations items={message.citations} />}
           {!user && message.pending && !message.text && <TypingDots color={colors.textMuted} motion={motion} />}
         </View>
         {!user && !!message.text && !message.pending && <Pressable hitSlop={9} onPress={() => onCopy(message.text)} style={styles.copyButton} accessibilityRole="button"><ClipboardDocumentIcon size={17} color={colors.textMuted} /></Pressable>}
@@ -145,7 +147,7 @@ const TypingDots = React.memo(function TypingDots({ color, motion }) {
   );
 });
 
-export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onRenameChat, onTogglePinChat, onProfileSelect }) {
+export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onStopReply, onRenameChat, onTogglePinChat, onProfileSelect }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { colors, type, t, motion, isRTL, language } = usePreferences();
@@ -182,6 +184,8 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   const activeThread = useMemo(() => threads.find((thread) => thread.id === threadId) || null, [threadId, threads]);
   const messages = activeThread?.messages || [];
+  // The reply still arriving, if there is one: the send button becomes a stop.
+  const streaming = useMemo(() => messages.find((message) => message.pending) || null, [messages]);
   const userMessages = useMemo(() => messages.filter((message) => message.role === 'user'), [messages]);
   const dashCount = Math.min(7, userMessages.length);
   const pinnedThreads = useMemo(() => threads.filter((thread) => thread.pinned), [threads]);
@@ -471,9 +475,15 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                 <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.accent, opacity: micProgress, transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] }]} />
                 <MicrophoneIcon size={20} color={listening || micHeld ? colors.background : colors.textSecondary} />
               </Pressable>
-              <ElasticPressable shape="circle" onPress={() => send()} disabled={!draft.trim() && !pendingAttachments.length} accessibilityRole="button" accessibilityLabel={t('sendMessage')}>
-                <View style={[styles.sendButton, { backgroundColor: colors.accent, opacity: draft.trim() || pendingAttachments.length ? 1 : 0.45 }]}><PaperAirplaneIcon size={20} color={colors.background} /></View>
-              </ElasticPressable>
+              {streaming ? (
+                <ElasticPressable shape="circle" onPress={() => onStopReply?.(streaming.id)} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
+                  <View style={[styles.sendButton, { backgroundColor: colors.cardButton }]}><StopIcon size={17} color={colors.textPrimary} /></View>
+                </ElasticPressable>
+              ) : (
+                <ElasticPressable shape="circle" onPress={() => send()} disabled={!draft.trim() && !pendingAttachments.length} accessibilityRole="button" accessibilityLabel={t('sendMessage')}>
+                  <View style={[styles.sendButton, { backgroundColor: colors.accent, opacity: draft.trim() || pendingAttachments.length ? 1 : 0.45 }]}><PaperAirplaneIcon size={20} color={colors.background} /></View>
+                </ElasticPressable>
+              )}
             </View>
           </View>
 

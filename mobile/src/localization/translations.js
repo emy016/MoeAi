@@ -140,3 +140,5 @@ Object.assign(fr,{deadlinesTogether:'{count} échéances tombent à cette heure.
 Object.assign(de,{deadlinesTogether:'{count} Abgaben fallen auf diese Zeit.'});
 Object.assign(zh,{deadlinesTogether:'此时间有 {count} 项到期。'});
 Object.assign(hi,{deadlinesTogether:'इस समय {count} चीज़ें देय हैं।'});
+Object.assign(en,{builtOnPassages:'Built on {count} passages from your material',yourLibrary:'Your library',courseMaterial:'Course material',stopReply:'Stop replying'});
+Object.assign(ar,{builtOnPassages:'مبني على {count} مقاطع من موادك',yourLibrary:'مكتبتك',courseMaterial:'مادة المقرر',stopReply:'إيقاف الرد'});

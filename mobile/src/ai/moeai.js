@@ -7,6 +7,8 @@
  * seen yet on every progress event. Same wire format, same endpoint, no
  * server changes:
  *
+ *   {"citations":[…]} once, before the first token, when the answer is
+ *                     grounded in the student's own course material
  *   {"delta":"..."}   zero or more, in order
  *   {"done":true}     once, at the end
  *   {"error":"..."}   instead, if the stream broke after it began
@@ -47,7 +49,7 @@ function forWire(messages) {
  * Streams a reply. `onDelta` is called with each chunk of text as it arrives;
  * the promise resolves with the whole reply, or rejects with a MoeAIError.
  */
-export function streamReply({ messages, context, signal }, onDelta) {
+export function streamReply({ messages, context, signal }, onDelta, onCitations) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     let seen = 0;
@@ -84,7 +86,9 @@ export function streamReply({ messages, context, signal }, onDelta) {
         if (!trimmed) continue;
         let event;
         try { event = JSON.parse(trimmed); } catch (_) { continue; }
-        if (typeof event.delta === 'string' && event.delta) {
+        if (Array.isArray(event.citations)) {
+          onCitations?.(event.citations);
+        } else if (typeof event.delta === 'string' && event.delta) {
           full += event.delta;
           onDelta?.(event.delta, full);
         } else if (event.error) {
