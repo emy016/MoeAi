@@ -23,6 +23,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Bars3Icon, CameraIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, XMarkIcon } from 'react-native-heroicons/solid';
 import { ClipboardDocumentIcon } from 'react-native-heroicons/outline';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MarkdownText from '../chat/MarkdownText';
 import useHoldToDictate from '../chat/useHoldToDictate';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
 import ElasticPressable from '../components/ElasticPressable';
@@ -86,7 +87,11 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
               <Text numberOfLines={1} style={[styles.fileName, { color: user ? colors.white : colors.textPrimary }, type(11, 'semiBold', 15)]}>{file.name}</Text>
             </Pressable>
           ))}</ScrollView>}
-          {!!message.text && <Text style={[message.files?.length && styles.messageAfterFiles, { color: user ? colors.white : colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}>{message.text}</Text>}
+          {!!message.text && (user
+            ? <Text style={[message.files?.length && styles.messageAfterFiles, { color: colors.white, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}>{message.text}</Text>
+            : <View style={message.files?.length ? styles.messageAfterFiles : null}>
+                <MarkdownText text={message.text} colors={colors} type={type} isRTL={isRTL} baseColor={colors.textPrimary} />
+              </View>)}
           {!user && message.pending && !message.text && <TypingDots color={colors.textMuted} motion={motion} />}
         </View>
         {!user && !!message.text && !message.pending && <Pressable hitSlop={9} onPress={() => onCopy(message.text)} style={styles.copyButton} accessibilityRole="button"><ClipboardDocumentIcon size={17} color={colors.textMuted} /></Pressable>}
