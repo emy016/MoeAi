@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MoeAI — the tutor that knows your syllabus | EduMoe</title>
+  <meta name="description" content="MoeAI is a curriculum-aware AI tutor for Egyptian university students. It answers from your own lectures, in Egyptian Arabic, Franco-Arabic or English, and remembers what you got wrong." />
+  <link rel="canonical" href="https://moe-ai-sable.vercel.app/showcase" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MoeAI — the tutor that knows your syllabus" />
+  <meta property="og:description" content="Curriculum-aware AI tutoring for Egyptian university students. Ask in Arabic, Franco or English." />
+  <meta property="og:url" content="https://moe-ai-sable.vercel.app/showcase" />
+  <meta property="og:image" content="https://moe-ai-sable.vercel.app/brand/moeai-logo.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"MoeAI",
+   "applicationCategory":"EducationalApplication","operatingSystem":"Web",
+   "url":"https://moe-ai-sable.vercel.app/moeai",
+   "description":"A curriculum-aware AI tutor that answers from the student's own lecture material in Egyptian Arabic, Franco-Arabic, or English.",
+   "offers":{"@type":"Offer","price":"0","priceCurrency":"EGP"}}
+  </script>
+
+  <style>
+:root {
+      /* Type system: one geometric display face for headlines/wordmarks,
+         one humanist sans for reading copy, one mono for code chrome.
+         Centralised here so a typeface swap never needs a find-and-replace. */
+      --font-display: 'Space Grotesk', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'Fira Code', 'JetBrains Mono', ui-monospace, monospace;
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a2a;
+      --accent: #e11d48;
+      --accent2: #f43f5e;
+      --accent3: #fb7185;
+      --accent-glow: rgba(225, 29, 72, 0.35);
+      --glow: rgba(225, 29, 72, 0.28);
+      --glow2: rgba(225, 29, 72, 0.12);
+      --glass-border: rgba(225, 29, 72, 0.18);
+      --glass-border2: rgba(225, 29, 72, 0.32);
+      --txt1: #fff0f5;
+      --txt2: rgba(255, 192, 208, 0.75);
+      --txt3: rgba(192, 128, 144, 0.50);
+      --tint: rgba(225, 29, 72, 0.05);
+      --tint2: rgba(225, 29, 72, 0.10);
+      --tint3: rgba(225, 29, 72, 0.18);
+      --c-glass: #c8a0a8;
+      --c-light: #ffe0e8;
+      --c-dark: #300010;
+      --reflex-l: 0.45;
+      --reflex-d: 1.7;
+      --sat: 190%;
+      --glass-blur: 14px;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+[data-theme="lava"] { --bg1: #0c0c0e; --bg2: #161618; --bg3: #202024; --accent: #ff5a1f; --accent2: #ff8c42; --accent3: #ffb347; --accent-glow: rgba(255,90,31,0.35); --glow: rgba(255,90,31,0.28); --glow2: rgba(255,90,31,0.12); --glass-border: rgba(255,90,31,0.18); --glass-border2: rgba(255,90,31,0.32); --txt1: #fff; --txt2: rgba(255,255,255,0.70); --txt3: rgba(255,255,255,0.40); --tint: rgba(255,255,255,0.05); --tint2: rgba(255,255,255,0.10); --tint3: rgba(255,255,255,0.18); --c-glass: #c8c8c9; --c-light: #fff; --c-dark: #000; --reflex-l:0.35; --reflex-d:1.8; --sat:180%; }
+[data-theme="space"] { --bg1: #000; --bg2: #0a0a14; --bg3: #141428; --accent: #7c3aed; --accent2: #a855f7; --accent3: #c084fc; --accent-glow: rgba(124,58,237,0.35); --glow: rgba(124,58,237,0.28); --glow2: rgba(124,58,237,0.12); --glass-border: rgba(124,58,237,0.18); --glass-border2: rgba(124,58,237,0.32); --txt1: #f0e8ff; --txt2: #c8b0ff; --txt3: #a080e0; --tint: rgba(124,58,237,0.05); --tint2: rgba(124,58,237,0.10); --tint3: rgba(124,58,237,0.18); --c-glass: #b0a0d0; --c-light: #e8d8ff; --c-dark: #1a0030; --reflex-l:0.50; --reflex-d:1.6; --sat:200%; }
+[data-theme="oxford"] { --bg1: #000510; --bg2: #020a18; --bg3: #081530; --accent: #00d4ff; --accent2: #00f0ff; --accent3: #80f8ff; --accent-glow: rgba(0,212,255,0.35); --glow: rgba(0,212,255,0.28); --glow2: rgba(0,212,255,0.12); --glass-border: rgba(0,212,255,0.18); --glass-border2: rgba(0,212,255,0.32); --txt1: #e0fcff; --txt2: #80d8f0; --txt3: #40b0d0; --tint: rgba(0,212,255,0.05); --tint2: rgba(0,212,255,0.10); --tint3: rgba(0,212,255,0.18); --c-glass: #80e8f8; --c-light: #e0fcff; --c-dark: #000810; --reflex-l:0.55; --reflex-d:1.5; --sat:200%; }
+[data-theme="gray"] { --bg1: #0f0f12; --bg2: #18181b; --bg3: #22222a; --accent: #6b7280; --accent2: #9ca3af; --accent3: #d1d5db; --accent-glow: rgba(107,114,128,0.35); --glow: rgba(107,114,128,0.28); --glow2: rgba(107,114,128,0.12); --glass-border: rgba(107,114,128,0.18); --glass-border2: rgba(107,114,128,0.32); --txt1: #f3f4f6; --txt2: #9ca3af; --txt3: #6b7280; --tint: rgba(107,114,128,0.05); --tint2: rgba(107,114,128,0.10); --tint3: rgba(107,114,128,0.18); --c-glass: #c8c8c9; --c-light: #fff; --c-dark: #000; --reflex-l:0.35; --reflex-d:1.8; --sat:120%; }
+[data-theme="light"] { --bg1: #fff; --bg2: #f4f4f6; --bg3: #e8e8ec; --accent: #111; --accent2: #333; --accent3: #555; --accent-glow: rgba(0,0,0,0.12); --glow: rgba(0,0,0,0.12); --glow2: rgba(0,0,0,0.06); --glass-border: rgba(0,0,0,0.10); --glass-border2: rgba(0,0,0,0.20); --txt1: #1a1a1a; --txt2: #555; --txt3: #888; --tint: rgba(0,0,0,0.03); --tint2: rgba(0,0,0,0.06); --tint3: rgba(0,0,0,0.12); --c-glass: #000; --c-light: #fff; --c-dark: #000; --reflex-l:0.06; --reflex-d:0.6; --sat:100%; }
+[data-theme="custom"] { --bg1: #0a0a0f; --bg2: #111118; --bg3: #1a1a2a; --accent: var(--custom-accent,#e11d48); --accent2: var(--custom-accent2,#f43f5e); --accent3: var(--custom-accent3,#fb7185); --accent-glow: var(--custom-glow,rgba(225,29,72,0.35)); --glow: var(--custom-glow,rgba(225,29,72,0.28)); --glow2: var(--custom-glow2,rgba(225,29,72,0.12)); --glass-border: var(--custom-border,rgba(225,29,72,0.18)); --glass-border2: var(--custom-border2,rgba(225,29,72,0.32)); --txt1:#fff0f5; --txt2:#ffc0d0; --txt3:#c08090; --tint: var(--custom-tint,rgba(225,29,72,0.05)); --tint2: var(--custom-tint2,rgba(225,29,72,0.10)); --tint3: var(--custom-tint3,rgba(225,29,72,0.18)); --c-glass:#c8a0a8; --c-light:#ffe0e8; --c-dark:#300010; --reflex-l:0.45; --reflex-d:1.7; --sat:190%; }
+[data-theme="terminal"] {
+      --bg1: #050a05; --bg2: #071007; --bg3: #0a180a; --accent: #4fff8f; --accent2: #6effa0; --accent3: #9dffc0;
+      --accent-glow: rgba(79,255,143,0.35); --glow: rgba(79,255,143,0.28); --glow2: rgba(79,255,143,0.10);
+      --glass-border: rgba(79,255,143,0.18); --glass-border2: rgba(79,255,143,0.32);
+      --txt1: #b8ffcf; --txt2: #4fff8f; --txt3: #2f8f57;
+      --tint: rgba(79,255,143,0.04); --tint2: rgba(79,255,143,0.08); --tint3: rgba(79,255,143,0.14);
+      --c-glass: #4fff8f; --c-light: #b8ffcf; --c-dark: #001a08; --reflex-l:0.20; --reflex-d:1.2; --sat:130%; --glass-blur:8px; --shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+[data-theme="terminal"] body,
+    [data-theme="terminal"] .nav-logo-name,
+    [data-theme="terminal"] .hero-title,
+    [data-theme="terminal"] .sf-title,
+    [data-theme="terminal"] .sf-display {
+      font-family: var(--font-mono) !important;
+      letter-spacing: 0 !important;
+    }
+[data-theme="terminal"] .hero-title { text-shadow: 0 0 16px var(--accent-glow), 0 0 4px rgba(79,255,143,0.5); color: var(--accent); }
+[data-theme="terminal"] .gradient-text { background: none !important; -webkit-text-fill-color: var(--accent2) !important; color: var(--accent2) !important; text-shadow: 0 0 12px var(--accent-glow); }
+[data-theme="terminal"] .lg-pill, [data-theme="terminal"] .lg-card, [data-theme="terminal"] .lg-panel, [data-theme="terminal"] .navbar, [data-theme="terminal"] .feature-card, [data-theme="terminal"] .btn, [data-theme="terminal"] .nav-cta, [data-theme="terminal"] .nav-auth-btn, [data-theme="terminal"] .float-win, [data-theme="terminal"] .stat-card { border-radius: 3px !important; }
+[data-theme="terminal"] .nav-logo-mark { border-radius: 3px !important; }
+[data-theme="terminal"] .hero-desc::before { content: "$ cat about.txt\A"; white-space: pre; color: var(--txt3); display: block; margin-bottom: 8px; }
+[data-theme="terminal"] .hero-title::after { content: "█"; color: var(--accent); animation: term-blink 1s steps(1) infinite; margin-left: 4px; }
+[data-theme="terminal"] .crt-overlay { display: block; }
+[data-theme="terminal"]:not(.no-crt) body { animation: crt-flicker 4s infinite; }
+[data-theme="terminal"] body, [data-theme="terminal"].no-crt body { animation: none !important; }
+[data-theme="terminal"] body { animation: none !important; }
+[data-theme="terminal"] .crt-toggle { display: inline-flex; }
+[data-theme="terminal"] .subj-card { border-radius: 3px; }
+[data-theme="terminal"] .subj-name { font-family: var(--font-mono); }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--bg1); color: var(--txt1);
+      font-family: var(--font-body); -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    em { font-style: normal; background: linear-gradient(120deg, var(--accent2), var(--accent3));
+         -webkit-background-clip: text; background-clip: text; color: transparent; }
+    code { font-family: var(--font-mono); font-size: 0.92em; background: var(--tint2);
+           padding: 2px 6px; border-radius: 6px; color: var(--txt1); }
+    :focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; border-radius: 8px; }
+
+    /* Ambient light, the same trick the homepage uses. */
+    .orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; display: block; }
+    .o1 { width: 520px; height: 520px; background: var(--glow); top: -180px; left: -120px; }
+    .o2 { width: 420px; height: 420px; background: var(--glow2); top: 40%; right: -140px; }
+    .o3 { width: 380px; height: 380px; background: var(--glow2); bottom: -120px; left: 30%; }
+
+    /* Liquid glass, matching the rest of the site. */
+    .lg { position: relative; isolation: isolate;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--sat));
+      box-shadow: var(--shadow);
+    }
+    .lg-card { border-radius: var(--radius-lg); }
+    .lg-pill { border-radius: 999px; }
+
+    .nav {
+      position: sticky; top: 14px; z-index: 40;
+      width: min(1100px, calc(100% - 28px)); margin: 14px auto 0;
+      display: flex; align-items: center; gap: 18px; padding: 9px 9px 9px 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-display);
+             font-weight: 700; letter-spacing: 0.04em; font-size: 0.95rem; }
+    .mark { width: 20px; height: 20px; flex: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent3));
+            clip-path: polygon(0 100%, 25% 0, 50% 55%, 75% 0, 100% 100%); }
+    .nav-mid { display: none; gap: 4px; margin-left: auto; }
+    .nav-mid a { padding: 8px 13px; border-radius: 999px; color: var(--txt2); font-size: 0.88rem;
+                 transition: var(--transition); }
+    .nav-mid a:hover { color: var(--txt1); background: var(--tint2); }
+    .cta-sm { margin-left: auto; padding: 9px 18px; border-radius: 999px; font-size: 0.88rem;
+              font-weight: 600; color: #fff;
+              background: linear-gradient(135deg, var(--accent), var(--accent2));
+              box-shadow: 0 6px 20px var(--accent-glow); transition: var(--transition); }
+    .cta-sm:hover { transform: translateY(-1px); }
+    @media (min-width: 860px) { .nav-mid { display: flex; } .cta-sm { margin-left: 0; } }
+
+    .hero { position: relative; z-index: 1; width: min(900px, calc(100% - 40px));
+            margin: 0 auto; padding: 84px 0 64px; text-align: center; }
+    .eyebrow { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
+               letter-spacing: 0.22em; color: var(--txt3); margin-bottom: 22px; }
+    .eyebrow.center { display: block; text-align: center; }
+    h1 { font-family: var(--font-display); font-size: clamp(2.6rem, 7vw, 4.6rem); line-height: 1.04;
+         letter-spacing: -0.03em; margin: 0 0 22px; font-weight: 700; }
+    h2 { font-family: var(--font-display); font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.14;
+         letter-spacing: -0.02em; margin: 0 0 16px; font-weight: 600; }
+    h3 { font-family: var(--font-display); font-size: 1.12rem; margin: 0 0 9px; font-weight: 600; }
+    p  { color: var(--txt2); line-height: 1.68; margin: 0 0 14px; }
+    .lede { font-size: 1.1rem; max-width: 62ch; margin-inline: auto; }
+    .center { text-align: center; }
+    .sub { max-width: 60ch; margin: 0 auto 36px; }
+
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 999px;
+           border: 1px solid var(--glass-border2); background: var(--tint); color: var(--txt1);
+           font-weight: 600; font-size: 0.95rem; transition: var(--transition); cursor: pointer; }
+    .btn:hover { background: var(--tint2); transform: translateY(-1px); }
+    .btn-primary { border-color: transparent; color: #fff;
+                   background: linear-gradient(135deg, var(--accent), var(--accent2));
+                   box-shadow: 0 10px 30px var(--accent-glow); }
+
+    .hero-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 56px; }
+    .hero-stats div { display: grid; gap: 3px; }
+    .hero-stats b { font-family: var(--font-display); font-size: 1.9rem; color: var(--accent3); }
+    .hero-stats span { font-size: 0.8rem; color: var(--txt3); }
+    @media (min-width: 720px) { .hero-stats { grid-template-columns: repeat(4, 1fr); } }
+
+    .band { position: relative; z-index: 1; width: min(1100px, calc(100% - 40px));
+            margin: 0 auto; padding: 68px 0; }
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    .split { display: grid; gap: 40px; align-items: center; }
+    @media (min-width: 900px) { .split { grid-template-columns: 1fr 1fr; gap: 56px; }
+                                .split.reverse > :first-child { order: 2; } }
+
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .col { padding: 20px 18px; border-radius: var(--radius-md); border: 1px solid var(--glass-border); }
+    .col p { font-size: 0.88rem; margin: 0 0 9px; }
+    .col.bad { background: rgba(255,255,255,0.02); }
+    .col.bad p { color: var(--txt3); text-decoration: line-through; }
+    .col.good { background: var(--tint2); border-color: var(--glass-border2); }
+    .col.good p { color: var(--txt1); }
+    .tag { display: block; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.14em;
+           color: var(--txt3); margin-bottom: 14px; }
+    .col.good .tag { color: var(--accent3); }
+
+    .chat-grid { display: grid; gap: 16px; }
+    @media (min-width: 880px) { .chat-grid { grid-template-columns: repeat(3, 1fr); } }
+    .chat { padding: 20px; display: grid; gap: 11px; align-content: start; }
+    .chip { justify-self: start; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.14em;
+            padding: 4px 11px; border-radius: 999px; background: var(--tint2);
+            border: 1px solid var(--glass-border); color: var(--accent3); }
+    .bubble { padding: 11px 15px; border-radius: 14px; font-size: 0.9rem; line-height: 1.55; }
+    .bubble.me { background: var(--tint3); border: 1px solid var(--glass-border2); justify-self: end;
+                 border-bottom-right-radius: 5px; max-width: 88%; }
+    .bubble.ai { background: rgba(255,255,255,0.035); border: 1px solid var(--glass-border);
+                 border-bottom-left-radius: 5px; color: var(--txt1); }
+    .note { text-align: center; font-size: 0.86rem; color: var(--txt3); margin-top: 26px; }
+
+    .cards { display: grid; gap: 16px; }
+    @media (min-width: 760px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .cards { grid-template-columns: repeat(4, 1fr); } }
+    .card { padding: 26px 22px; display: grid; gap: 4px; align-content: start; }
+    .card p { font-size: 0.9rem; margin-bottom: 12px; }
+    .num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent3); letter-spacing: 0.1em; }
+    .status { justify-self: start; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em;
+              padding: 4px 11px; border-radius: 999px; border: 1px solid var(--glass-border); }
+    .status.live { color: #6ee7a8; border-color: rgba(110,231,168,0.32); background: rgba(110,231,168,0.08); }
+    .status.soon { color: var(--txt3); }
+
+    .drop { padding: 22px; display: grid; gap: 11px; }
+    .file { display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+            border-radius: var(--radius-md); background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border); }
+    .file span { font-size: 1.3rem; }
+    .file b { display: block; font-size: 0.9rem; }
+    .file small { color: var(--txt3); font-size: 0.76rem; }
+    .file.dim { border-style: dashed; opacity: 0.62; }
+
+    .feat { display: grid; gap: 12px; }
+    @media (min-width: 620px) { .feat { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 980px) { .feat { grid-template-columns: repeat(4, 1fr); } }
+    .feat div { padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--glass-border);
+                background: rgba(255,255,255,0.025); }
+    .feat b { display: block; font-size: 0.94rem; margin-bottom: 4px; }
+    .feat span { font-size: 0.82rem; color: var(--txt3); line-height: 1.5; }
+
+    .plat { display: grid; gap: 16px; }
+    @media (min-width: 860px) { .plat { grid-template-columns: repeat(3, 1fr); } }
+    .plat .card { gap: 10px; }
+    .plat .btn { justify-self: start; margin-top: 4px; }
+
+    .close { position: relative; z-index: 1; width: min(860px, calc(100% - 40px));
+             margin: 40px auto 80px; padding: 56px 34px; text-align: center; }
+    .close p { max-width: 58ch; margin-inline: auto; }
+
+    .foot { position: relative; z-index: 1; width: min(1100px, calc(100% - 40px)); margin: 0 auto;
+            padding: 34px 0 60px; border-top: 1px solid var(--glass-border);
+            display: grid; gap: 16px; justify-items: center; text-align: center; }
+    .foot div { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); }
+    .foot nav { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; }
+    .foot nav a { color: var(--txt2); font-size: 0.86rem; }
+    .foot nav a:hover { color: var(--txt1); }
+    .foot small { color: var(--txt3); font-size: 0.76rem; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="orbs" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
+
+  <nav class="nav lg lg-pill">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"></span><span>EDUMOE</span></a>
+    <div class="nav-mid">
+      <a href="/">Home</a><a href="/courses">Courses</a><a href="/quizzes">Quizzes</a><a href="/ranked">Ranked</a>
+    </div>
+    <a class="cta-sm" href="/moeai">Open MoeAI</a>
+  </nav>
+
+  <!-- ─── HERO ──────────────────────────────────────────────── -->
+  <header class="hero">
+    <span class="eyebrow">MOEAI · BY EDUMOE</span>
+    <h1>The tutor that knows<br><em>your</em> syllabus.</h1>
+    <p class="lede">
+      Every AI can explain pointers. None of them know that <strong>your</strong> lecture
+      covered them in week 11, that you got the dereference question wrong last Tuesday,
+      or that you'd rather be explained to in Franco.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="/moeai">Open MoeAI <span aria-hidden="true">→</span></a>
+      <a class="btn" href="#how">How it works</a>
+    </div>
+    <div class="hero-stats">
+      <div><b>230+</b><span>students already</span></div>
+      <div><b>60</b><span>lectures indexed</span></div>
+      <div><b>8</b><span>first-year courses</span></div>
+      <div><b>3</b><span>languages, per message</span></div>
+    </div>
+  </header>
+
+  <!-- ─── THE PROBLEM ───────────────────────────────────────── -->
+  <section class="band">
+    <div class="split">
+      <div>
+        <span class="eyebrow">THE PROBLEM</span>
+        <h2>Generic AI explains the subject. It can't explain <em>your course.</em></h2>
+        <p>
+          You ask about electrodynamics. It answers with Newtonian motion, in formal
+          English, using examples from a university you've never been to. Your professor
+          teaches a different method, and the AI has never heard of them.
+        </p>
+        <p>An hour gone. Tab closed. Cram the night before.</p>
+      </div>
+      <div class="compare">
+        <div class="col bad">
+          <span class="tag">Generic AI</span>
+          <p>Explains from the internet</p><p>Defaults to English</p>
+          <p>Forgets you instantly</p><p>Never heard of your lecturer</p>
+        </div>
+        <div class="col good">
+          <span class="tag">MoeAI</span>
+          <p>Answers from your lectures</p><p>Replies in what you wrote</p>
+          <p>Remembers what you missed</p><p>Teaches your instructor's method</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LANGUAGE ──────────────────────────────────────────── -->
+  <section class="band" id="language">
+    <span class="eyebrow center">THE PART NOBODY ELSE DOES</span>
+    <h2 class="center">Ask however you actually talk.</h2>
+    <p class="center sub">
+      Detected per message, from rules tuned on real Egyptian students — not guessed
+      by the model, which drifts to English the moment you say “pointer”.
+    </p>
+    <div class="chat-grid">
+      <div class="chat lg lg-card">
+        <span class="chip">Franco</span>
+        <div class="bubble me">msh fahem el recursion</div>
+        <div class="bubble ai">aywa بص، recursion ببساطة إن الـ function بتنادي نفسها.</div>
+      </div>
+      <div class="chat lg lg-card">
+        <span class="chip">عربي</span>
+        <div class="bubble me" dir="rtl">مش فاهم الـ pointers</div>
+        <div class="bubble ai" dir="rtl">المؤشر بيخزن عنوان المتغير، مش قيمته. خلينا نبص على الميموري.</div>
+      </div>
+      <div class="chat lg lg-card">
+        <span class="chip">English</span>
+        <div class="bubble me">why do we need pointers</div>
+        <div class="bubble ai">Honestly? Because C++ decided variables weren't complicated enough. Here's the actual reason…</div>
+      </div>
+    </div>
+    <p class="note">Mixed is normal too — <code>el problem هنا إنك بتخلط بين the address و the value</code> is exactly how students write, and it's handled.</p>
+  </section>
+
+  <!-- ─── PILLARS ───────────────────────────────────────────── -->
+  <section class="band" id="how">
+    <span class="eyebrow center">HOW IT WORKS</span>
+    <h2 class="center">Three layers a chatbot doesn't have.</h2>
+    <div class="cards">
+      <article class="card lg lg-card">
+        <span class="num">01</span><h3>Your curriculum</h3>
+        <p>Before answering, MoeAI searches your actual lectures and anything you've
+        uploaded, then cites the part it used. No material? It says so instead of
+        inventing a syllabus.</p>
+        <span class="status live">Live · 60 lectures indexed</span>
+      </article>
+      <article class="card lg lg-card">
+        <span class="num">02</span><h3>Your language</h3>
+        <p>Egyptian Arabic, Franco-Arabic or English, decided per message and enforced,
+        so technical terms stay readable without flipping the whole answer to English.</p>
+        <span class="status live">Live · 19 regression tests</span>
+      </article>
+      <article class="card lg lg-card">
+        <span class="num">03</span><h3>You</h3>
+        <p>Every quiz question you miss becomes a note. Next week it's brought back up —
+        as continuity, not as “according to my records”. You can read and delete all of it.</p>
+        <span class="status live">Live</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── LIBRARY ───────────────────────────────────────────── -->
+  <section class="band">
+    <div class="split reverse">
+      <div>
+        <span class="eyebrow">LIBRARY MODE</span>
+        <h2>Bring your own syllabus.</h2>
+        <p>
+          Drop in a PDF, paste your notes, or upload subtitles exported from a lecture
+          video. MoeAI indexes it and teaches from it — citing which part it used.
+        </p>
+        <p>
+          That's what makes MoeAI work for anyone, not just FUE Computer Science: a
+          medical student, a tutor with their own material, an organisation with a
+          private curriculum.
+        </p>
+        <a class="btn" href="/moeai">Try it with your own lecture</a>
+      </div>
+      <div class="drop lg lg-card">
+        <div class="file"><span>📕</span><div><b>CS102 — Lecture 11.pdf</b><small>indexed · 24 searchable parts</small></div></div>
+        <div class="file"><span>📄</span><div><b>my-notes.md</b><small>indexed · 6 searchable parts</small></div></div>
+        <div class="file dim"><span>＋</span><div><b>Drop a file</b><small>PDF, .txt, .md, .srt — up to 8 MB</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── WORKSPACE ─────────────────────────────────────────── -->
+  <section class="band">
+    <span class="eyebrow center">INSIDE THE WORKSPACE</span>
+    <h2 class="center">Not a chat box. A place to study.</h2>
+    <div class="feat">
+      <div><b>Conversations</b><span>Threaded, searchable, exportable</span></div>
+      <div><b>Library</b><span>PDFs, notes, subtitles — grounded answers</span></div>
+      <div><b>Study plan</b><span>Deadlines, with MoeAI planning around them</span></div>
+      <div><b>Modes</b><span>Tutor, quick, code, math, library, quiz</span></div>
+      <div><b>Workbench</b><span>Calculator, graphs, truth tables, sandbox</span></div>
+      <div><b>Notebook</b><span>Save any answer worth keeping</span></div>
+      <div><b>Read aloud</b><span>For revising away from the screen</span></div>
+      <div><b>Proactive</b><span>It notices the exam before you do</span></div>
+    </div>
+  </section>
+
+  <!-- ─── PLATFORMS ─────────────────────────────────────────── -->
+  <section class="band">
+    <span class="eyebrow center">WHERE IT RUNS</span>
+    <h2 class="center">Start on your laptop. Finish on your phone.</h2>
+    <div class="plat">
+      <article class="card lg lg-card">
+        <h3>Web</h3><p>Full workspace, nothing to install.</p>
+        <span class="status live">Live now</span>
+        <a class="btn btn-primary" href="/moeai">Open MoeAI</a>
+      </article>
+      <article class="card lg lg-card">
+        <h3>Android</h3><p>Native app: subjects, lectures, calendar, attachments, hold-to-talk.</p>
+        <span class="status soon">In development · v0.2.3</span>
+      </article>
+      <article class="card lg lg-card">
+        <h3>Desktop</h3><p>Installable from the browser — its own window, no store.</p>
+        <span class="status soon">Planned</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── TRUST ─────────────────────────────────────────────── -->
+  <section class="band">
+    <span class="eyebrow center">STRAIGHT ANSWERS</span>
+    <h2 class="center">What it won't do.</h2>
+    <div class="cards">
+      <article class="card lg lg-card"><h3>It won't invent your syllabus</h3>
+        <p>With no material retrieved, it tells you it's answering from general knowledge.</p></article>
+      <article class="card lg lg-card"><h3>It won't do your homework</h3>
+        <p>It teaches the method. Submitting its output as yours is your call, and your risk.</p></article>
+      <article class="card lg lg-card"><h3>It won't read other students</h3>
+        <p>Row-level security on every table. Your library and notes are yours.</p></article>
+      <article class="card lg lg-card"><h3>It won't pretend to be right</h3>
+        <p>It admits mistakes and says when it's unsure. MoeAI can still be wrong — check what matters.</p></article>
+    </div>
+  </section>
+
+  <!-- ─── CLOSE ─────────────────────────────────────────────── -->
+  <section class="close lg lg-card">
+    <h2>Built by a student who got tired of explaining pointers twice.</h2>
+    <p>
+      EduMoe started as a study channel for first-year Computer Science at FUE. Around
+      230 students — roughly half the year — already learn from it. MoeAI is what that
+      channel was always trying to become.
+    </p>
+    <div class="hero-cta center">
+      <a class="btn btn-primary" href="/moeai">Open MoeAI <span aria-hidden="true">→</span></a>
+      <a class="btn" href="https://t.me/CS_Epic_Save" target="_blank" rel="noopener noreferrer">The Telegram channel</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div><span class="mark" aria-hidden="true"></span> <b>EduMoe</b> · MoeAI</div>
+    <nav><a href="/">Home</a><a href="/courses">Courses</a><a href="/moeai">MoeAI</a><a href="/about">About</a><a href="/legal">Terms &amp; Privacy</a></nav>
+    <small>MoeAI can make mistakes. Check the important things against your lecture notes.</small>
+  </footer>
+
+  <script>
+    // Match whatever theme the student picked elsewhere on the site. The
+    // switcher itself lives in the main nav; this page only follows it.
+    try {
+      var t = localStorage.getItem('edumoe-theme');
+      if (t && t !== 'ruby') document.documentElement.setAttribute('data-theme', t);
+      var c = localStorage.getItem('edumoe-custom-color');
+      if (c && t === 'custom') document.documentElement.style.setProperty('--accent', c);
+    } catch (e) {}
+
+    // Reveal sections as they arrive, unless the visitor asked for less motion.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.band, .close').forEach(function (el) { el.classList.add('reveal'); io.observe(el); });
+    }
+  </script>
+</body>
+</html>
