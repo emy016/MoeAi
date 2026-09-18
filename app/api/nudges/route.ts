@@ -19,7 +19,7 @@ export async function GET() {
 
   const { data } = await sb
     .from("nudges")
-    .select("id, kind, body, action_url, created_at")
+    .select("id, kind, body, prompt, action_url, created_at")
     .is("seen_at", null)
     .order("created_at", { ascending: false })
     .limit(3);

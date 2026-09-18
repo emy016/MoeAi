@@ -227,7 +227,10 @@ export function RoomSwitcher({
 export interface Nudge {
   id: string;
   kind: string;
+  /** What the student reads. */
   body: string;
+  /** What MoeAI is asked if they act on it — not the same sentence. */
+  prompt: string | null;
   action_url: string | null;
 }
 

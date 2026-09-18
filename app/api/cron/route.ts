@@ -24,7 +24,12 @@ export async function GET(req: NextRequest) {
 
   const db = supabaseAdmin();
   const now = Date.now();
-  const rows: { user_id: string; kind: string; body: string; action_url: string }[] = [];
+  /**
+ * `body` is what the student reads. `prompt` is what gets sent to MoeAI if they
+ * act on it — they are not the same sentence, and echoing the notice back at
+ * the tutor produces an answer about the notice rather than about the work.
+ */
+const rows: { user_id: string; kind: string; body: string; prompt: string; action_url: string }[] = [];
 
   // 1. Weak spots worth revisiting: a misconception recorded 2+ days ago.
   //    Spaced repetition, at its simplest and cheapest.
@@ -44,6 +49,7 @@ export async function GET(req: NextRequest) {
       user_id: m.user_id,
       kind: "revisit",
       body: `Worth another look: ${String(m.value).slice(0, 160)}`,
+      prompt: `A while ago I struggled with this: ${String(m.value).slice(0, 300)}. Check whether I actually have it now — ask me one question about it and wait for my answer.`,
       action_url: "/moeai",
     });
   }
@@ -64,6 +70,7 @@ export async function GET(req: NextRequest) {
       user_id: c.user_id,
       kind: "dormant",
       body: "It has been a few days. Pick one topic you are shaky on and we will go through it.",
+      prompt: "I have not studied in a few days. Ask me what I am working on this week, then pick one thing to go through properly.",
       action_url: "/moeai",
     });
   }
@@ -83,6 +90,7 @@ export async function GET(req: NextRequest) {
       user_id: d.owner_id,
       kind: "misconception",
       body: `You added “${String(d.title).slice(0, 80)}” but never tested yourself on it.`,
+      prompt: `Quiz me on “${String(d.title).slice(0, 80)}” from my library. One question at a time, and wait for my answer before the next.`,
       action_url: "/quizzes",
     });
   }
