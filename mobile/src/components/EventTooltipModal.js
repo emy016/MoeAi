@@ -181,7 +181,9 @@ const styles = StyleSheet.create({
   descriptionClip: { overflow: 'hidden', transformOrigin: 'top' },
   description: { marginTop: Spacing.sm },
   expand: { marginTop: Spacing.sm, paddingVertical: Spacing.xs },
-  actions: { alignSelf: 'stretch', direction: 'ltr', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start', gap: 6, marginTop: Spacing.md },
+  // Keep the action order explicit through the JSX order. `direction` is not
+  // a React Native style; writingDirection is the portable equivalent.
+  actions: { alignSelf: 'stretch', writingDirection: 'ltr', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start', gap: 6, marginTop: Spacing.md },
   actionSlot: { flex: 1, minWidth: 0 },
   actionButton: { minHeight: 36, borderRadius: Radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 7, overflow: 'hidden' },
   actionText: { flexShrink: 1, textAlign: 'center' },

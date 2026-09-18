@@ -36,9 +36,6 @@
           ]
         }
       ]
-    ],
-    "extra": {
-      "apiBaseUrl": "https://moe-ai-sable.vercel.app"
-    }
+    ]
   }
 }

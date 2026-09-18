@@ -197,7 +197,7 @@ Ipsum assistant bubble. Each assistant reply has a background-free outline
 Clipboard Document action that copies its complete text.
 
 The composer keeps taps active while the software keyboard is visible. Its Plus
-action springs through a short rotation and opens an upward Camera / Images /
+action opens an upward Camera / Images /
 Files menu; Camera is mobile-only, opens the back camera, and is omitted on
 desktop. Gallery images and ordinary documents remain as removable 80-pixel
 previews above the composer until Send is pressed, allowing text and attachments
@@ -642,6 +642,11 @@ Implements the spec behavior:
 
 ## Notes for whoever (human or AI) picks this up next
 
+- React Native Web compatibility: the event tooltip action row does not use
+  the unsupported `direction` style. The progress ring renders a static SVG
+  circle on web (where animating SVG props through `Animated` is unsupported)
+  and retains its animated SVG path on native Expo targets.
+
 - Every component/file has a header comment explaining its purpose and any
   non-obvious decisions — read those before modifying.
 - Don't hardcode colors or spacing values; always import from
@@ -652,25 +657,3 @@ Implements the spec behavior:
   don't render your own.)
 - Privacy/Data and Information actions are UI-only placeholders. Notification
   preferences persist locally but do not schedule OS notifications yet.
-
-## Talking to MoeAI
-
-`src/ai/moeai.js` posts the conversation to `POST /api/moeai` on the EduMoe
-deployment and streams the reply back into the chat. React Native's `fetch`
-exposes no response stream, so it uses `XMLHttpRequest` and re-reads the new
-tail of `responseText` on each progress event — same NDJSON wire format the web
-workspace reads, no server changes.
-
-`src/ai/config.js` decides which deployment. It reads, in order:
-
-1. `EXPO_PUBLIC_MOEAI_API_URL` in the environment
-2. `expo.extra.apiBaseUrl` in `app.json`
-3. the production deployment
-
-On a physical phone `localhost` is the phone, not your laptop. To point at a dev
-server, use your machine's LAN address: `EXPO_PUBLIC_MOEAI_API_URL=http://192.168.1.5:3000 npm start`.
-
-A reply that cannot be delivered falls back to `t('aiUnreachable')` for transport
-failures, or to whatever MoeAI itself said (a spend cap, a provider outage) when
-the server answered. Attachments are named to the tutor, not uploaded — it is
-told what was attached rather than handed a file it has no way to read yet.

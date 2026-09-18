@@ -93,8 +93,8 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
             : <View style={message.files?.length ? styles.messageAfterFiles : null}>
                 <MarkdownText text={message.text} colors={colors} type={type} isRTL={isRTL} baseColor={colors.textPrimary} />
               </View>)}
-          {!user && !message.pending && <Citations items={message.citations} />}
           {!user && message.pending && !message.text && <TypingDots color={colors.textMuted} motion={motion} />}
+          {!user && !message.pending && <Citations items={message.citations} />}
         </View>
         {!user && !!message.text && !message.pending && <Pressable hitSlop={9} onPress={() => onCopy(message.text)} style={styles.copyButton} accessibilityRole="button"><ClipboardDocumentIcon size={17} color={colors.textMuted} /></Pressable>}
       </View>
@@ -140,9 +140,7 @@ const TypingDots = React.memo(function TypingDots({ color, motion }) {
   }, [motion]);
   return (
     <View style={styles.typingRow}>
-      {dots.map((dot, index) => (
-        <Animated.View key={index} style={[styles.typingDot, { backgroundColor: color, opacity: dot }]} />
-      ))}
+      {dots.map((dot, index) => <Animated.View key={index} style={[styles.typingDot, { backgroundColor: color, opacity: dot }]} />)}
     </View>
   );
 });
@@ -309,7 +307,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     if (!clean && !files.length) return;
     const targetId = threadId || onStartChat();
     if (!threadId) setThreadId(targetId);
-    onSend(targetId, { text: clean, files, unavailableText: t('aiUnreachable'), lectureTitle: lecture?.title, subjectTitle: subject?.name });
+    onSend(targetId, { text: clean, files, unavailableText: t('aiUnavailable'), lectureTitle: lecture?.title, subjectTitle: subject?.name });
     setDraft('');
     setPendingAttachments([]);
     setAttachmentOpen(false);
@@ -455,7 +453,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
             </Animated.View>}
             <View style={[styles.composer, { backgroundColor: colors.card }]}> 
               <ElasticPressable shape="circle" onPress={() => setAttachmentOpen((open) => !open)} accessibilityRole="button" accessibilityLabel={t('attachFiles')}>
-                <View style={[styles.composerButton, { backgroundColor: colors.cardButton }]}><Animated.View style={{ transform: [{ rotate: plusProgress.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '32deg'] }) }] }}><PlusIcon size={21} color={colors.textPrimary} /></Animated.View></View>
+                <View style={[styles.composerButton, { backgroundColor: colors.cardButton }]}><PlusIcon size={21} color={colors.textPrimary} /></View>
               </ElasticPressable>
               <TextInput
                 value={draft}

@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   // admin is a private tool, not something to invite crawlers into.
-  const routes = [...new Set([...pages, "/moeai", "/legal"])].filter((r) => r !== "/admin");
+  const routes = [...new Set([...pages, "/moeai", "/workspace", "/legal"])].filter((r) => r !== "/admin");
   const now = new Date();
 
   return routes.map((route) => ({

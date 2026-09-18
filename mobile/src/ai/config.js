@@ -15,7 +15,16 @@ const fromConfig = Constants?.expoConfig?.extra?.apiBaseUrl;
 // also loads anywhere `process` is not defined.
 const fromEnv = typeof process !== 'undefined' ? process.env?.EXPO_PUBLIC_MOEAI_API_URL : undefined;
 
-export const API_BASE_URL = String(fromEnv || fromConfig || 'https://moe-ai-sable.vercel.app').replace(/\/+$/, '');
+/**
+ * Served from the EduMoe site itself, the tutor is on this very origin — which
+ * also means the request carries the student's session cookie, so a signed-in
+ * student gets their rooms, their library and their memory. Falls back to the
+ * deployment for a native build, where there is no origin to speak of.
+ */
+const sameOrigin = typeof window !== 'undefined' && window.location?.origin
+  && !/^file:/.test(window.location.origin) ? window.location.origin : '';
+
+export const API_BASE_URL = String(fromEnv || fromConfig || sameOrigin || 'https://moe-ai-sable.vercel.app').replace(/\/+$/, '');
 
 /** Where EduMoe's students already are. */
 export const TELEGRAM_URL = 'https://t.me/CS_Epic_Save';

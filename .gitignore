@@ -148,3 +148,7 @@ next-env.d.ts
 out/
 .vercel
 .env.local
+
+# Expo's install for the web export. The built bundle in public/ is committed;
+# this is 500 MB of toolchain that rebuilds with npm run build:app.
+mobile/node_modules/

@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       { source: "/", destination: "/index.html" },
+      // /moeai is Youssef's app, exported to static web by Expo. Its bundle
+      // references /_expo absolutely, so the files sit at the public root and
+      // only its entry page is rewritten — the URL stays /moeai.
+      { source: "/moeai", destination: "/moeai-app.html" },
       ...pages
         .filter((page) => page !== "index")
         .map((page) => ({ source: `/${page}`, destination: `/${page}.html` })),

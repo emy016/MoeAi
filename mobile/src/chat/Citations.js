@@ -30,7 +30,7 @@ export default function Citations({ items }) {
         <View style={[styles.toggle, { borderColor: colors.border, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <BookOpenIcon size={12} color={colors.textMuted} />
           <Text style={[{ color: colors.textMuted }, type(11, 'regular', 15)]}>
-            {t('builtOnPassages', { count: items.length })}
+            {t(items.length === 1 ? 'builtOnPassage' : 'builtOnPassages', { count: items.length })}
           </Text>
           <Chevron size={12} color={colors.textMuted} />
         </View>

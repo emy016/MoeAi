@@ -2,10 +2,10 @@
  * Persistent local lecture conversations.
  *
  * Sending is optimistic: the student's message and an empty assistant message
- * go in immediately, then the reply streams into that assistant message as it
- * arrives. If the tutor cannot be reached the same message becomes the
- * unavailable notice the app showed before there was a tutor, so a dropped
- * connection looks like the old behaviour rather than a stuck spinner.
+ * go in at once, then the reply streams into that assistant message as it
+ * arrives from MoeAI. If the tutor cannot be reached the same message becomes
+ * the notice this app showed before there was a tutor, so a dropped connection
+ * looks like the old behaviour rather than a stuck spinner.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
@@ -129,32 +129,33 @@ export function useLectureChatStore() {
     });
 
     // Attachments are named, not uploaded — the tutor is told what was attached
-    // rather than being handed a file it has no way to read yet.
+    // rather than handed a file it has no way to read yet.
     const attached = files.map((file) => file?.name).filter(Boolean);
-    const question = attached.length
-      ? `${clean}\n\n[Attached: ${attached.join(', ')}]`
-      : clean;
+    const question = attached.length ? `${clean}\n\n[Attached: ${attached.join(', ')}]` : clean;
     const messages = [...history.slice(0, -1), { role: 'user', text: question }];
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     streamRef.current[assistantMessage.id] = controller;
 
-    streamReply({
-      messages,
-      context: { lecture: lectureTitle || null, course: subjectTitle || null, source: 'mobile' },
-      signal: controller?.signal,
-    },
+    streamReply(
+      {
+        messages,
+        context: { lecture: lectureTitle || null, course: subjectTitle || null, source: 'moeai-app' },
+        signal: controller?.signal,
+      },
       (_delta, full) => patchMessage(key, threadId, assistantMessage.id, { text: full }),
-      (citations) => patchMessage(key, threadId, assistantMessage.id, { citations }))
+      (citations) => patchMessage(key, threadId, assistantMessage.id, { citations }),
+    )
       .then((full) => patchMessage(key, threadId, assistantMessage.id, { text: full, pending: false }))
-      // A refusal MoeAI actually sent (a spend cap, an outage) is worth showing
-      // word for word; a transport failure reads better in the app's own voice.
       .catch((error) => {
         // Stopping on purpose is not a failure: keep what arrived.
         const cancelled = error?.message === 'Cancelled.';
         patchMessage(key, threadId, assistantMessage.id, cancelled
           ? { pending: false }
           : {
+              // A refusal MoeAI actually sent (a spend cap, an outage) is worth
+              // showing word for word; a transport failure reads better in the
+              // app's own voice.
               text: (error?.fromServer && error.message) || unavailableText || 'MoeAI could not be reached.',
               pending: false,
               failed: true,
@@ -169,12 +170,6 @@ export function useLectureChatStore() {
     if (!controller) return;
     try { controller.abort(); } catch (_) {}
     delete streamRef.current[messageId];
-  }, []);
-
-  /** Drops every in-flight reply. Called when the app unmounts the store. */
-  const cancelStreams = useCallback(() => {
-    Object.values(streamRef.current).forEach((controller) => { try { controller?.abort(); } catch (_) {} });
-    streamRef.current = {};
   }, []);
 
   const removeLectureChats = useCallback((subjectId, lectureId) => {
@@ -209,5 +204,5 @@ export function useLectureChatStore() {
     setChats((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${subjectId}:`))));
   }, []);
 
-  return { chats, ready, startChat, sendMessage, stopReply, cancelStreams, renameChat, togglePinChat, removeLectureChats, removeSubjectChats };
+  return { chats, ready, startChat, sendMessage, stopReply, renameChat, togglePinChat, removeLectureChats, removeSubjectChats };
 }

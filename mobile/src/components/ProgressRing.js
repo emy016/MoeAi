@@ -1,6 +1,6 @@
 /** Animated circular lecture progress indicator based on the supplied reference. */
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { usePreferences } from '../context/AppPreferences';
 
@@ -32,20 +32,40 @@ export default React.memo(function ProgressRing({ completed, total, active, size
     <View style={[styles.root, { width: size, height: size }]}>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
         <Circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={colors.track} strokeWidth={strokeWidth} opacity={0.72} />
-        <AnimatedCircle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={colors.accent}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={dashOffset}
-          rotation={-90}
-          originX={size / 2}
-          originY={size / 2}
-        />
+        {Platform.OS === 'web' ? (
+          // React Native Web cannot reliably animate SVG presentation props
+          // through Animated.createAnimatedComponent. Render the current value
+          // directly on web; native Expo targets keep the animated path below.
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={colors.accent}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={circumference * (1 - progressValue)}
+            rotation={-90}
+            originX={size / 2}
+            originY={size / 2}
+          />
+        ) : (
+          <AnimatedCircle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={colors.accent}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={dashOffset}
+            rotation={-90}
+            originX={size / 2}
+            originY={size / 2}
+          />
+        )}
       </Svg>
       <View style={styles.copy}>
         <Text style={[{ color: colors.textPrimary }, type(28, 'bold', 33)]}>{Math.round(progressValue * 100)}%</Text>
