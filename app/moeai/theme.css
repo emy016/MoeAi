@@ -285,3 +285,36 @@
   color: #c3b6c9; font-size: 11.5px; line-height: 1.75;
 }
 .mx-app .mx-citations blockquote svg { opacity: 0.5; margin-right: 6px; vertical-align: -1px; }
+
+/* The 3D surface. Square, because a surface that changes shape with the panel
+   width is harder to read than one that stays put. */
+.mx-app .mx-surface {
+  margin: 14px 0 4px; border: 1px solid var(--mx-border); border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(var(--mx-accent-rgb), 0.06), transparent 70%), #0a0a11;
+  overflow: hidden;
+}
+.mx-app .mx-surface canvas {
+  display: block; width: 100%; aspect-ratio: 1; cursor: grab; touch-action: none;
+}
+.mx-app .mx-surface canvas:active { cursor: grabbing; }
+
+/* Simulators. The frame is same-origin, so the page inside follows whatever
+   theme the student picked out here. */
+.mx-app .mx-simulators { display: flex; flex-direction: column; min-height: 0; height: 100%; padding-bottom: 14px; }
+.mx-app .mx-simulator-frame {
+  position: relative; flex: 1; min-height: 420px; margin-top: 4px;
+  border: 1px solid var(--mx-border); border-radius: 14px; overflow: hidden; background: #08080d;
+}
+.mx-app .mx-simulator-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.mx-app .mx-simulator-loading {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  gap: 10px; color: var(--mx-muted); font-size: 12px; pointer-events: none;
+}
+.mx-app .mx-simulator-asks { margin-top: 14px; display: grid; gap: 8px; }
+.mx-app .mx-simulator-asks > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.mx-app .mx-simulator-asks button {
+  display: flex; align-items: center; gap: 6px; padding: 7px 13px; font-size: 11.5px;
+  border: 1px solid var(--mx-border); border-radius: 999px; color: var(--mx-muted);
+  background: rgba(255, 255, 255, 0.02);
+}
+.mx-app .mx-simulator-asks button:hover { color: var(--mx-text); border-color: rgba(var(--mx-accent-rgb), 0.35); }

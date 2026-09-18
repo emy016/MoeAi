@@ -1,13 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Calculator, Check, Code2, Download, FunctionSquare, GitBranch, NotebookPen, Pause, Play, RotateCcw, Timer, X } from "lucide-react";
+import { ArrowUpRight, Box, Calculator, Check, Code2, Download, FunctionSquare, GitBranch, NotebookPen, Pause, Play, RotateCcw, Timer, X } from "lucide-react";
 import { Markdown } from "./markdown";
 import { downloadText } from "@/lib/moeai/workspace";
+import { SurfacePlot } from "./surface";
 import type { Analysis } from "@/lib/moeai/logic";
-export type Tool = "calculator" | "graph" | "code" | "logic" | "notebook" | "focus";
+export type Tool = "calculator" | "graph" | "surface" | "code" | "logic" | "notebook" | "focus";
 export const toolItems = [
   { id: "calculator" as Tool, label: "Calculator", hint: "Evaluate & differentiate", icon: Calculator },
   { id: "graph" as Tool, label: "Graph plotter", hint: "See the function", icon: FunctionSquare },
+  { id: "surface" as Tool, label: "3D surface", hint: "See z = f(x, y)", icon: Box },
   { id: "code" as Tool, label: "Code studio", hint: "Write, run, understand", icon: Code2 },
   { id: "logic" as Tool, label: "Logic & K-map", hint: "Table, map, minimal form", icon: GitBranch },
   { id: "notebook" as Tool, label: "Notebook", hint: "Keep the important parts", icon: NotebookPen },
@@ -15,7 +17,7 @@ export const toolItems = [
 ];
 export default function ToolPanel({ tool, onClose, onAsk, notebook, onNotebook }: { tool: Tool; onClose: () => void; onAsk: (text: string) => void; notebook: string; onNotebook: (text: string) => void }) {
   const info = toolItems.find(t => t.id === tool)!;
-  return <aside className="mx-tool-panel" aria-label={info.label}><header><div><span className="mx-eyebrow">WORKBENCH</span><h2>{info.label}</h2></div><button className="mx-icon" aria-label="Close tool" onClick={onClose}><X size={18}/></button></header><div className="mx-tool-body">{tool === "calculator" || tool === "graph" || tool === "logic" ? <MathTool key={tool} type={tool} onAsk={onAsk}/> : tool === "code" ? <CodeStudio onAsk={onAsk}/> : tool === "focus" ? <FocusTimer/> : <Notebook text={notebook} onChange={onNotebook}/>}</div><footer><span className="mx-dot"/> Tools run on your device</footer></aside>;
+  return <aside className="mx-tool-panel" aria-label={info.label}><header><div><span className="mx-eyebrow">WORKBENCH</span><h2>{info.label}</h2></div><button className="mx-icon" aria-label="Close tool" onClick={onClose}><X size={18}/></button></header><div className="mx-tool-body">{tool === "calculator" || tool === "graph" || tool === "logic" ? <MathTool key={tool} type={tool} onAsk={onAsk}/> : tool === "surface" ? <SurfacePlot onAsk={onAsk}/> : tool === "code" ? <CodeStudio onAsk={onAsk}/> : tool === "focus" ? <FocusTimer/> : <Notebook text={notebook} onChange={onNotebook}/>}</div><footer><span className="mx-dot"/> Tools run on your device</footer></aside>;
 }
 function MathTool({type,onAsk}: {type: "calculator" | "graph" | "logic";onAsk:(text:string)=>void}) {
   const [input,setInput] = useState(type === "graph" ? "sin(x)" : type === "logic" ? "(A and B) or C" : "(2^8 - 1) / 5");
