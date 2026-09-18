@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "MoeAI",
+    "slug": "moeai-mobile",
+    "version": "0.2.3",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#181920",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.moeai.mobile"
+    },
+    "android": {
+      "package": "com.moeai.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#181920"
+      }
+    },
+    "plugins": [
+      "expo-splash-screen",
+      "expo-status-bar",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow MoeAI to choose images for your lecture chats.",
+          "cameraPermission": "Allow MoeAI to take photos for your lecture chats."
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow MoeAI to use the microphone for dictation.",
+          "speechRecognitionPermission": "Allow MoeAI to turn your speech into chat text.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "https://moe-ai-sable.vercel.app"
+    }
+  }
+}
