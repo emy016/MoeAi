@@ -9,6 +9,9 @@ import { Check, Copy, Download, Terminal } from "lucide-react";
 import { downloadText } from "@/lib/moeai/workspace";
 import { Diagram } from "./diagram";
 
+/** Arabic, Hebrew, Persian — anything that would legitimately want an RTL table. */
+const RTL_TEXT = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
 function plain(children: ReactNode): string { return Children.toArray(children).map(child => isValidElement<{children?: ReactNode}>(child) ? plain(child.props.children) : String(child)).join(""); }
 function CodeBlock({ children }: { children?: ReactNode }) {
   const [copied, setCopied] = useState(false);
@@ -20,5 +23,9 @@ function CodeBlock({ children }: { children?: ReactNode }) {
 }
 export const Markdown = memo(function Markdown({ text }: { text: string }) {
   const normalized = text.replace(/\\\[([\s\S]*?)\\\]/g, (_, math) => `\n$$\n${math}\n$$\n`).replace(/\\\(([\s\S]*?)\\\)/g, (_, math) => `$${math}$`);
-  return <div className="mx-markdown" dir="auto"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeKatex, { throwOnError: false, trust: false, strict: "ignore", maxExpand: 200 }], [rehypeHighlight, { detect: false }]]} components={{ pre: CodeBlock, a: ({children,href}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>, img: ({alt}) => <span className="mx-muted">[Image: {alt || "image"}]</span> }}>{normalized}</ReactMarkdown></div>;
+  return <div className="mx-markdown" dir="auto"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeKatex, { throwOnError: false, trust: false, strict: "ignore", maxExpand: 200 }], [rehypeHighlight, { detect: false }]]} components={{ pre: CodeBlock,
+      // A truth table inside an Arabic explanation is still a truth table: its
+      // columns read A, B, F. Without this the paragraph's RTL direction is
+      // inherited and the header row comes out mirrored.
+      table: ({children}) => <table dir={RTL_TEXT.test(plain(children)) ? "rtl" : "ltr"}>{children}</table>, a: ({children,href}) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>, img: ({alt}) => <span className="mx-muted">[Image: {alt || "image"}]</span> }}>{normalized}</ReactMarkdown></div>;
 });
