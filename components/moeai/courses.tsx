@@ -36,11 +36,18 @@ function iconFor(subject: Subject) {
 }
 
 export function Courses({
-  userSubjects, completions, onChange, onAsk,
+  subjects: userSubjects, completions, onChange, onAsk,
 }: {
-  userSubjects: Subject[];
+  /** Only the courses the student added; the eight seeded ones live in code. */
+  subjects: Subject[];
   completions: Record<string, boolean>;
-  onChange: (next: { userSubjects?: Subject[]; completions?: Record<string, boolean> }) => void;
+  /**
+   * The keys here are the workspace's own field names, deliberately. An
+   * earlier version emitted `userSubjects` while the workspace stored
+   * `subjects`, so adding a course wrote to a key nothing read and the course
+   * silently never existed.
+   */
+  onChange: (next: { subjects?: Subject[]; completions?: Record<string, boolean> }) => void;
   onAsk: (text: string) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
@@ -68,7 +75,7 @@ export function Courses({
     const subject = normalizeSubject({
       id: `course-${Date.now().toString(36)}`, name: clean, owner: "user", iconQuery: clean, lectures: [],
     });
-    onChange({ userSubjects: [...userSubjects, subject] });
+    onChange({ subjects: [...userSubjects, subject] });
     setDraft(""); setAdding(false); setOpen(subject.id);
   }
 
@@ -80,7 +87,7 @@ export function Courses({
       createdAt: new Date().toISOString(), files: [],
     };
     onChange({
-      userSubjects: userSubjects.map(s => s.id === subject.id ? { ...s, lectures: [...s.lectures, lecture] } : s),
+      subjects: userSubjects.map(s => s.id === subject.id ? { ...s, lectures: [...s.lectures, lecture] } : s),
     });
   }
 
@@ -158,7 +165,7 @@ export function Courses({
         onAsk={onAsk}
         onAddLecture={title => addLecture(active, title)}
         onRemove={active.owner === "user" ? () => {
-          onChange({ userSubjects: userSubjects.filter(s => s.id !== active.id) });
+          onChange({ subjects: userSubjects.filter(s => s.id !== active.id) });
           setOpen(null);
         } : undefined}
       />}
