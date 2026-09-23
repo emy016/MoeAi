@@ -4,6 +4,14 @@ Foundational UI for the AI tutoring app, now including a complete local
 Settings experience, persisted personalization, localization, and consistent
 elastic touch feedback. Current app version: **0.2.3**.
 
+## Portable build
+
+The distributable ZIP includes a prebuilt `web-build` plus one-click launchers.
+On Windows, extract the ZIP and open `Start MoeAI - Windows.cmd`; Node.js and npm
+are not required. macOS/Linux instructions and editable-source setup are in
+`START-HERE.md`. Rebuild the portable site after code changes with
+`npm run build:web`.
+
 ## Project structure
 
 ```
@@ -50,6 +58,8 @@ src/
     subjectIconSource.js      Replaceable Noun Project source and search rules
   chat/
     useHoldToDictate.js       Native/mobile + browser hold-to-dictate adapter
+  ai/
+    client.js                 Sends lecture chat (history, lecture, attachments) to the EduMoe server
   storage/
     persistedStorage.js       MoeAI namespace + migration from earlier saved keys
   context/
@@ -65,6 +75,42 @@ src/
     CommunityScreen.js
     SettingsScreen.js         Settings cards, controls, language/font bottom sheets
 ```
+
+## Live MoeAI runtime
+
+Lecture chat is answered by the EduMoe server at `POST /api/moeai`, the same
+tutor the website uses. The app sends the conversation history (last 10
+turns), the active subject and lecture, the names of the lecture's materials,
+and every attachment: text files as text, PDFs and images as base64 (3 MB per
+message, the most a Vercel request can carry). The server reads PDFs into text
+and passes images to Gemini.
+
+The server owns everything that must not ship to a browser: the provider keys
+(Gemini first, then Groq, rotated across keys), the Eslam/Emy specification
+files in the repo's `prompts/` and `lib/moeai/personality.md`, language
+detection, rate limits, and — for a signed-in student — their course material
+and memory. `generateMoeAIReply` keeps its `{ text, provider, model }` contract,
+so the chat store still persists the final text and turns any failure into a
+readable chat error instead of losing the student's message.
+
+On the web the app is served by the EduMoe site and calls its own origin. A
+native build calls `https://moe-ai-sable.vercel.app`; set
+`EXPO_PUBLIC_MOEAI_API_URL` to point it elsewhere (e.g. `http://192.168.x.x:3000`
+while developing on a phone).
+
+Earlier builds bundled provider keys in `src/ai/privateConfig.js`. That file is
+gone; any keys it held should be treated as public and rotated.
+
+## Bundle size
+
+- `babel.config.js` rewrites `import { XIcon } from 'react-native-heroicons/solid'`
+  to the icon's own file at build time. Through the barrel, every Heroicon in
+  every style used shipped (~630 KB of source); now only the ~60 used do.
+- `src/constants/fonts.js` imports each Nunito Sans weight from its own entry
+  point. The package root requires all 18 files (every weight, upright and
+  italic), and all 18 shipped although four are used.
+
+Together these took the web export from 4.4 MB to 1.9 MB with no visual change.
 
 ## Design system
 
@@ -167,11 +213,16 @@ persisted separately by `lectureChatStore.js`.
 
 Subject icons use the first result from a replaceable Noun Project search rule
 in `subjectIconSource.js`. The default resolver searches the subject's current
-name during an idle callback, caches the result for the session, and falls back
-to a related bundled Heroicon when offline. `configureSubjectIconSource` can replace the provider,
-base URL, result index, normalization rule, or resolver; production can point it
-at an authenticated Noun Project API v2 proxy without putting OAuth credentials
-inside the mobile bundle.
+name during an idle callback on native, caches the result for the session, and
+falls back to a related bundled Heroicon when offline. Browsers cannot read the
+third-party Noun Project HTML search page because of CORS, so when the app is
+served from the EduMoe site it resolves through the site's `/api/subject-icon`,
+which reads the same first result server-side; if that finds nothing, the
+distinct, name-reactive bundled icon stays. `configureSubjectIconSource` can replace the provider, base URL, result
+index, normalization rule, or resolver; a custom resolver works on web, while a
+CORS-enabled proxy can opt in with `supportsWeb: true`. Production can therefore
+point it at an authenticated Noun Project API v2 proxy without putting OAuth
+credentials inside the mobile bundle.
 
 User subjects open a hinge-equipped, swipe-dismissable lecture/chat sheet with
 a transparent dashed create-chat tile in the next available grid position. New lecture chats can
@@ -194,7 +245,10 @@ Tapping a lecture opens a full-screen MoeAI conversation while long-pressing
 continues to open lecture metadata. User messages use the active accent surface;
 until an AI service is connected, every sent message receives a seven-line Lorem
 Ipsum assistant bubble. Each assistant reply has a background-free outline
-Clipboard Document action that copies its complete text.
+Clipboard Document action that copies its complete text. On press, the outline
+smoothly gives way to the solid accent icon through the same centered radial-fill
+transition used by the navbar, while a translated `Copied!` label glides in beside
+it. After three seconds both animations reverse to the idle outline state.
 
 The composer keeps taps active while the software keyboard is visible. Its Plus
 action opens an upward Camera / Images /
@@ -228,7 +282,9 @@ The physical top-left menu opens a smoothly animated history drawer occupying
 75% of the viewport. Its title is MoeAI; pinned conversations form a conditional
 Pinned section and all others remain under Recent. Long-pressing a conversation
 reveals the same bouncing action-pill language used by subjects, with rename and
-pin controls. Pin state and edited names persist locally. The bottom row keeps a
+pin controls plus the shared destructive trash action. Deletion uses a confirmation
+modal, removes the complete persisted thread, and selects or creates the next chat.
+Pin state and edited names persist locally. The bottom row keeps a
 Pencil Square “New chat” action beside the standard profile pill, whose shared
 profile menu opens upward so it remains on-screen.
 
@@ -240,7 +296,15 @@ above the selected history row instead of sitting inside its text area.
 The drawer and dimming layer sit above the entire chat surface, including the
 still-rendered composer, so nothing jumps or remounts when history opens. Newly
 sent user bubbles float swiftly into place and the placeholder MoeAI reply enters
-with a short spring pop. Chat threads, messages, pin state, renamed titles, and
+with a short spring pop. While the provider is working, three dots bounce in a
+smooth staggered wave and rest for half a second between cycles. Completed
+responses render directly on the app background with no assistant bubble. Text
+supports CommonMark formatting—including emphasis, headings, lists, quotes,
+links, inline code, fenced code blocks, tables, and strikethrough—plus KaTeX inline
+(`$...$` or `\\(...\\)`) and display (`$$...$$` or `\\[...\\]`) math on native and web.
+Raw HTML stays escaped. Formatted content measures its natural width, grows only to
+the responsive message maximum, then wraps long words, links, and code so neither
+assistant text nor a user bubble can exceed the screen. Chat threads, messages, pin state, renamed titles, and
 attachment metadata persist locally for university and user-created lectures;
 deleting a lecture or user subject removes its associated conversations.
 
@@ -248,10 +312,11 @@ Sent images and document cards occupy one horizontally swipeable strip above
 their message text, rather than wrapping into a vertical stack. The multiline
 composer explicitly uses the platform Send/Enter action with submit-without-blur
 behavior, so keyboard submission sends the draft while the keyboard and input
-focus remain active.
+focus remain active. Tapping the adjacent send button also preserves input focus,
+including while a phone's onscreen keyboard is visible.
 
-The sent attachment strip is explicitly constrained to the 80-pixel preview
-height, with only a four-pixel gap before accompanying text. This prevents a
+The sent attachment strip is explicitly constrained to the bubble width and
+80-pixel preview height, with only a four-pixel gap before accompanying text. This prevents a
 horizontal ScrollView from contributing unused vertical space inside a bubble.
 
 The public app name, Expo slug, package metadata, native identifiers, localized

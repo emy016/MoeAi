@@ -23,9 +23,9 @@
  * ---------------------------------------------------------------------
  */
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, Platform, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Spacing } from '../constants/layout';
+import { Spacing, TabBar } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 
 export default function ScreenContainer({ scroll = true, children }) {
@@ -45,7 +45,15 @@ export default function ScreenContainer({ scroll = true, children }) {
                   // Top/bottom need nothing extra: the RootNavigator header
                   // pads the notch above, and the tab bar occupies layout
                   // below.
-                  { paddingLeft: Spacing.md + insets.left, paddingRight: Spacing.md + insets.right },
+                  {
+                    paddingLeft: Spacing.md + insets.left,
+                    paddingRight: Spacing.md + insets.right,
+                    // The web navbar floats over the page. Keep enough final
+                    // scroll space that the last card can move fully above it.
+                    paddingBottom: Platform.OS === 'web'
+                      ? TabBar.HEIGHT + TabBar.PILL_MARGIN_BOTTOM + Spacing.md + insets.bottom
+                      : Spacing.xl,
+                  },
                 ]
               : { paddingLeft: insets.left, paddingRight: insets.right }
           }

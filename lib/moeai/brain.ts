@@ -95,13 +95,33 @@ export async function reply(messages: ChatMessage[], context: BrainContext = par
   throw new Error("PROVIDERS_UNAVAILABLE");
 }
 
+/**
+ * Images a student attached ride on their latest message as OpenAI-style
+ * image parts. Only Gemini can see them; Groq's models are text-only and
+ * reject the request outright, so for those the images are named instead and
+ * the answer can still use everything else in the message.
+ */
+function withImages(messages: ChatMessage[], providerName: string, images: { name: string; dataUrl: string }[]) {
+  if (!images.length) return messages;
+  const last = messages[messages.length - 1];
+  const head = messages.slice(0, -1);
+  if (!providerName.startsWith("gemini")) {
+    const note = `[Attached image${images.length > 1 ? "s" : ""}: ${images.map((i) => i.name).join(", ")} — this model cannot view images]`;
+    return [...head, { role: last.role, content: `${last.content}\n\n${note}` }];
+  }
+  return [...head, {
+    role: last.role,
+    content: [{ type: "text", text: last.content }, ...images.map((i) => ({ type: "image_url", image_url: { url: i.dataUrl } }))],
+  }];
+}
+
 // Fall back only before delivering content; never concatenate two providers' answers.
 /**
  * `extra` carries anything the request layer worked out that this module has
  * no business knowing about: retrieved curriculum, the detected reply
  * language. Appended after the context block so it outranks nothing above it.
  */
-export async function* streamReply(messages: ChatMessage[], context: BrainContext, signal: AbortSignal, extra = "") {
+export async function* streamReply(messages: ChatMessage[], context: BrainContext, signal: AbortSignal, extra = "", images: { name: string; dataUrl: string }[] = []) {
   const system = await systemPrompt(context, extra);
   let delivered = false;
   for (const provider of providers()) {
@@ -111,7 +131,7 @@ export async function* streamReply(messages: ChatMessage[], context: BrainContex
     try {
       const response = await fetch(provider.url, {
         method: "POST", headers: { Authorization: `Bearer ${provider.key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: provider.model, messages: [{ role: "system", content: system }, ...messages], max_tokens: 4096, stream: true }),
+        body: JSON.stringify({ model: provider.model, messages: [{ role: "system", content: system }, ...withImages(messages, provider.name, images)], max_tokens: 4096, stream: true }),
         signal: AbortSignal.any([signal, AbortSignal.timeout(18000)]), cache: "no-store",
       });
       if (!response.ok || !response.body) { console.warn("MoeAI stream unavailable", provider.name, response.status); continue; }

@@ -106,6 +106,14 @@ Object.assign(de,{pinned:'Angepinnt',recent:'Zuletzt',renameChat:'Chat umbenenne
 Object.assign(zh,{pinned:'已置顶',recent:'最近',renameChat:'重命名聊天',chatName:'聊天名称',pinChat:'置顶聊天',unpinChat:'取消置顶'});
 Object.assign(hi,{pinned:'पिन किए गए',recent:'हाल के',renameChat:'चैट का नाम बदलें',chatName:'चैट का नाम',pinChat:'चैट पिन करें',unpinChat:'चैट अनपिन करें'});
 
+Object.assign(en,{deleteChat:'Delete chat?',deleteChatConfirm:'This chat and all of its messages will be permanently deleted.',aiThinking:'MoeAI is thinking',copyMessage:'Copy message',copied:'Copied!'});
+Object.assign(ar,{deleteChat:'حذف المحادثة؟',deleteChatConfirm:'سيتم حذف هذه المحادثة وجميع رسائلها نهائيًا.',aiThinking:'MoeAI يفكر',copyMessage:'نسخ الرسالة',copied:'تم النسخ!'});
+Object.assign(es,{deleteChat:'¿Eliminar chat?',deleteChatConfirm:'Este chat y todos sus mensajes se eliminarán permanentemente.',aiThinking:'MoeAI está pensando',copyMessage:'Copiar mensaje',copied:'¡Copiado!'});
+Object.assign(fr,{deleteChat:'Supprimer la discussion ?',deleteChatConfirm:'Cette discussion et tous ses messages seront définitivement supprimés.',aiThinking:'MoeAI réfléchit',copyMessage:'Copier le message',copied:'Copié !'});
+Object.assign(de,{deleteChat:'Chat löschen?',deleteChatConfirm:'Dieser Chat und alle seine Nachrichten werden dauerhaft gelöscht.',aiThinking:'MoeAI denkt nach',copyMessage:'Nachricht kopieren',copied:'Kopiert!'});
+Object.assign(zh,{deleteChat:'删除聊天？',deleteChatConfirm:'此聊天及其全部消息将被永久删除。',aiThinking:'MoeAI 正在思考',copyMessage:'复制消息',copied:'已复制！'});
+Object.assign(hi,{deleteChat:'चैट हटाएँ?',deleteChatConfirm:'यह चैट और इसके सभी संदेश स्थायी रूप से हटा दिए जाएँगे।',aiThinking:'MoeAI सोच रहा है',copyMessage:'संदेश कॉपी करें',copied:'कॉपी हो गया!'});
+
 const CHAT_LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco.\nLaboris nisi ut aliquip ex ea commodo consequat.\nDuis aute irure dolor in reprehenderit in voluptate velit esse.\nCillum dolore eu fugiat nulla pariatur.\nExcepteur sint occaecat cupidatat non proident.';
 Object.assign(en,{aiUnavailable:CHAT_LOREM,camera:'Camera',images:'Images',files:'Files',attachment:'Attachment',holdToDictate:'Hold to dictate',voiceUnavailable:'Speech recognition unavailable',voiceUnavailableDesc:'Speech recognition is unavailable or microphone permission was not granted on this device.',cameraPermission:'Camera permission required',cameraPermissionDesc:'Allow camera access to take a photo for this chat.',messageNavigator:'Open sent-message navigator'});
 Object.assign(ar,{aiUnavailable:CHAT_LOREM,camera:'الكاميرا',images:'الصور',files:'الملفات',attachment:'مرفق',holdToDictate:'اضغط مطولًا للإملاء',voiceUnavailable:'التعرّف على الكلام غير متاح',voiceUnavailableDesc:'التعرّف على الكلام غير متاح أو لم يُمنح إذن الميكروفون على هذا الجهاز.',cameraPermission:'إذن الكاميرا مطلوب',cameraPermissionDesc:'اسمح بالوصول إلى الكاميرا لالتقاط صورة لهذه المحادثة.',messageNavigator:'فتح متصفح الرسائل المرسلة'});
@@ -117,13 +125,3 @@ Object.assign(hi,{aiUnavailable:CHAT_LOREM,camera:'कैमरा',images:'च�
 
 export const translations = { en, ar, es, fr, de, zh, hi };
 export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_META);
-
-// The tutor is wired up now, so "unavailable" is no longer the right word:
-// aiUnreachable is what the student sees when the request never reached it.
-Object.assign(en,{aiUnreachable:'MoeAI could not be reached. Check your connection and try again.',builtOnPassage:'Built on one passage from your material',builtOnPassages:'Built on {count} passages from your material',yourLibrary:'Your library',courseMaterial:'Course material',stopReply:'Stop replying'});
-Object.assign(ar,{aiUnreachable:'تعذّر الوصول إلى MoeAI. تأكد من اتصالك وحاول مرة أخرى.',builtOnPassage:'مبني على مقطع واحد من موادك',builtOnPassages:'مبني على {count} مقاطع من موادك',yourLibrary:'مكتبتك',courseMaterial:'مادة المقرر',stopReply:'إيقاف الرد'});
-Object.assign(es,{aiUnreachable:'No se pudo contactar con MoeAI. Comprueba tu conexión e inténtalo de nuevo.'});
-Object.assign(fr,{aiUnreachable:'MoeAI est injoignable. Vérifiez votre connexion et réessayez.'});
-Object.assign(de,{aiUnreachable:'MoeAI ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.'});
-Object.assign(zh,{aiUnreachable:'无法连接到 MoeAI。请检查网络后重试。'});
-Object.assign(hi,{aiUnreachable:'MoeAI से संपर्क नहीं हो सका। अपना कनेक्शन जाँचें और फिर से प्रयास करें।'});

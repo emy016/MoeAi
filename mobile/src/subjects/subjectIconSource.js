@@ -11,14 +11,39 @@ export const SUBJECT_ICON_SEARCH_RULES = {
   provider: 'noun-project',
   resultIndex: 0,
   baseUrl: 'https://thenounproject.com/browse/icons/term',
+  supportsWeb: false,
   normalizeQuery: (name) => String(name || '').trim().toLowerCase().replace(/\s+/g, '-'),
 };
+
+/**
+ * Served from the EduMoe site, the browser cannot read Noun Project pages
+ * itself (no CORS), but the site's /api/subject-icon reads the same first
+ * result server-side and answers from this origin. So on the web the default
+ * rule goes through that proxy and the predictor works the same as on native.
+ */
+const webOrigin = typeof window !== 'undefined' && /^https?:/.test(window.location?.origin || '') ? window.location.origin : '';
+if (webOrigin) {
+  SUBJECT_ICON_SEARCH_RULES.resolve = async ({ query }) => {
+    try {
+      const response = await fetch(`${webOrigin}/api/subject-icon?q=${encodeURIComponent(query)}`);
+      if (!response.ok) return null;
+      const result = await response.json();
+      return result?.uri ? result : null;
+    } catch (_) {
+      return null; // Offline or no result: SubjectIcon keeps its built-in icon.
+    }
+  };
+}
 
 let activeSource = SUBJECT_ICON_SEARCH_RULES;
 
 export function configureSubjectIconSource(overrides = {}) {
   activeSource = { ...SUBJECT_ICON_SEARCH_RULES, ...overrides };
   cache.clear();
+}
+
+export function subjectIconSourceSupportsPlatform(platform) {
+  return platform !== 'web' || activeSource.supportsWeb === true || typeof activeSource.resolve === 'function';
 }
 
 function decodeJsonString(value) {

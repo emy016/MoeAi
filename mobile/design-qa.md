@@ -17,8 +17,18 @@
 - Calendar fixture data is no longer imported or rendered.
 - All application source files parse and all relative imports resolve.
 
+## Chat follow-up checks
+
+- The pending assistant bubble uses three independently translated dots, staggered into a wave with a 500 ms rest between cycles. Disabling Motion leaves a static three-dot indicator.
+- CommonMark formatting and KaTeX math share a safe renderer with raw HTML disabled. Italic, bold, strikethrough, headings, lists, quotes, links, code, fenced code, tables, and math are covered by automated source checks.
+- Plain and formatted content both clamp to the responsive bubble maximum. Long words, links, code, tables, images, and MathML cannot expand a bubble beyond the screen.
+- Long-pressing a history row exposes the same solid destructive Trash icon used by subject actions. Confirmation removes the persisted thread and selects or creates a valid replacement chat.
+- Copy feedback uses the navbar's centered radial solid-icon reveal, early outline fade, and a translated label that fades/slides out after three seconds.
+- All 54 application JavaScript files parse successfully.
+- Expo production export succeeds for both web and Android, including platform-specific KaTeX resolution.
+
 ## Runtime visual comparison
 
-Runtime screenshot comparison was not run because the user explicitly requested that Expo not be started automatically. The implementation therefore has not received device-level visual verification in this turn.
+No device or simulator was attached for a screenshot comparison. Source, parser, security-escaping, dependency, web-bundle, and Android-bundle checks passed.
 
-final result: blocked
+final result: source and production bundles verified; device visual QA pending

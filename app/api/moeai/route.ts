@@ -21,6 +21,7 @@
 import { NextRequest } from "next/server";
 import { streamReply } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
+import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase-server";
 import { detectLanguage, languageDirective, type Target } from "@/lib/language";
 import { checkRateLimit } from "@/lib/ratelimit";
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let raw: { messages?: unknown; context?: unknown };
+  let raw: { messages?: unknown; context?: unknown; attachments?: unknown; learning?: unknown };
   let messages: { role: "user" | "assistant"; content: string }[];
   try {
     raw = await req.json();
@@ -228,6 +229,16 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // ── What the MoeAI app sent along with the message ──────────────────────
+  // The lecture the chat belongs to, and any files the student attached.
+  const learning = learningContext(raw?.learning);
+  if (learning) extra.push(learning);
+  const attached = await parseAttachments(raw?.attachments);
+  if (attached.material) extra.push(attached.material);
+  if (attached.described.length) {
+    extra.push(`Attachments that could not be included: ${attached.described.join("; ")}. Do not guess their contents.`);
+  }
+
   const spec = security();
   if (spec) extra.push(spec);
 
@@ -251,7 +262,7 @@ export async function POST(req: NextRequest) {
         // Citations lead, so the workspace can show what it is reading from
         // while the answer is still arriving.
         if (citations.length) ctrl.enqueue(encoder.encode(JSON.stringify({ citations }) + "\n"));
-        for await (const delta of streamReply(messages, context, controller.signal, extra.join("\n\n"))) {
+        for await (const delta of streamReply(messages, context, controller.signal, extra.join("\n\n"), attached.images)) {
           answer += delta;
           ctrl.enqueue(encoder.encode(JSON.stringify({ delta }) + "\n"));
         }

@@ -33,7 +33,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const [chatTarget, setChatTarget] = useState(null);
   const { events: userEvents, addEvent, removeEvent } = useUserCalendarEvents();
   const { subjects, addSubject, renameSubject, removeSubject, addLecture, removeLecture, toggleLectureComplete } = useSubjectStore();
-  const { chats, startChat, sendMessage, stopReply, renameChat, togglePinChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
+  const { chats, startChat, sendMessage, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
   const objects = userEvents;
   const selectedSubject = useMemo(() => subjects.find((subject) => subject.id === selectedSubjectId) || null, [selectedSubjectId, subjects]);
   const chatSubject = useMemo(() => subjects.find((subject) => subject.id === chatTarget?.subjectId) || null, [chatTarget?.subjectId, subjects]);
@@ -85,14 +85,21 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const closeLectureChat = useCallback(() => setChatTarget(null), []);
   const startLectureChat = useCallback(() => chatTarget ? startChat(chatTarget.subjectId, chatTarget.lectureId, t('newChat')) : null, [chatTarget, startChat, t]);
   const sendLectureMessage = useCallback((threadId, draft) => {
-    if (chatTarget) sendMessage(chatTarget.subjectId, chatTarget.lectureId, threadId, draft);
-  }, [chatTarget, sendMessage]);
+    if (chatTarget) sendMessage(chatTarget.subjectId, chatTarget.lectureId, threadId, {
+      ...draft,
+      subject: chatSubject,
+      lecture: chatLecture,
+    });
+  }, [chatLecture, chatSubject, chatTarget, sendMessage]);
   const renameLectureChat = useCallback((threadId, title) => {
     if (chatTarget) renameChat(chatTarget.subjectId, chatTarget.lectureId, threadId, title);
   }, [chatTarget, renameChat]);
   const toggleLectureChatPin = useCallback((threadId) => {
     if (chatTarget) togglePinChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
   }, [chatTarget, togglePinChat]);
+  const deleteLectureChat = useCallback((threadId) => {
+    if (chatTarget) removeChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
+  }, [chatTarget, removeChat]);
   const selectChatProfileItem = useCallback((id) => {
     if (id !== 'settings') return;
     setChatTarget(null);
@@ -128,7 +135,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
       <SubjectEditorModal visible={!!lectureEditorSubjectId} title={t('newLectureChat')} placeholder={t('lectureName')} allowFiles onCancel={() => setLectureEditorSubjectId(null)} onConfirm={saveLecture} />
       <SubjectActionOverlay visible={!!subjectActions} anchor={subjectActions?.anchor} onClose={() => setSubjectActions(null)} onRename={startRenameSubject} onDelete={requestSubjectDelete} />
       <CalendarAlertModal visible={!!deleteTarget} title={deleteTarget?.type === 'subject' ? t('deleteSubject') : t('deleteLecture')} message={deleteTarget?.type === 'subject' ? t('deleteSubjectConfirm') : t('deleteLectureConfirm')} onClose={() => setDeleteTarget(null)} onConfirm={confirmContentDelete} destructive />
-      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onStopReply={stopReply} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onProfileSelect={selectChatProfileItem} />
+      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onDeleteChat={deleteLectureChat} onProfileSelect={selectChatProfileItem} />
     </ScreenContainer>
   );
 }

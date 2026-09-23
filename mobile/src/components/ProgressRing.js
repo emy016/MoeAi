@@ -46,9 +46,7 @@ export default React.memo(function ProgressRing({ completed, total, active, size
             strokeLinecap="round"
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={circumference * (1 - progressValue)}
-            rotation={-90}
-            originX={size / 2}
-            originY={size / 2}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
           />
         ) : (
           <AnimatedCircle
