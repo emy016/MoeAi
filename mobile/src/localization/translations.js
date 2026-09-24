@@ -146,3 +146,23 @@ Object.assign(ar, {
   blockOffline: 'مقدرناش نحمّل أدوات الكارت ده. اتأكد من النت.',
   followExplain: 'اشرحها بطريقة تانية', followExample: 'اديني مثال', followVisual: 'وريهالي بصريًا', followQuiz: 'اختبرني فيها',
 });
+
+// Account and sync.
+Object.assign(en, {
+  guest: 'Guest', signInShort: 'Tap to sign in', student: 'Student', signIn: 'Sign in', createAccount: 'Create account', yourAccount: 'Your account',
+  accountPitch: 'Sign in to keep your courses, progress, chats and calendar on every device, and so MoeAI remembers how you learn.',
+  yourName: 'Your name', email: 'Email', password: 'Password', continueGoogle: 'Continue with Google',
+  noAccountYet: 'New here? Create an account', haveAccount: 'Already have an account? Sign in', signOut: 'Sign out',
+  accountError: 'Something went wrong. Try again.', syncSaved: 'Saved to your account', syncSaving: 'Saving…',
+  syncOffline: 'Offline, your changes will save when you are back online',
+  syncExplain: 'Courses, lecture progress, chats, calendar events and settings sync to your account. This device keeps its own copy too.',
+});
+Object.assign(ar, {
+  guest: 'زائر', signInShort: 'اضغط لتسجيل الدخول', student: 'طالب', signIn: 'تسجيل الدخول', createAccount: 'إنشاء حساب', yourAccount: 'حسابك',
+  accountPitch: 'سجّل دخولك عشان موادك وتقدمك ومحادثاتك وتقويمك يبقوا معاك على أي جهاز، وعشان MoeAI يفتكر إزاي بتذاكر.',
+  yourName: 'اسمك', email: 'الإيميل', password: 'كلمة السر', continueGoogle: 'كمّل بجوجل',
+  noAccountYet: 'جديد هنا؟ اعمل حساب', haveAccount: 'عندك حساب؟ سجّل دخول', signOut: 'تسجيل الخروج',
+  accountError: 'حصلت مشكلة، جرّب تاني.', syncSaved: 'متسجّل في حسابك', syncSaving: 'بيتحفظ…',
+  syncOffline: 'مفيش نت، التغييرات هتتحفظ أول ما النت يرجع',
+  syncExplain: 'المواد وتقدم المحاضرات والمحادثات والتقويم والإعدادات بتتحفظ في حسابك، والجهاز ده كمان محتفظ بنسخة.',
+});

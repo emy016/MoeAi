@@ -14,6 +14,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useAppFonts } from './src/constants/fonts';
 import { AppPreferencesProvider, usePreferences } from './src/context/AppPreferences';
+import { AccountProvider, useAccount } from './src/account/AccountContext';
+import AccountSheet from './src/account/AccountSheet';
 
 // Keep the splash screen up until Nunito Sans is ready, so text never
 // flashes in the fallback font on first launch.
@@ -101,10 +103,24 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <AppPreferencesProvider>
-        <ThemedApp />
-      </AppPreferencesProvider>
+      <AccountProvider>
+        <SyncedApp />
+      </AccountProvider>
     </SafeAreaProvider>
+  );
+}
+
+/**
+ * When another device's saved work arrives, every store reloads from device
+ * storage by remounting under a new key; nothing else has to know about sync.
+ */
+function SyncedApp() {
+  const { revision } = useAccount();
+  return (
+    <AppPreferencesProvider key={revision}>
+      <ThemedApp />
+      <AccountSheet />
+    </AppPreferencesProvider>
   );
 }
 

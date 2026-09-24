@@ -17,6 +17,7 @@ import { lectureChatKey, useLectureChatStore } from '../subjects/lectureChatStor
 import { useSubjectStore } from '../subjects/subjectStore';
 import FullCalendarScreen from './FullCalendarScreen';
 import LectureChatScreen from './LectureChatScreen';
+import { useAccount } from '../account/AccountContext';
 
 export default function HomeScreen({ registerCurrentWeekReset, active = false, onOpenSettings }) {
   const { t } = usePreferences();
@@ -106,11 +107,13 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const deleteLectureChat = useCallback((threadId) => {
     if (chatTarget) removeChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
   }, [chatTarget, removeChat]);
+  const { openAccount } = useAccount();
   const selectChatProfileItem = useCallback((id) => {
+    if (id === 'profile') { openAccount(); return; }
     if (id !== 'settings') return;
     setChatTarget(null);
     requestAnimationFrame(() => onOpenSettings?.());
-  }, [onOpenSettings]);
+  }, [onOpenSettings, openAccount]);
   const confirmContentDelete = useCallback(() => {
     if (deleteTarget?.type === 'subject') {
       removeSubjectChats(deleteTarget.subject.id);

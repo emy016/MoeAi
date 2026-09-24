@@ -519,3 +519,15 @@ language sql stable set search_path = public as $$
   where ranked.rank <= greatest(1, least(max_rows, 200)) or ranked.user_id = auth.uid()
   order by ranked.rank;
 $$;
+
+-- ============================================================================
+-- The project's ensure_rls event trigger (created in the dashboard) runs
+-- public.rls_auto_enable() to switch RLS on for every new table. Event
+-- triggers run it as its owner regardless of grants, so nobody needs to call
+-- it over RPC; the security advisor flags it while anon can.
+-- ============================================================================
+do $$ begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+  end if;
+end $$;
