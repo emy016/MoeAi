@@ -166,3 +166,15 @@ Object.assign(ar, {
   syncOffline: 'مفيش نت، التغييرات هتتحفظ أول ما النت يرجع',
   syncExplain: 'المواد وتقدم المحاضرات والمحادثات والتقويم والإعدادات بتتحفظ في حسابك، والجهاز ده كمان محتفظ بنسخة.',
 });
+
+// Simulators tab.
+Object.assign(en, {
+  simulatorsForYou: 'Picked for the courses on your Home tab. Add a course there and its simulators appear here.',
+  simulatorsEmpty: 'None of your courses has a simulator yet. Add courses on your Home tab, like Logic Design, Discrete Math, Python, Calculus or Physics, to unlock theirs. Here are a few to start with.',
+  simulatorsStarter: 'To get you started',
+});
+Object.assign(ar, {
+  simulatorsForYou: 'مختارة حسب المواد اللي في الصفحة الرئيسية. ضيف مادة هناك وهتلاقي المحاكاة بتاعتها هنا.',
+  simulatorsEmpty: 'لسه مفيش محاكاة لموادك. ضيف موادك في الصفحة الرئيسية زي Logic Design أو Discrete Math أو Python أو Calculus أو Physics عشان تفتح بتاعتها. ودي شوية تبدأ بيهم.',
+  simulatorsStarter: 'عشان تبدأ',
+});

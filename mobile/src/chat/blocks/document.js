@@ -419,11 +419,64 @@ function animation(source, theme, fullscreen) {
   };
 }
 
-const KINDS = { visualizer, mermaid, chart, steps, quiz, scene3d, animation };
+/** An editable Python or JavaScript editor with Run, for the Simulators tab. */
+function ide(source, theme, fullscreen, language = 'python') {
+  return {
+    css: `.bar { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--m-border); }
+.bar select { padding: 5px 8px; } .bar .m-muted { font-size: 12px; margin-inline-start: auto; }
+textarea#code { display: block; width: 100%; height: ${fullscreen ? 'calc(60vh)' : '220px'}; resize: vertical; border: 0; border-radius: 0; padding: 12px 14px; background: var(--m-bg);
+  font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--m-text); tab-size: 4; outline: none; }
+#out { margin: 0; border-top: 1px solid var(--m-border); padding: 10px 14px; min-height: 64px; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word; max-height: ${fullscreen ? '30vh' : '220px'}; overflow: auto; background: var(--m-surface); }
+#out .err { color: var(--m-danger); } #out .note { color: var(--m-muted); }`,
+    body: `<div class="bar"><select id="lang"><option value="python">Python</option><option value="javascript">JavaScript</option></select><button id="run" class="m-btn">Run</button><span class="m-muted">Ctrl/⌘ + Enter runs</span></div>
+<textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off">${escapeHtml(source)}</textarea><div id="out"><span class="note">Output appears here.</span></div>
+<script>
+(function () {
+  var sources = { python: ${js(RUNNERS.python(LIBS.pyodide))}, javascript: ${js(RUNNERS.javascript)} };
+  var lang = document.getElementById('lang'), code = document.getElementById('code'), out = document.getElementById('out'), btn = document.getElementById('run');
+  var workers = {}, busy = false, timer = null;
+  lang.value = ${js(language)};
+  code.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') { e.preventDefault(); var s = code.selectionStart; code.value = code.value.slice(0, s) + '    ' + code.value.slice(code.selectionEnd); code.selectionStart = code.selectionEnd = s + 4; }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
+  });
+  function line(kind, text) { var d = document.createElement('div'); d.className = kind; d.textContent = text; out.appendChild(d); out.scrollTop = out.scrollHeight; }
+  function done(note) { busy = false; btn.textContent = 'Run'; clearTimeout(timer); if (note) line('note', note); }
+  function kill(which) { if (workers[which]) { workers[which].terminate(); delete workers[which]; } }
+  function worker(which) {
+    // Python stays loaded between runs; JavaScript gets a fresh worker each time.
+    if (which === 'javascript') kill(which);
+    if (!workers[which]) {
+      var w = new Worker(URL.createObjectURL(new Blob([sources[which]], { type: 'text/javascript' })));
+      w.onerror = function (e) { e.preventDefault(); line('err', e.message || 'The code crashed.'); kill(which); done(); };
+      workers[which] = w;
+    }
+    return workers[which];
+  }
+  function run() {
+    var which = lang.value;
+    if (busy) { kill(which); done('Stopped.'); return; }
+    out.innerHTML = ''; busy = true; btn.textContent = 'Stop';
+    if (which === 'python' && !workers.python) line('note', 'Starting Python… (the first run downloads it once)');
+    var w = worker(which);
+    timer = setTimeout(function () { kill(which); done('Stopped: it ran for too long.'); }, which === 'python' ? 90000 : 8000);
+    w.onmessage = function (e) { var m = e.data;
+      if (m.kind === 'ready') { var notes = out.querySelectorAll('.note'); notes.forEach(function (n) { n.remove(); }); clearTimeout(timer); timer = setTimeout(function () { kill(which); done('Stopped: it ran for too long.'); }, 20000); return; }
+      if (m.kind === 'done') { if (!out.textContent.trim()) line('note', '(no output)'); done(); return; }
+      line(m.kind, m.text); };
+    w.postMessage({ code: code.value });
+  }
+  btn.onclick = run;
+})();
+</script>`,
+  };
+}
+
+const KINDS = { visualizer, mermaid, chart, steps, quiz, scene3d, animation, ide };
 
 /** The full HTML document for one block. */
 export function blockDocument({ id, kind, language, code: source, theme, fullscreen = false }) {
   const build = KINDS[kind];
-  const parts = build ? build(source, theme, fullscreen) : code(source, theme, language);
+  const parts = build ? build(source, theme, fullscreen, language) : code(source, theme, language);
   return page(id, theme, parts);
 }
