@@ -9,6 +9,7 @@ import { FontFamily } from '../constants/fonts';
 import { Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 import { LANGUAGE_META, SUPPORTED_LANGUAGES } from '../localization/translations';
+import { useAccount } from '../account/AccountContext';
 
 const FONT_OPTIONS = ['small', 'default', 'large', 'extraLarge'];
 const ACCENTS = ['orange', 'green', 'blue', 'red', 'purple'];
@@ -139,7 +140,10 @@ function LanguageSheet({ visible, onClose }) {
 }
 
 export default function SettingsScreen(){
-  const p=usePreferences(); const {colors,t,type,setPreference,isRTL}=p; const [fontOpen,setFontOpen]=useState(false); const [languageOpen,setLanguageOpen]=useState(false); const lang=LANGUAGE_META[p.language];
+  const p=usePreferences(); const {colors,t,type,setPreference,isRTL}=p;
+  // Account actions live on the site (export, deletion, re-authentication); guests sign in first.
+  const {account,openSite,openAccount}=useAccount(); const signedIn=account.status==='signedIn';
+  const accountPage=(path)=>signedIn?openSite(path):openAccount(); const [fontOpen,setFontOpen]=useState(false); const [languageOpen,setLanguageOpen]=useState(false); const lang=LANGUAGE_META[p.language];
   return <View style={[s.root,{backgroundColor:colors.background}]}><ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
     <Section title={t('appearance')}>
       <Inner title={t('theme')} description={t('themeDesc')}><Segmented value={p.theme} options={THEME_OPTIONS} onChange={v=>setPreference('theme',v)}/></Inner>
@@ -152,8 +156,8 @@ export default function SettingsScreen(){
       <Inner title={t('motion')} description={t('motionDesc')}><Toggle value={p.motion} onChange={v=>setPreference('motion',v)} label={t('motion')}/></Inner>
     </Section>
     <Section title={t('notifications')}>{['studyReminders','quizReminders','sessionReminders'].map(key=><Inner key={key} title={t(key)} description={t(`${key}Desc`)}><Toggle value={p[key]} onChange={v=>setPreference(key,v)} label={t(key)}/></Inner>)}</Section>
-    <Section title={t('privacyData')}><Inner title={t('dataAiUsage')} description={t('dataAiUsageDesc')} onPress={()=>{}}/><Inner title={t('downloadData')} description={t('downloadDataDesc')} onPress={()=>{}}/><Inner title={t('deleteData')} description={t('deleteDataDesc')} onPress={()=>{}} danger/></Section>
-    <Section title={t('information')}><Inner title={t('whatsNew')} description={t('whatsNewDesc')} onPress={()=>{}}/><Inner title={t('terms')} description={t('termsDesc')} onPress={()=>{}}/><Inner title={t('privacyPolicy')} description={t('privacyPolicyDesc')} onPress={()=>{}}/><Inner title={t('licenses')} description={t('licensesDesc')} onPress={()=>{}}/><Inner title={t('version')}><Text style={[{color:colors.textMuted},type(13,'semiBold')]}>{t('currentVersion')}</Text></Inner></Section>
+    <Section title={t('privacyData')}><Inner title={t('dataAiUsage')} description={t('dataAiUsageDesc')} onPress={()=>openSite('/legal#privacy')}/><Inner title={t('downloadData')} description={t('downloadDataDesc')} onPress={()=>accountPage('/api/account')}/><Inner title={t('deleteData')} description={t('deleteDataDesc')} onPress={()=>accountPage('/account#delete')} danger/></Section>
+    <Section title={t('information')}><Inner title={t('whatsNew')} description={t('whatsNewDesc')} onPress={()=>openSite('/showcase#whats-new')}/><Inner title={t('terms')} description={t('termsDesc')} onPress={()=>openSite('/legal#terms')}/><Inner title={t('privacyPolicy')} description={t('privacyPolicyDesc')} onPress={()=>openSite('/legal#privacy')}/><Inner title={t('licenses')} description={t('licensesDesc')} onPress={()=>openSite('/legal#licenses')}/><Inner title={t('version')}><Text style={[{color:colors.textMuted},type(13,'semiBold')]}>{t('currentVersion')}</Text></Inner></Section>
   </ScrollView><FontSheet visible={fontOpen} onClose={()=>setFontOpen(false)}/><LanguageSheet visible={languageOpen} onClose={()=>setLanguageOpen(false)}/></View>;
 }
 

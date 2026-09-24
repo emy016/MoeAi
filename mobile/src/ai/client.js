@@ -154,7 +154,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       body: JSON.stringify({
         surface: 'app',
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
-        learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}) },
+        learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}), ...(lecture?.materialId ? { materialId: lecture.materialId } : {}) },
         attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (
           fileText !== undefined ? { name, mimeType, text: fileText } : { name, mimeType, data }
         )),

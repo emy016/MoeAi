@@ -30,8 +30,9 @@ export async function supabaseServer() {
 }
 
 /**
- * Service-role client. BYPASSES RLS. Used only for ai_logs and rate_limits,
- * which students must not be able to write themselves.
+ * Service-role client. BYPASSES RLS. Only the daily cron (/api/cron) and room
+ * joins still use it; rate limits, AI logs, memory and embeddings run as the
+ * student through SECURITY DEFINER functions that check auth.uid().
  */
 export function supabaseAdmin() {
   return createClient(URL, process.env.SUPABASE_SERVICE_ROLE_KEY ?? PLACEHOLDER_KEY, {

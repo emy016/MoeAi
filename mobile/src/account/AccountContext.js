@@ -14,6 +14,13 @@ import { startCloudSync } from './cloudSync';
 
 const AccountContext = createContext(null);
 
+/** A page of the site (onboarding, account settings): same tab on the web, the browser on a phone. */
+function openSite(path) {
+  const url = `${API_BASE_URL}${path}`;
+  if (Platform.OS === 'web' && typeof window !== 'undefined') window.location.assign(url);
+  else Linking.openURL(url);
+}
+
 async function call(path, body) {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: body ? 'POST' : 'GET',
@@ -38,7 +45,7 @@ export function AccountProvider({ children }) {
   const refresh = useCallback(async () => {
     try {
       const me = await call('/api/auth');
-      setAccount(me?.signedIn ? { status: 'signedIn', name: me.name, email: me.email, org: me.org || null } : { status: 'guest' });
+      setAccount(me?.signedIn ? { status: 'signedIn', name: me.name, email: me.email, handle: me.handle || null, onboarded: me.onboarded !== false, org: me.org || null } : { status: 'guest' });
     } catch (_) {
       setAccount({ status: 'guest', offline: true });
     }
@@ -53,22 +60,24 @@ export function AccountProvider({ children }) {
     return () => { session.stop(); syncRef.current = null; };
   }, [account.status]);
 
-  const signIn = useCallback(async (email, password) => {
-    await call('/api/auth', { action: 'login', email, password });
+  const signIn = useCallback(async (identifier, password) => {
+    const result = await call('/api/auth', { action: 'login', identifier, password });
+    // Two-step verification finishes on the site's verification page.
+    if (result?.mfa) { openSite('/start/mfa?next=/moeai'); return result; }
     await refresh();
-  }, [refresh]);
-
-  const signUp = useCallback(async (name, email, password) => {
-    const result = await call('/api/auth', { action: 'signup', name, email, password });
-    if (result.confirmed) await refresh();
     return result;
   }, [refresh]);
 
-  const signInWithGoogle = useCallback(async () => {
-    const { url } = await call('/api/auth', { action: 'google', next: '/moeai' });
+
+  // Google and Apple come back through the onboarding router, so a first-time
+  // account still picks a handle and accepts the terms before reaching the app.
+  const signInWithProvider = useCallback(async (provider) => {
+    const { url } = await call('/api/auth', { action: 'oauth', provider, next: '/start/continue?next=/moeai' });
     if (Platform.OS === 'web' && typeof window !== 'undefined') window.location.assign(url);
     else Linking.openURL(url);
   }, []);
+  const signInWithGoogle = useCallback(() => signInWithProvider('google'), [signInWithProvider]);
+  const signInWithApple = useCallback(() => signInWithProvider('apple'), [signInWithProvider]);
 
   // A university account's courses: what its faculty set up, replacing the sample subjects.
   const [orgCourses, setOrgCourses] = useState([]);
@@ -80,11 +89,7 @@ export function AccountProvider({ children }) {
   }, [account.status, account.org]);
 
   /** The university sign-in lives on the site; it comes back to the app signed in. */
-  const signInWithUniversity = useCallback(() => {
-    const url = `${API_BASE_URL}/sso?next=/moeai`;
-    if (Platform.OS === 'web' && typeof window !== 'undefined') window.location.assign(url);
-    else Linking.openURL(url);
-  }, []);
+  const signInWithUniversity = useCallback(() => openSite('/sso?next=/moeai'), []);
 
   const signOut = useCallback(async () => {
     await syncRef.current?.flush().catch?.(() => {});
@@ -97,19 +102,30 @@ export function AccountProvider({ children }) {
     account, sync, revision, sheetOpen, orgCourses, signInWithUniversity,
     openAccount: () => setSheetOpen(true),
     closeAccount: () => setSheetOpen(false),
-    refresh, signIn, signUp, signInWithGoogle, signOut,
-  }), [account, orgCourses, refresh, revision, sheetOpen, signIn, signInWithGoogle, signInWithUniversity, signOut, signUp, sync]);
+    refresh, signIn, signInWithGoogle, signInWithApple, signOut, openSite,
+  }), [account, orgCourses, refresh, revision, sheetOpen, signIn, signInWithApple, signInWithGoogle, signInWithUniversity, signOut, sync]);
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }
 
 export function useAccount() {
-  return useContext(AccountContext) || { account: { status: 'guest' }, sync: { state: 'idle' }, revision: 0, sheetOpen: false, orgCourses: [], openAccount() {}, closeAccount() {}, signInWithUniversity() {} };
+  return useContext(AccountContext) || { account: { status: 'guest' }, sync: { state: 'idle' }, revision: 0, sheetOpen: false, orgCourses: [], openAccount() {}, closeAccount() {}, signInWithUniversity() {}, openSite };
 }
 
 /** "Mariam Adel" and "@mariam.adel" for the profile pill; guests see a sign-in prompt. */
 export function accountLabels(account, t) {
   if (account.status !== 'signedIn') return { displayName: t('guest'), handle: t('signInShort') };
-  const handle = String(account.email || '').split('@')[0];
+  const handle = account.handle || String(account.email || '').split('@')[0];
   return { displayName: account.name || handle || t('student'), handle: handle ? `@${handle}` : '' };
+}
+
+/**
+ * The name of the MoeAI a university account is on: its faculty's model,
+ * e.g. "MoeAI · FUE Computer Science". Null for everyone else.
+ */
+export function modelLabel(account) {
+  const org = account?.org;
+  if (!org) return null;
+  const school = String(org.orgSlug || '').toUpperCase() || org.orgName;
+  return `MoeAI · ${school}${org.program ? ` ${org.program}` : ''}`;
 }

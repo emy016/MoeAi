@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
-import Client from "./Client";
+import { redirect } from "next/navigation";
+import { safeNext } from "@/lib/auth/next";
 
-export const metadata: Metadata = {
-  title: 'Sign in',
-  description: 'Sign in to EduMoe with a one-time link. No password to forget.',
-  alternates: { canonical: "/login" },
-};
-
-export default function Page() {
-  return <Client />;
+/** The old /login address: sign-in now lives in the onboarding flow. */
+export default async function Page({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next } = await searchParams;
+  redirect(`/start/signin?next=${encodeURIComponent(safeNext(next, "/moeai"))}`);
 }

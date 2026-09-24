@@ -102,6 +102,13 @@ export type BuildOptions = {
   budgetTokens: number;
   /** Blocks the app adds for this turn (course material, attachments, chat tools), placed before the language directive. */
   appContext?: string[];
+  /**
+   * Reference data for this turn (course passages, session, what the chat can
+   * render). Placed right after the runtime contract, before the personality,
+   * and not charged to the specification budget: the personality and the
+   * language directive stay the last thing the model reads, as in the bot.
+   */
+  referenceContext?: string[];
 };
 
 export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): BuiltPrompt {
@@ -114,6 +121,7 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
   const contract = directives.runtimeContract(opts.assistantName ?? "MoeAI");
   const languageBlock = directives.languageDirective(opts.decision);
   const appContext = (opts.appContext ?? []).filter(Boolean);
+  const reference = (opts.referenceContext ?? []).filter(Boolean);
   const fixed = [contract, directives.PERSONALITY_ACTIVATION, directives.TUTORING_ACTIVATION, languageBlock, ...appContext];
   const fixedCost = fixed.reduce((sum, b) => sum + estimateTokens(b), 0);
   const available = Math.max(600, opts.budgetTokens - fixedCost);
@@ -136,7 +144,7 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
   if (excess > 0) trace.overBudget = shed(chosen, excess, boosted, trace) > 0;
 
   // The bot defines RESPONSE_STYLE_ACTIVATION but never sends it; neither does this.
-  const parts = [contract, directives.PERSONALITY_ACTIVATION];
+  const parts = [contract, ...reference, directives.PERSONALITY_ACTIVATION];
   let tutoringActivated = false;
   for (const name of SECTION_ORDER) {
     const units = chosen[name];

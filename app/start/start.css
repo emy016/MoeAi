@@ -1,0 +1,72 @@
+/* Onboarding: the university sign-in kit (org.css), plus the few pieces it lacked. */
+.st-steps { display: flex; justify-content: center; gap: 6px; margin: -4px 0 2px; }
+.st-steps i { width: 22px; height: 4px; border-radius: 999px; background: var(--line-bright); transition: background 0.3s ease, width 0.3s ease; }
+.st-steps i.on { background: #f43f6d; width: 30px; }
+.st-steps i.done { background: rgba(244, 63, 109, 0.5); }
+
+.st-card { animation: st-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes st-in { from { opacity: 0; transform: translateY(8px) scale(0.99); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .st-card { animation: none; } }
+
+.st-options { display: grid; gap: 10px; margin-top: 18px; }
+.st-option { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--text); font: inherit; text-align: start; cursor: pointer; transition: border-color 0.18s ease, background 0.18s ease, transform 0.12s ease; }
+.st-option:hover { border-color: var(--line-bright); background: rgba(255,255,255,0.06); }
+.st-option:active { transform: scale(0.99); }
+.st-option:focus-visible { outline: 2px solid rgba(244, 63, 109, 0.6); outline-offset: 2px; }
+.st-option strong { display: block; font-size: 15px; }
+.st-option span.st-sub { display: block; color: var(--muted); font-size: 13px; line-height: 1.45; margin-top: 2px; }
+.st-option .st-icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(244, 63, 109, 0.12); color: #ff7798; }
+.st-option .st-chev { color: var(--muted); }
+.st-option[aria-disabled="true"] { opacity: 0.55; cursor: default; }
+
+.st-oauth { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+@media (max-width: 380px) { .st-oauth { grid-template-columns: 1fr; } }
+.st-oauth button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-bright); background: rgba(255,255,255,0.05); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.st-oauth button:hover:not(:disabled) { background: rgba(255,255,255,0.09); }
+.st-oauth button:disabled { opacity: 0.6; cursor: default; }
+.st-or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; margin: 16px 0 0; }
+.st-or::before, .st-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.st-field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; align-content: start; }
+.st-field .org-input[aria-invalid="true"] { border-color: rgba(253, 164, 175, 0.8); }
+.st-hint { font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.4; }
+.st-hint.ok { color: #6ee7b7; }
+.st-hint.bad { color: #fda4af; }
+.st-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+@media (max-width: 440px) { .st-two { grid-template-columns: 1fr; } }
+.st-pass { position: relative; }
+.st-pass button { position: absolute; inset-inline-end: 6px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; padding: 6px 8px; cursor: pointer; border-radius: 8px; }
+.st-meter { height: 4px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.st-meter i { display: block; height: 100%; border-radius: inherit; transition: width 0.25s ease, background 0.25s ease; }
+.st-check, .org-form label.st-check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--muted); }
+.st-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: #f43f6d; flex: none; }
+.st-check a { color: var(--text); text-decoration: underline; }
+
+.st-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.st-links a, .st-links button { color: var(--text); text-decoration: underline; background: none; border: 0; font: inherit; padding: 0; cursor: pointer; }
+.st-back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+.st-back:hover { color: var(--text); }
+.st-status { font-size: 13px; line-height: 1.5; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+.st-status.ok { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.08); color: #b7f5da; }
+.st-status.warn { border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08); color: #fde7a6; }
+.st-status.bad { border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); color: #fecdd3; }
+.st-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; animation: st-spin 0.7s linear infinite; }
+@keyframes st-spin { to { transform: rotate(360deg); } }
+
+.st-plans { display: grid; gap: 10px; margin-top: 18px; }
+.st-plan { border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; background: rgba(255,255,255,0.03); }
+.st-plan.selectable:hover { border-color: var(--line-bright); }
+.st-plan header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.st-plan header strong { font-size: 16px; }
+.st-plan .st-price { color: var(--muted); font-size: 13px; min-height: 18px; }
+.st-plan ul { margin: 0; padding-inline-start: 18px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.st-plan .st-empty { color: var(--muted); font-size: 12px; font-style: italic; }
+
+.st-wide { width: min(100%, 980px); }
+.st-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.st-kpi { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: rgba(255,255,255,0.03); }
+.st-kpi b { display: block; font-size: 20px; }
+.st-kpi span { color: var(--muted); font-size: 12px; }
+.st-copy { display: flex; gap: 8px; align-items: center; }
+.st-copy code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 12px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,0.25); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

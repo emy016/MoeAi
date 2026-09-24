@@ -8,7 +8,9 @@ import { embed, toVector } from "../ai/embed";
  * Hybrid: the question is embedded and matched by meaning, and also matched by
  * words (course codes, gate names, formula symbols that embeddings blur), and
  * match_course_chunks fuses both rankings. It runs with the student's session,
- * so it only returns anything for a course they are enrolled in.
+ * so it only returns anything for a course they are enrolled in. With the
+ * lecture they have open as `focusMaterial`, that lecture's pages lead unless
+ * something elsewhere in the course is a clearly better match.
  */
 export type Passage = { id: number; material_id: string; material_title: string; heading: string | null; page: number | null; content: string; score: number };
 
@@ -20,7 +22,7 @@ export type CourseBrain = {
   mistakes: unknown;
 };
 
-export async function retrieve(sb: SupabaseClient, courseId: string, question: string, count = 6): Promise<Passage[]> {
+export async function retrieve(sb: SupabaseClient, courseId: string, question: string, count = 6, focusMaterial: string | null = null): Promise<Passage[]> {
   let vector: string | null = null;
   try {
     [vector] = (await embed([question.slice(0, 2000)], "RETRIEVAL_QUERY")).map(toVector);
@@ -32,6 +34,7 @@ export async function retrieve(sb: SupabaseClient, courseId: string, question: s
     query_embedding: vector,
     query_text: question.slice(0, 500),
     match_count: count,
+    focus_material: focusMaterial,
   });
   if (error) throw new Error(error.message);
   return (data ?? []) as Passage[];

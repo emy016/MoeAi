@@ -608,7 +608,7 @@
       </div>
       <button class="crt-toggle" id="crtToggle" onclick="toggleCRT()" title="Toggle CRT scanlines"><i class="ic" data-ic="tv"></i></button>
       <button class="nav-auth-btn" onclick="openModal('loginModal')"><i class="ic" data-ic="user"></i> <span>Log in</span></button>
-      <button class="nav-cta" onclick="openModal('signupModal')">Sign up</button>
+      <a class="nav-cta" href="/start?next=/moeai" style="text-decoration:none;display:inline-flex;align-items:center">Sign up</a>
     </div>
   </nav>
 
@@ -860,40 +860,20 @@
       <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
       <button class="m-close" onclick="closeModal('loginModal')" aria-label="Close"><i class="ic" data-ic="times"></i></button>
       <h2 id="loginTitle">Welcome back</h2>
-      <button class="m-btn-google" onclick="showToast('🔑 Google sign-in — connect to Supabase')">
+      <button class="m-btn-google" onclick="moeOAuth('google')">
         <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continue with Google
       </button>
       <div class="m-divider">or</div>
-      <input class="m-input" type="text" id="loginId" placeholder="Username or email" autocomplete="username" />
+      <input class="m-input" type="text" id="loginId" placeholder="Email or phone number" autocomplete="username" />
       <div class="m-input-wrap">
         <input class="m-input" type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
         <button class="m-pass-toggle" type="button" onclick="togglePass('loginPassword', this)" aria-label="Show password"><i class="ic" data-ic="eye"></i></button>
       </div>
-      <button class="m-btn m-btn-fire" onclick="showToast('🔑 Login demo — connect to Supabase'); closeModal('loginModal')">Log In</button>
-      <button class="m-btn" onclick="switchModal('loginModal','signupModal')">Create an account</button>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
-    <div class="modal-box lg lg-panel">
-      <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-      <button class="m-close" onclick="closeModal('signupModal')" aria-label="Close"><i class="ic" data-ic="times"></i></button>
-      <h2 id="signupTitle">Create account</h2>
-      <button class="m-btn-google" onclick="showToast('🔑 Google sign-in — connect to Supabase')">
-        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Continue with Google
-      </button>
-      <div class="m-divider">or</div>
-      <input class="m-input" type="text" id="signupUsername" placeholder="Username" autocomplete="username" />
-      <input class="m-input" type="email" id="signupEmail" placeholder="Email (optional)" autocomplete="email" />
-      <div class="m-input-wrap">
-        <input class="m-input" type="password" id="signupPassword" placeholder="Password (6+ characters)" autocomplete="new-password" />
-        <button class="m-pass-toggle" type="button" onclick="togglePass('signupPassword', this)" aria-label="Show password"><i class="ic" data-ic="eye"></i></button>
-      </div>
-      <p class="m-hint">Email is optional — a username is all you need to start.</p>
-      <button class="m-btn m-btn-fire" onclick="showToast('✅ Signup demo — connect to Supabase'); closeModal('signupModal')">Create Account</button>
-      <button class="m-btn" onclick="switchModal('signupModal','loginModal')">Already have an account? Log in</button>
+      <p class="m-hint" id="loginError" role="alert" style="color:#fda4af;min-height:0"></p>
+      <button class="m-btn m-btn-fire" id="loginSubmit" onclick="moeLogin()">Log In</button>
+      <a class="m-btn" href="/start/forgot?next=/moeai" style="text-align:center;text-decoration:none">Forgot password?</a>
+      <a class="m-btn" href="/start?next=/moeai" style="text-align:center;text-decoration:none">Create an account</a>
     </div>
   </div>
 
@@ -1644,5 +1624,30 @@
   </script>
   <script src="/assets/ascii-reveal.js" defer></script>
   <script src="/assets/brand.js" defer></script>
+  <script>
+    // The login modal signs in for real, through /api/auth (Supabase Auth).
+    async function moeLogin() {
+      var id = document.getElementById('loginId').value.trim();
+      var pw = document.getElementById('loginPassword').value;
+      var err = document.getElementById('loginError');
+      var btn = document.getElementById('loginSubmit');
+      if (!id || !pw) { err.textContent = 'Enter your email or phone number and your password.'; return; }
+      btn.disabled = true; err.textContent = '';
+      try {
+        var res = await fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'login', identifier: id, password: pw }) });
+        var body = await res.json().catch(function () { return {}; });
+        if (!res.ok) { err.textContent = body.error || 'Sign-in failed. Try again.'; btn.disabled = false; return; }
+        location.href = body.mfa ? '/start/mfa?next=/moeai' : '/start/continue?next=/moeai';
+      } catch (e) { err.textContent = 'You seem to be offline.'; btn.disabled = false; }
+    }
+    async function moeOAuth(provider) {
+      try {
+        var res = await fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'oauth', provider: provider, next: '/start/continue?next=/moeai' }) });
+        var body = await res.json().catch(function () { return {}; });
+        if (body.url) location.href = body.url; else showToast(body.error || 'That sign-in could not start.');
+      } catch (e) { showToast('You seem to be offline.'); }
+    }
+    document.getElementById('loginPassword').addEventListener('keydown', function (e) { if (e.key === 'Enter') moeLogin(); });
+  </script>
 </body>
 </html>

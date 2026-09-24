@@ -12,7 +12,8 @@ import { providerKeys } from "../keys";
  */
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 export const EMBED_DIMENSIONS = 768;
-const BATCH = 100;
+// Free-tier keys count every item in a batch; small batches stay under the per-minute cap.
+const BATCH = 20;
 
 let chosen: string | null = null;
 

@@ -96,6 +96,22 @@ export default function Client() {
   }, [courseId]);
   useEffect(() => { setMaterials([]); setBrain(null); void refresh(); }, [refresh]);
 
+  // Finish the course's semantic index in the background: bulk-imported
+  // lectures arrive searchable by text, and this adds the embeddings.
+  useEffect(() => {
+    if (!courseId) return undefined;
+    let alive = true;
+    (async () => {
+      for (let round = 0; alive && round < 12; round++) {
+        const r = await api<{ filled: number; remaining: number }>("/api/organizer/reindex", { method: "POST", json: { courseId } }).catch(() => null);
+        if (!r || !alive) return;
+        if (r.filled) note(`Indexed ${r.filled} passages by meaning${r.remaining ? `, ${r.remaining} to go` : ", index complete"}.`);
+        if (!r.remaining || !r.filled) return;
+      }
+    })();
+    return () => { alive = false; };
+  }, [courseId, note]);
+
   const uploaded = materials.filter((m) => m.kind !== "generated");
   const pending = materials.filter((m) => m.status === "pending_review");
 

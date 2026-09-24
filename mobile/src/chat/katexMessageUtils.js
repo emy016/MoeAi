@@ -72,7 +72,9 @@ export const hasMathContent = (value) => splitMathSegments(value).some((segment)
 // KaTeX's own HTML layout with its fonts (KATEX_CSS below), plus hidden MathML
 // for screen readers. MathML alone is drawn with whatever math font the
 // browser has, which on most phones means uneven spacing and fractions.
-export const KATEX_CSS = 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css';
+// Served by the site the web app runs on (public/vendor/katex, same version as the bundled katex):
+// no third-party CDN on the page, so it works behind strict networks and a strict CSP.
+export const KATEX_CSS = '/vendor/katex/katex.min.css';
 
 const renderMathExpression = (value, displayMode) => katex.renderToString(value, {
   displayMode,

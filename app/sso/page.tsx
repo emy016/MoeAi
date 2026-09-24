@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ORGS } from "@/lib/orgs";
+import { safeNext } from "@/lib/auth/next";
 import "@/components/brand/logo.css";
 import "../org.css";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "Sign in with your university", robot
 /** Step one: which university or school. The rollout shows as "coming soon". */
 export default async function Page({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
-  const q = next && next.startsWith("/") && !next.startsWith("//") ? `?next=${encodeURIComponent(next)}` : "";
+  const q = next ? `?next=${encodeURIComponent(safeNext(next))}` : "";
   return (
     <main className="org-page">
       <div className="org-wrap">
@@ -41,7 +42,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
           </div>
         </section>
         <p className="org-muted" style={{ textAlign: "center" }}>
-          Not with a partner university? <Link href="/moeai" style={{ textDecoration: "underline" }}>Use MoeAI on your own</Link>.
+          Not with a partner university? <Link href="/start" style={{ textDecoration: "underline" }}>Create a MoeAI account</Link> or <Link href="/moeai" style={{ textDecoration: "underline" }}>try it as a guest</Link>.
         </p>
       </div>
     </main>
