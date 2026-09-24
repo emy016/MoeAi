@@ -18,11 +18,17 @@ export type AttachedImage = { name: string; dataUrl: string };
  * why the tutor sounded Egyptian on Telegram and like a generic assistant
  * here.
  *
- * Gemini gets a generous budget, so nearly all of the specification goes in;
- * Groq, the fallback, runs on the bot's own 5,900-token budget because its
- * free tier counts tokens per minute.
+ * Both providers get the bot's own 5,900-token selection of the
+ * specification. The app's per-turn data (course passages, session, what the
+ * chat can render) goes before the personality as reference material, so the
+ * personality and the language directive are the last things the model reads,
+ * exactly as in the bot.
  */
-const GEMINI_BUDGET_TOKENS = 24_000;
+// The bot's own budget. Sending more of the specification (security, tools,
+// memory policy in full) buried the personality: with 24,000 tokens the same
+// model answered like a generic assistant; with the bot's selection it sounds
+// like Emy. Tested side by side on the same messages.
+const GEMINI_BUDGET_TOKENS = 5_900;
 const GROQ_BUDGET_TOKENS = 5_900;
 
 /** For the health check: are Eslam's files loaded and mapped? */
@@ -58,14 +64,18 @@ export function resolveLanguage(messages: ChatMessage[], hint?: string): Languag
   return detectLanguage(current, previous);
 }
 
-function systemFor(turn: Turn, decision: LanguageDecision, budgetTokens: number) {
+function systemFor(turn: Turn, decision: LanguageDecision, budgetTokens: number, referenceCounts = false) {
   const current = turn.messages[turn.messages.length - 1]?.content ?? "";
   const session = sessionBlock(turn.context ?? parseContext(null));
+  const reference = [...(turn.appContext ?? []), session].filter(Boolean);
+  // Groq's free tier counts tokens per minute, so there the reference data
+  // comes out of the same budget instead of on top of it.
+  const referenceTokens = referenceCounts ? Math.ceil(reference.join("\n").length / 4) : 0;
   return buildSystemPrompt(loadRegistry(), {
     decision,
     signals: detectSignals(current),
-    budgetTokens,
-    appContext: [...(turn.appContext ?? []), session].filter(Boolean),
+    budgetTokens: Math.max(2_500, budgetTokens - referenceTokens),
+    referenceContext: reference,
   }).system;
 }
 
@@ -149,7 +159,7 @@ export async function* streamReply(turn: Turn, decision = resolveLanguage(turn.m
   }
   if (!providerKeys("groq").length) throw new Error("PROVIDERS_UNAVAILABLE");
   try {
-    yield* streamGroq(systemFor(turn, decision, GROQ_BUDGET_TOKENS), turn.messages, images, turn.signal);
+    yield* streamGroq(systemFor(turn, decision, GROQ_BUDGET_TOKENS, true), turn.messages, images, turn.signal);
   } catch (error) {
     if (error instanceof ProvidersUnavailable) throw new Error("PROVIDERS_UNAVAILABLE");
     throw error;
