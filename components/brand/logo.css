@@ -1,24 +1,17 @@
 /* Animations for the MoeAI mark. Kept out of the component so the plain-HTML
    pages can use the same classes with an inline copy of the SVG. */
 
-.moe-mark path {
-  /* One triangle's two contours, rounded up. */
-  stroke-dasharray: 480;
-}
-
-/* Draws itself once, like a neon tube warming up. */
-.moe-draw path:nth-child(2) { animation-delay: 0.18s; }
-.moe-draw path {
-  stroke-dashoffset: 480;
-  animation: moe-draw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes moe-draw { to { stroke-dashoffset: 0; } }
+/* Draws itself once: the outline sweeps in, then the red fills. */
+.moe-draw .moe-mark-ink { clip-path: inset(0 100% 0 0); animation: moe-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.moe-draw .moe-mark-red { opacity: 0; animation: moe-fill 0.5s ease-out 0.55s forwards; }
+@keyframes moe-reveal { to { clip-path: inset(0 0 0 0); } }
+@keyframes moe-fill { to { opacity: 1; } }
 
 /* Breathes. For the header, where it should be alive but not distracting. */
 .moe-pulse { animation: moe-pulse 3.4s ease-in-out infinite; }
 @keyframes moe-pulse {
-  0%, 100% { opacity: 0.88; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.035); }
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.035); }
 }
 
 /* Slow 3D tilt. For the hero, where it earns the attention. */
@@ -29,7 +22,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moe-draw path:nth-child(2) { animation-delay: 0.18s; }
-.moe-draw path { stroke-dashoffset: 0; animation: none; }
+  .moe-draw .moe-mark-ink { clip-path: none; animation: none; }
+  .moe-draw .moe-mark-red { opacity: 1; animation: none; }
   .moe-pulse, .moe-orbit { animation: none; }
 }

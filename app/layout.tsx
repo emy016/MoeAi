@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://edu-moe-ai.vercel.app"),
+  metadataBase: new URL("https://moe-ai-sable.vercel.app"),
+  icons: { icon: "/favicon.svg" },
+  openGraph: { images: ["/brand/moeai-logo.jpg"] },
   title: {
     default: "EduMoe — Computer Science, made clear",
     template: "%s | EduMoe",

@@ -1,31 +1,16 @@
 /**
  * The MoeAI mark, drawn in code.
  *
- * Two overlapping triangles, each drawn as a nested outline — so every edge
- * reads as a pair of neon lines, and the two long bars cross below the valley.
- * The gradient runs straight across: cyan at the left foot, magenta at the
- * first peak, red at the crossing, amber at the right foot.
- *
- * Being code means it stays sharp at any size, weighs about 2 KB instead of
- * 90 KB, inherits the page's theme, and can be animated.
- *
- * Every instance needs its own gradient and filter ids, or a second logo on the
- * page silently adopts the first one's paint. Hence `uid`.
+ * A red M of two overlapping peaks, each a band with a black outline and a
+ * white cut between them, traced from the brand image into two filled paths:
+ * the black outline layer, then the red layer on top. Being code means it
+ * stays sharp at any size, weighs under 1 KB, and can be animated.
  */
-import { useId } from "react";
-
 type Animation = "none" | "draw" | "pulse" | "orbit";
 
-/** Two overlapping triangles, each an inner contour followed by an outer one. */
-const MARK = [
-  "M 9.3 95.6 L 37.8 25.2 L 58.0 64.8 Z M 0.3 106.4 L 37.0 11.2 L 66.4 67.2 Z",
-  "M 62.0 64.8 L 82.2 25.2 L 110.7 95.6 Z M 53.6 67.2 L 83.0 11.2 L 119.7 106.4 Z",
-];
-
-const STOPS: [string, string][] = [
-  ["0%", "#22d3ee"], ["16%", "#3b82f6"], ["32%", "#d946ef"],
-  ["50%", "#f43f5e"], ["68%", "#f97316"], ["100%", "#fde047"],
-];
+/** Black outline layer, then red fill layer; both even-odd so the white cut stays open. */
+export const MARK_INK = "M35.5 15.6L0 92.3L0 105L60.1 73.3L119.8 105.1L120 92.2L84.3 14.9L60 51.4L35.9 14.9ZM36.6 29.8L5.6 95.9L52.9 69.9L38.5 50.2L20.2 84.9L9.8 91.1L37.4 36.6L60.1 68.5L82.9 36.6L110.2 90.9L100.1 85.4L81.6 50.2L67.2 69.9L114.3 95.7L83.2 29.5L60.1 63.7L36.9 29.5Z";
+export const MARK_RED = "M35.7 17.2L1 92.5L1 103.4L60.3 72.4L119 103.6L119 92.5L84.2 16.8L60.1 53L36.1 16.9ZM36.5 27.9L3.8 97.8L39.4 78.7L54.2 70.1L38.3 48.5L19.4 84.5L12 88.7L37.6 38.4L59.9 70L82.8 38.4L108 88.8L100.8 84.6L81.7 48.5L65.9 70.1L116.2 97.8L83.5 27.7L60.1 62.1L36.8 27.6Z";
 
 export function Logo({
   size = 48,
@@ -38,46 +23,21 @@ export function Logo({
   title?: string;
   className?: string;
 }) {
-  const uid = useId().replace(/:/g, "");
-  const grad = `moe-grad-${uid}`;
-  const glow = `moe-glow-${uid}`;
-
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 120 120"
       role="img"
-      aria-label={title}
+      aria-label={title || undefined}
+      aria-hidden={title ? undefined : true}
       className={[ "moe-mark", animation !== "none" ? `moe-${animation}` : "", className ]
         .filter(Boolean)
         .join(" ")}
     >
-      <title>{title}</title>
-      <defs>
-        <linearGradient id={grad} x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-          {STOPS.map(([offset, color]) => <stop key={offset} offset={offset} stopColor={color} />)}
-        </linearGradient>
-        <filter id={glow} x="-45%" y="-45%" width="190%" height="190%">
-          <feGaussianBlur stdDeviation="1.7" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      <g
-        fill="none"
-        stroke={`url(#${grad})`}
-        strokeWidth="2.4"
-        strokeLinejoin="miter"
-        strokeMiterlimit="8"
-        filter={`url(#${glow})`}
-      >
-        {MARK.map(d => <path key={d} d={d} />)}
-      </g>
+      {title ? <title>{title}</title> : null}
+      <path className="moe-mark-ink" fill="#0e0404" fillRule="evenodd" d={MARK_INK} />
+      <path className="moe-mark-red" fill="#ea4349" fillRule="evenodd" d={MARK_RED} />
     </svg>
   );
 }

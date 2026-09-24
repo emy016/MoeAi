@@ -1,43 +1,21 @@
 /**
  * One mark, every page.
  *
- * The MoeAI mark is two overlapping triangles, each drawn as a nested outline —
- * so every edge reads as a pair of neon lines, and the two long bars cross
- * below the valley. Each page used to draw its own idea of a logo (a book
- * glyph here, a graduation cap there); this replaces all of them, and points
- * the favicon at the same geometry.
+ * The MoeAI mark is a red M of two overlapping peaks, each a band with a
+ * black outline and a white cut between them — traced from the brand image
+ * into two filled paths (the black outline layer under the red layer), so it
+ * stays sharp at any size and weighs under 1 KB.
  */
 (function () {
-  var PATHS = [
-    "M 9.3 95.6 L 37.8 25.2 L 58.0 64.8 Z M 0.3 106.4 L 37.0 11.2 L 66.4 67.2 Z",
-    "M 62.0 64.8 L 82.2 25.2 L 110.7 95.6 Z M 53.6 67.2 L 83.0 11.2 L 119.7 106.4 Z",
-  ];
-  var STOPS = [
-    ["0%", "#22d3ee"], ["15%", "#3b82f6"], ["30%", "#d946ef"],
-    ["50%", "#fb1e4e"], ["70%", "#f97316"], ["100%", "#fde047"],
-  ];
-  var seq = 0;
+  var INK = "M35.5 15.6L0 92.3L0 105L60.1 73.3L119.8 105.1L120 92.2L84.3 14.9L60 51.4L35.9 14.9ZM36.6 29.8L5.6 95.9L52.9 69.9L38.5 50.2L20.2 84.9L9.8 91.1L37.4 36.6L60.1 68.5L82.9 36.6L110.2 90.9L100.1 85.4L81.6 50.2L67.2 69.9L114.3 95.7L83.2 29.5L60.1 63.7L36.9 29.5Z";
+  var RED = "M35.7 17.2L1 92.5L1 103.4L60.3 72.4L119 103.6L119 92.5L84.2 16.8L60.1 53L36.1 16.9ZM36.5 27.9L3.8 97.8L39.4 78.7L54.2 70.1L38.3 48.5L19.4 84.5L12 88.7L37.6 38.4L59.9 70L82.8 38.4L108 88.8L100.8 84.6L81.7 48.5L65.9 70.1L116.2 97.8L83.5 27.7L60.1 62.1L36.8 27.6Z";
 
-  function markup(glow) {
-    var id = "moe-mark-" + (seq++);
-    var stops = STOPS.map(function (s) {
-      return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"/>';
-    }).join("");
-    // Below about 40px the bloom swallows the gap between the paired lines,
-    // so small marks are drawn flat.
-    var filter = glow
-      ? '<filter id="f' + id + '" x="-40%" y="-40%" width="180%" height="180%">'
-        + '<feGaussianBlur stdDeviation="1.7" result="s"/><feMerge>'
-        + '<feMergeNode in="s"/><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
-      : "";
+  function markup() {
     return '<svg class="moe-mark-svg" viewBox="0 0 120 120" width="100%" height="100%" aria-hidden="true" '
       + 'style="display:block;overflow:visible">'
-      + '<defs><linearGradient id="g' + id + '" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">'
-      + stops + "</linearGradient>" + filter + "</defs>"
-      + '<g fill="none" stroke="url(#g' + id + ')" stroke-width="2.4" stroke-linejoin="miter" stroke-miterlimit="8"'
-      + (glow ? ' filter="url(#f' + id + ')"' : "") + ">"
-      + PATHS.map(function (d) { return '<path d="' + d + '"/>'; }).join("")
-      + "</g></svg>";
+      + '<path fill="#0e0404" fill-rule="evenodd" d="' + INK + '"/>'
+      + '<path fill="#ea4349" fill-rule="evenodd" d="' + RED + '"/>'
+      + "</svg>";
   }
 
   function paint() {
@@ -45,8 +23,7 @@
     for (var i = 0; i < marks.length; i++) {
       var el = marks[i];
       if (el.dataset.moePainted) continue;
-      var box = el.getBoundingClientRect();
-      el.innerHTML = markup(Math.max(box.width, box.height) >= 40);
+      el.innerHTML = markup();
       el.dataset.moePainted = "1";
       el.setAttribute("aria-hidden", "true");
       // The tile these used to sit on was the logo. Now the mark is.
