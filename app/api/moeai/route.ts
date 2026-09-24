@@ -18,16 +18,17 @@
  *   {"error":"..."}          instead, if the stream broke after it began
  * Failures before the stream starts are a normal JSON body with a 4xx/5xx.
  */
-import { NextRequest } from "next/server";
+import { NextRequest, after } from "next/server";
 import { resolveLanguage, streamReply } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { surfaceGuide } from "@/lib/moeai/surface";
-import { supabaseServer, supabaseAdmin } from "@/lib/supabase-server";
+import { supabaseServer } from "@/lib/supabase-server";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
 import { courseBlock, courseBrain, retrieve } from "@/lib/rag/retrieve";
+import { backfillEmbeddings } from "@/lib/rag/backfill";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
 
   // ── Limits ────────────────────────────────────────────────────────────
   if (userId) {
-    const rate = await checkRateLimit(userId);
+    const rate = await checkRateLimit(sb!);
     if (!rate.allowed) {
       return fail(429, `You have hit this hour's limit. Try again after ${rate.resetAt.toLocaleTimeString()}.`);
     }
@@ -147,12 +148,15 @@ export async function POST(req: NextRequest) {
   // A university course the student is enrolled in: retrieve from what its
   // staff uploaded (RLS limits this to their own courses), and lead with it.
   const courseId = (raw?.learning as { courseId?: unknown } | undefined)?.courseId;
+  // The lecture the student opened, when the chat belongs to one: its pages lead.
+  const materialRaw = (raw?.learning as { materialId?: unknown } | undefined)?.materialId;
+  const materialId = typeof materialRaw === "string" && /^[0-9a-f-]{36}$/i.test(materialRaw) ? materialRaw : null;
   if (sb && userId && typeof courseId === "string" && /^[0-9a-f-]{36}$/i.test(courseId)) {
     try {
       const recent = messages.filter((m) => m.role === "user").slice(-2).map((m) => m.content).join("\n");
       const [{ data: course }, passages, brain] = await Promise.all([
         sb.from("courses").select("code, title").eq("id", courseId).maybeSingle(),
-        retrieve(sb, courseId, recent),
+        retrieve(sb, courseId, recent, 6, materialId),
         courseBrain(sb, courseId),
       ]);
       if (course) {
@@ -166,6 +170,10 @@ export async function POST(req: NextRequest) {
           });
         }
         extra.push(courseBlock(course, passages, brain));
+        // Finish the course's vector index a few passages at a time, after the
+        // reply has gone out, with the student's own (RLS-limited) session.
+        const client = sb;
+        after(() => backfillEmbeddings(client, courseId).catch(() => undefined));
       }
     } catch {
       // Retrieval is an enhancement; without it MoeAI still teaches, just ungrounded.
@@ -285,19 +293,18 @@ export async function POST(req: NextRequest) {
         if (userId && answer && shouldExtract(messages.length, question)) {
           // Every extraction is a second model call, so it runs on a cadence
           // rather than on every turn.
-          void extractMemory(supabaseAdmin(), userId, question, answer);
+          void extractMemory(sb!, userId, question, answer);
         }
         if (userId) {
-          void supabaseAdmin()
-            .from("ai_logs")
-            .insert({
-              user_id: userId,
-              provider: "moeai",
-              model: process.env.GEMINI_MODELS || "gemini-auto",
-              completion_tokens: Math.ceil(answer.length / 4),
-              latency_ms: Date.now() - started,
-              status: answer ? "ok" : "all_failed",
-              error_message: answer ? null : "no content delivered",
+          void sb!
+            .rpc("log_ai_call", {
+              p_provider: "moeai",
+              p_model: process.env.GEMINI_MODELS || "gemini-auto",
+              p_latency_ms: Date.now() - started,
+              p_prompt_tokens: null,
+              p_completion_tokens: Math.ceil(answer.length / 4),
+              p_status: answer ? "ok" : "all_failed",
+              p_error: answer ? null : "no content delivered",
             })
             .then(() => {}, () => {});
         }

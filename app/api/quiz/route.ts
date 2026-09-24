@@ -7,7 +7,7 @@
  * internet's idea of the subject.
  */
 import { NextRequest } from "next/server";
-import { supabaseServer, supabaseAdmin } from "@/lib/supabase-server";
+import { supabaseServer } from "@/lib/supabase-server";
 import { completeChat, parseJsonBlock } from "@/lib/providers";
 import { checkRateLimit } from "@/lib/ratelimit";
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return Response.json({ error: "Not signed in." }, { status: 401 });
 
-  const rate = await checkRateLimit(user.id);
+  const rate = await checkRateLimit(sb);
   if (!rate.allowed) {
     return Response.json(
       { error: "You have hit this hour's limit. Try again shortly." },
@@ -148,11 +148,9 @@ export async function POST(req: NextRequest) {
     })),
   );
 
-  await supabaseAdmin().from("ai_logs").insert({
-    user_id: user.id,
-    status: "ok",
-    model: "quiz-generation",
-    completion_tokens: Math.ceil(sourceText.length / 4),
+  await sb.rpc("log_ai_call", {
+    p_provider: "moeai", p_model: "quiz-generation", p_latency_ms: null,
+    p_prompt_tokens: null, p_completion_tokens: Math.ceil(sourceText.length / 4), p_status: "ok", p_error: null,
   });
 
   return Response.json({ quizId: quiz.id, questions: valid.length });
