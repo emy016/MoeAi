@@ -1,4 +1,3 @@
-import { API_BASE_URL } from '../ai/client';
 /** Safe CommonMark + KaTeX rendering shared by native and web chat bubbles. */
 import katex from 'katex';
 import MarkdownIt from 'markdown-it';
@@ -73,9 +72,9 @@ export const hasMathContent = (value) => splitMathSegments(value).some((segment)
 // KaTeX's own HTML layout with its fonts (KATEX_CSS below), plus hidden MathML
 // for screen readers. MathML alone is drawn with whatever math font the
 // browser has, which on most phones means uneven spacing and fractions.
-// Served by the site itself (public/vendor/katex, same version as the bundled katex):
+// Served by the site the web app runs on (public/vendor/katex, same version as the bundled katex):
 // no third-party CDN on the page, so it works behind strict networks and a strict CSP.
-export const KATEX_CSS = `${API_BASE_URL}/vendor/katex/katex.min.css`;
+export const KATEX_CSS = '/vendor/katex/katex.min.css';
 
 const renderMathExpression = (value, displayMode) => katex.renderToString(value, {
   displayMode,

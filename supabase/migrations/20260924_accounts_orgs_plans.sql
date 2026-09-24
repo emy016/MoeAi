@@ -161,7 +161,7 @@ create or replace function public.has_current_consent(p_user uuid default auth.u
 language sql stable security definer set search_path = public as $$
   select not exists (
     select 1 from public.legal_documents d where d.current
-      and not exists (select 1 from public.consents c where c.user_id = p_user and c.kind = d.kind and c.version = d.version));
+      and not exists (select 1 from public.consents c where c.user_id = auth.uid() and c.kind = d.kind and c.version = d.version));  -- only ever the caller
 $$;
 
 -- ─── 3. Security / audit events ──────────────────────────────────────────
