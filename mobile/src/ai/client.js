@@ -100,21 +100,37 @@ async function prepareAttachments(files) {
   return prepared;
 }
 
-function parseStream(body) {
+/** Reads NDJSON events as they arrive; `onDelta(chunk, fullSoFar)` sees the reply grow. */
+function createStreamParser(onDelta) {
+  let buffer = '';
   let text = '';
   let streamError = '';
-  for (const line of String(body || '').split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    let event;
-    try { event = JSON.parse(trimmed); } catch (_) { continue; }
-    if (typeof event.delta === 'string') text += event.delta;
-    else if (event.error) streamError = String(event.error);
-  }
-  return { text: text.trim(), streamError };
+  const consume = (chunk) => {
+    buffer += chunk;
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      let event;
+      try { event = JSON.parse(trimmed); } catch (_) { continue; }
+      if (typeof event.delta === 'string' && event.delta) { text += event.delta; onDelta?.(event.delta, text); }
+      else if (event.error) streamError = String(event.error);
+    }
+  };
+  return {
+    consume,
+    finish() { if (buffer.trim()) consume('\n'); return { text: text.trim(), streamError }; },
+  };
 }
 
-export async function generateMoeAIReply({ text, files = [], lectureFiles = [], history = [], subject, lecture } = {}) {
+/**
+ * Asks the tutor for a reply to `text`. Streams through `onDelta` where the
+ * platform can (browsers read the response body as it arrives); where it
+ * cannot, the whole reply arrives at once and `onDelta` is called with it.
+ * `signal` stops it: whatever had arrived is returned, marked `stopped`.
+ */
+export async function generateMoeAIReply({ text, files = [], lectureFiles = [], history = [], subject, lecture, onDelta, signal } = {}) {
   const attachments = await prepareAttachments([...lectureFiles, ...files]);
   const notes = attachments.filter((item) => item.note).map((item) => `[Attached file: ${item.name} (${item.mimeType}) — ${item.note}]`);
   const question = [String(text || '').trim() || 'Please help me with the attached material.', ...notes].join('\n\n');
@@ -122,14 +138,19 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
 
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS) : null;
+  let stoppedByStudent = false;
+  const onStop = () => { stoppedByStudent = true; controller?.abort(); };
+  signal?.addEventListener?.('abort', onStop);
+  const parser = createStreamParser(onDelta);
   let response;
-  let body = '';
+  let raw = '';
   try {
     response = await fetch(`${API_BASE_URL}/api/moeai`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/x-ndjson' },
       credentials: 'include',
       body: JSON.stringify({
+        surface: 'app',
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
         learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials },
         attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (
@@ -138,8 +159,24 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       }),
       ...(controller ? { signal: controller.signal } : {}),
     });
-    body = await response.text();
+    const reader = response.ok && response.body?.getReader ? response.body.getReader() : null;
+    if (reader) {
+      const decoder = new TextDecoder();
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        raw += chunk;
+        parser.consume(chunk);
+      }
+    } else {
+      raw = await response.text();
+      if (response.ok) parser.consume(raw);
+    }
   } catch (error) {
+    const partial = parser.finish();
+    if (stoppedByStudent) return { text: partial.text, provider: 'moeai', model: 'moeai', stopped: true };
+    if (partial.text) return { text: partial.text, provider: 'moeai', model: 'moeai', interrupted: true };
     const failure = new Error(error?.name === 'AbortError'
       ? 'MoeAI took too long to answer. Please try again.'
       : 'MoeAI could not be reached. Check the connection and try again.');
@@ -147,14 +184,15 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     throw failure;
   } finally {
     if (timer) clearTimeout(timer);
+    signal?.removeEventListener?.('abort', onStop);
   }
 
-  const { text: answer, streamError } = parseStream(body);
+  const { text: answer, streamError } = parser.finish();
   if (!response.ok && !answer) {
     let message = response.status === 429
       ? 'MoeAI is busy right now. Please try again in a moment.'
       : 'MoeAI could not reach any model. Please try again.';
-    try { message = JSON.parse(body)?.error || message; } catch (_) {}
+    try { message = JSON.parse(raw)?.error || message; } catch (_) {}
     const failure = new Error(message);
     failure.name = 'MoeAIUnavailableError';
     throw failure;
@@ -165,5 +203,5 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     throw failure;
   }
   // A stream that broke midway still delivered real text; keep it.
-  return { text: answer, provider: 'moeai', model: 'moeai' };
+  return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError) };
 }

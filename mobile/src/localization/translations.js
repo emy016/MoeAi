@@ -125,3 +125,24 @@ Object.assign(hi,{aiUnavailable:CHAT_LOREM,camera:'कैमरा',images:'च�
 
 export const translations = { en, ar, es, fr, de, zh, hi };
 export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_META);
+
+// Interactive replies: cards, streaming controls and follow-ups. Other locales
+// fall back to English through t() until they are translated.
+Object.assign(en, {
+  blockVisualizer: 'Visualizer', blockChart: 'Chart', blockDiagram: 'Diagram', blockSteps: 'Steps', blockQuiz: 'Quick check',
+  block3d: '3D scene', blockAnimation: 'Animation', blockCode: 'Code', blockRun: 'Run', blockStop: 'Stop', blockExpand: 'Full screen',
+  blockDownload: 'Download', blockCopy: 'Copy', blockFix: 'Fix it', blockBuilding: 'Building the {what}…',
+  blockFixPrompt: 'The {what} you made shows an error: "{error}". Please fix it and send the whole {what} again.',
+  regenerate: 'Regenerate', tryAgain: 'Try again', replyStopped: 'Stopped · regenerate', stopReply: 'Stop replying',
+  blockOffline: "This card's tools could not be downloaded. Check your connection.",
+  followExplain: 'Explain it differently', followExample: 'Give me an example', followVisual: 'Show me visually', followQuiz: 'Quiz me on this',
+});
+Object.assign(ar, {
+  blockVisualizer: 'محاكاة تفاعلية', blockChart: 'رسم بياني', blockDiagram: 'مخطط', blockSteps: 'خطوات', blockQuiz: 'سؤال سريع',
+  block3d: 'مشهد ثلاثي الأبعاد', blockAnimation: 'شرح متحرك', blockCode: 'كود', blockRun: 'تشغيل', blockStop: 'إيقاف', blockExpand: 'ملء الشاشة',
+  blockDownload: 'تحميل', blockCopy: 'نسخ', blockFix: 'صلّحها', blockBuilding: 'بيتعمل الـ{what}…',
+  blockFixPrompt: 'الـ{what} اللي عملته فيه error: "{error}". صلّحه وابعته كامل تاني.',
+  regenerate: 'إعادة الإجابة', tryAgain: 'جرّب تاني', replyStopped: 'اتوقف · أعد الإجابة', stopReply: 'وقف الرد',
+  blockOffline: 'مقدرناش نحمّل أدوات الكارت ده. اتأكد من النت.',
+  followExplain: 'اشرحها بطريقة تانية', followExample: 'اديني مثال', followVisual: 'وريهالي بصريًا', followQuiz: 'اختبرني فيها',
+});

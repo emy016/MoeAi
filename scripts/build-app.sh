@@ -16,5 +16,7 @@ rm -rf public/_expo public/assets/node_modules public/assets/assets
 cp -r "$OUT/_expo" public/
 cp -r "$OUT/assets/." public/assets/
 cp "$OUT/index.html" public/moeai-app.html
+# The app's icon (app.json web.favicon); also the site-wide /favicon.ico.
+[ -f "$OUT/favicon.ico" ] && cp "$OUT/favicon.ico" public/favicon.ico
 rm -rf "$OUT"
 echo "Installed $(grep -o 'AppEntry-[a-f0-9]*\.js' public/moeai-app.html) into public/"

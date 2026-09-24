@@ -33,7 +33,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const [chatTarget, setChatTarget] = useState(null);
   const { events: userEvents, addEvent, removeEvent } = useUserCalendarEvents();
   const { subjects, addSubject, renameSubject, removeSubject, addLecture, removeLecture, toggleLectureComplete } = useSubjectStore();
-  const { chats, startChat, sendMessage, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
+  const { chats, startChat, sendMessage, stopReply, regenerateReply, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
   const objects = userEvents;
   const selectedSubject = useMemo(() => subjects.find((subject) => subject.id === selectedSubjectId) || null, [selectedSubjectId, subjects]);
   const chatSubject = useMemo(() => subjects.find((subject) => subject.id === chatTarget?.subjectId) || null, [chatTarget?.subjectId, subjects]);
@@ -91,6 +91,12 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
       lecture: chatLecture,
     });
   }, [chatLecture, chatSubject, chatTarget, sendMessage]);
+  const stopLectureReply = useCallback((threadId) => {
+    if (chatTarget) stopReply(chatTarget.subjectId, chatTarget.lectureId, threadId);
+  }, [chatTarget, stopReply]);
+  const regenerateLectureReply = useCallback((threadId) => {
+    if (chatTarget) regenerateReply(chatTarget.subjectId, chatTarget.lectureId, threadId, { subject: chatSubject, lecture: chatLecture });
+  }, [chatLecture, chatSubject, chatTarget, regenerateReply]);
   const renameLectureChat = useCallback((threadId, title) => {
     if (chatTarget) renameChat(chatTarget.subjectId, chatTarget.lectureId, threadId, title);
   }, [chatTarget, renameChat]);
@@ -135,7 +141,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
       <SubjectEditorModal visible={!!lectureEditorSubjectId} title={t('newLectureChat')} placeholder={t('lectureName')} allowFiles onCancel={() => setLectureEditorSubjectId(null)} onConfirm={saveLecture} />
       <SubjectActionOverlay visible={!!subjectActions} anchor={subjectActions?.anchor} onClose={() => setSubjectActions(null)} onRename={startRenameSubject} onDelete={requestSubjectDelete} />
       <CalendarAlertModal visible={!!deleteTarget} title={deleteTarget?.type === 'subject' ? t('deleteSubject') : t('deleteLecture')} message={deleteTarget?.type === 'subject' ? t('deleteSubjectConfirm') : t('deleteLectureConfirm')} onClose={() => setDeleteTarget(null)} onConfirm={confirmContentDelete} destructive />
-      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onDeleteChat={deleteLectureChat} onProfileSelect={selectChatProfileItem} />
+      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onStop={stopLectureReply} onRegenerate={regenerateLectureReply} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onDeleteChat={deleteLectureChat} onProfileSelect={selectChatProfileItem} />
     </ScreenContainer>
   );
 }

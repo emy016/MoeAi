@@ -20,11 +20,12 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Bars3Icon, CameraIcon, ClipboardDocumentIcon as SolidClipboardDocumentIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, TrashIcon, XMarkIcon } from 'react-native-heroicons/solid';
-import { ClipboardDocumentIcon as OutlineClipboardDocumentIcon } from 'react-native-heroicons/outline';
+import { Bars3Icon, CameraIcon, ClipboardDocumentIcon as SolidClipboardDocumentIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, StopIcon, TrashIcon, XMarkIcon } from 'react-native-heroicons/solid';
+import { ArrowPathIcon, ClipboardDocumentIcon as OutlineClipboardDocumentIcon } from 'react-native-heroicons/outline';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useHoldToDictate from '../chat/useHoldToDictate';
 import KaTeXMessage from '../chat/KaTeXMessage';
+import RichMessage from '../chat/RichMessage';
 import CalendarAlertModal from '../components/CalendarAlertModal';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
 import ElasticPressable from '../components/ElasticPressable';
@@ -161,11 +162,27 @@ function CopyFeedback({ text, onCopy }) {
   );
 }
 
-const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }) {
-  const { colors, type, isRTL, motion } = usePreferences();
+const FOLLOW_UPS = ['followExplain', 'followExample', 'followVisual', 'followQuiz'];
+
+function FollowUps({ onPick }) {
+  const { colors, type, isRTL, t } = usePreferences();
+  return (
+    <View style={[styles.followUps, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      {FOLLOW_UPS.map((key) => (
+        <ElasticPressable key={key} shape="pill" onPress={() => onPick(t(key))} accessibilityRole="button">
+          <View style={[styles.followUp, { backgroundColor: colors.cardButton }]}><Text style={[{ color: colors.textSecondary }, type(11, 'semiBold', 15)]}>{t(key)}</Text></View>
+        </ElasticPressable>
+      ))}
+    </View>
+  );
+}
+
+const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, onRegenerate, onFix, onFollowUp }) {
+  const { colors, type, isRTL, motion, t } = usePreferences();
   const { width } = useWindowDimensions();
   const user = message.role === 'user';
-  const pending = !user && message.status === 'pending';
+  const pending = !user && (message.status === 'pending' || (message.status === 'streaming' && !message.text));
+  const streaming = !user && message.status === 'streaming' && !!message.text;
   const messageTextStyle = type(14, 'regular', 20);
   const availableWidth = Math.max(0, width - Spacing.md * 2);
   const columnWidth = user
@@ -205,18 +222,40 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
           ))}</ScrollView>}
           {pending ? (
             <View style={message.files?.length && styles.messageAfterFiles}><LoadingDots /></View>
-          ) : !!message.text && (
+          ) : !!message.text && (user ? (
             <KaTeXMessage
               text={message.text}
-              color={user ? colors.white : colors.textPrimary}
+              color={colors.white}
               textAlign={isRTL ? 'right' : 'left'}
               fontStyle={messageTextStyle}
               maxWidth={messageTextWidth}
               style={message.files?.length && styles.messageAfterFiles}
             />
-          )}
+          ) : (
+            <RichMessage
+              text={message.text}
+              color={message.status === 'failed' ? colors.danger : colors.textPrimary}
+              textAlign={isRTL ? 'right' : 'left'}
+              fontStyle={messageTextStyle}
+              maxWidth={messageTextWidth}
+              style={message.files?.length && styles.messageAfterFiles}
+              onFix={onFix}
+            />
+          ))}
+          {streaming ? <View style={styles.streamingDots}><LoadingDots /></View> : null}
         </View>
-        {!user && !pending && !!message.text && <CopyFeedback text={message.text} onCopy={onCopy} />}
+        {!user && !pending && !streaming && !!message.text && (
+          <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
+            {isLast ? (
+              <Pressable hitSlop={9} onPress={onRegenerate} accessibilityRole="button" accessibilityLabel={t('regenerate')} style={[styles.regenerate, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <ArrowPathIcon size={COPY_ICON_SIZE} color={colors.textMuted} />
+                {message.status === 'failed' || message.status === 'stopped' ? <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>{t(message.status === 'failed' ? 'tryAgain' : 'replyStopped')}</Text> : null}
+              </Pressable>
+            ) : null}
+          </View>
+        )}
+        {isLast && !user && message.status === 'complete' && !!message.text ? <FollowUps onPick={onFollowUp} /> : null}
       </View>
     </Animated.View>
   );
@@ -246,7 +285,7 @@ function ChatActionPill({ pinned, onRename, onTogglePin, onDelete }) {
   );
 }
 
-export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onRenameChat, onTogglePinChat, onDeleteChat, onProfileSelect }) {
+export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onStop, onRegenerate, onRenameChat, onTogglePinChat, onDeleteChat, onProfileSelect }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { colors, type, t, motion, isRTL, language } = usePreferences();
@@ -286,6 +325,9 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   const activeThread = useMemo(() => threads.find((thread) => thread.id === threadId) || null, [threadId, threads]);
   const messages = activeThread?.messages || [];
+  const replying = messages.some((message) => message.role === 'assistant' && (message.status === 'pending' || message.status === 'streaming'));
+  const lastText = messages[messages.length - 1]?.text || '';
+  const nearBottom = useRef(true);
   const userMessages = useMemo(() => messages.filter((message) => message.role === 'user'), [messages]);
   const dashCount = Math.min(7, userMessages.length);
   const pinnedThreads = useMemo(() => threads.filter((thread) => thread.pinned), [threads]);
@@ -383,6 +425,14 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     return () => cancelAnimationFrame(id);
   }, [messages.length, motion]);
 
+  // Follow a reply as it streams in, but only while the student is already
+  // at the bottom; scrolling up to reread something must not be yanked back.
+  useEffect(() => {
+    if (!replying || !nearBottom.current) return undefined;
+    const id = requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }));
+    return () => cancelAnimationFrame(id);
+  }, [lastText.length, replying]);
+
   useEffect(() => {
     sawFirstMessage.current = false;
     setNavigatorUnlocked(false);
@@ -431,7 +481,19 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     setAttachmentOpen(false);
   }, [draft, onSend, onStartChat, pendingAttachments, threadId]);
 
+  const stopReplying = useCallback(() => { if (threadId) onStop?.(threadId); }, [onStop, threadId]);
+  const regenerate = useCallback(() => { if (threadId && !replying) onRegenerate?.(threadId); }, [onRegenerate, replying, threadId]);
+  // Follow-ups and "fix it" requests send on their own, leaving the draft alone.
+  const sendText = useCallback((text) => {
+    const clean = String(text || '').trim();
+    if (replying || !clean) return;
+    const targetId = threadId || onStartChat();
+    if (!threadId) setThreadId(targetId);
+    onSend(targetId, { text: clean, files: [] });
+  }, [onSend, onStartChat, replying, threadId]);
+
   const sendFromComposer = useCallback(() => {
+    if (replying) return;
     send();
     // Mobile browsers may try to blur the textarea when the adjacent send
     // control is tapped. Focusing during the same gesture keeps the virtual
@@ -524,13 +586,18 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     onProfileSelect?.(id);
   }, [onProfileSelect]);
 
+  const lastId = messages[messages.length - 1]?.id;
   const renderMessage = useCallback(({ item }) => (
     <ChatBubble
       message={item}
       onPreview={openPreview}
       onCopy={copyMessage}
+      isLast={item.id === lastId}
+      onRegenerate={regenerate}
+      onFix={sendText}
+      onFollowUp={sendText}
     />
-  ), [copyMessage, openPreview]);
+  ), [copyMessage, lastId, openPreview, regenerate, sendText]);
   const renderNavigatorMessage = useCallback(({ item }) => (
     <ElasticPressable shape="pill" onPress={() => jumpToMessage(item)}>
       <View style={[styles.navigatorMessage, { backgroundColor: colors.cardButton }]}><Text numberOfLines={2} style={[{ color: colors.textSecondary, textAlign: isRTL ? 'right' : 'left' }, type(10, 'semiBold', 14)]}>{item.text || item.files?.map((file) => file.name).join(', ') || t('attachment')}</Text></View>
@@ -573,6 +640,11 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
             viewabilityConfig={viewabilityConfig}
             onViewableItemsChanged={onViewableItemsChanged}
             onScrollBeginDrag={() => { setAttachmentOpen(false); setNavigatorOpen(false); }}
+            onScroll={(event) => {
+              const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+              nearBottom.current = contentSize.height - contentOffset.y - layoutMeasurement.height < 140;
+            }}
+            scrollEventThrottle={100}
             onTouchStart={() => setAttachmentOpen(false)}
             onScrollToIndexFailed={(info) => {
               listRef.current?.scrollToOffset({ offset: Math.max(0, info.averageItemLength * info.index), animated: true });
@@ -629,16 +701,22 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                 <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.accent, opacity: micProgress, transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] }]} />
                 <MicrophoneIcon size={20} color={listening || micHeld ? colors.background : colors.textSecondary} />
               </Pressable>
-              <ElasticPressable
-                shape="circle"
-                onPressIn={keepComposerFocused}
-                onPress={sendFromComposer}
-                disabled={!draft.trim() && !pendingAttachments.length}
-                accessibilityRole="button"
-                accessibilityLabel={t('sendMessage')}
-              >
-                <View style={[styles.sendButton, { backgroundColor: colors.accent, opacity: draft.trim() || pendingAttachments.length ? 1 : 0.45 }]}><PaperAirplaneIcon size={20} color={colors.background} /></View>
-              </ElasticPressable>
+              {replying ? (
+                <ElasticPressable shape="circle" onPress={stopReplying} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
+                  <View style={[styles.sendButton, { backgroundColor: colors.accent }]}><StopIcon size={18} color={colors.background} /></View>
+                </ElasticPressable>
+              ) : (
+                <ElasticPressable
+                  shape="circle"
+                  onPressIn={keepComposerFocused}
+                  onPress={sendFromComposer}
+                  disabled={!draft.trim() && !pendingAttachments.length}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('sendMessage')}
+                >
+                  <View style={[styles.sendButton, { backgroundColor: colors.accent, opacity: draft.trim() || pendingAttachments.length ? 1 : 0.45 }]}><PaperAirplaneIcon size={20} color={colors.background} /></View>
+                </ElasticPressable>
+              )}
             </View>
           </View>
 
@@ -698,6 +776,11 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 }
 
 const styles = StyleSheet.create({
+  replyActions: { alignItems: 'center', gap: 12 },
+  regenerate: { alignItems: 'center', gap: 5, paddingVertical: 4 },
+  streamingDots: { marginTop: 2 },
+  followUps: { flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  followUp: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
   root: { flex: 1 },
   header: { minHeight: 72, paddingHorizontal: Spacing.md, paddingBottom: 9, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   headerButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },

@@ -69,9 +69,14 @@ export function splitMathSegments(value) {
 
 export const hasMathContent = (value) => splitMathSegments(value).some((segment) => segment.type === 'math');
 
+// KaTeX's own HTML layout with its fonts (KATEX_CSS below), plus hidden MathML
+// for screen readers. MathML alone is drawn with whatever math font the
+// browser has, which on most phones means uneven spacing and fractions.
+export const KATEX_CSS = 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css';
+
 const renderMathExpression = (value, displayMode) => katex.renderToString(value, {
   displayMode,
-  output: 'mathml',
+  output: 'htmlAndMathml',
   throwOnError: false,
   strict: 'ignore',
   trust: false,
@@ -156,6 +161,10 @@ export const CHAT_MARKDOWN_CSS = `
   .moeai-markdown > :first-child { margin-top: 0; }
   .moeai-markdown > :last-child { margin-bottom: 0; }
   .moeai-markdown p { margin: 0 0 0.55em; }
+  /* Each paragraph takes its direction from its own first letter, so an
+     Egyptian Arabic answer with English terms reads right-to-left even in an
+     English-language app, and an English paragraph after it does not. */
+  .moeai-markdown p, .moeai-markdown li, .moeai-markdown h1, .moeai-markdown h2, .moeai-markdown h3, .moeai-markdown h4, .moeai-markdown h5, .moeai-markdown h6, .moeai-markdown blockquote, .moeai-markdown td, .moeai-markdown th { unicode-bidi: plaintext; text-align: start; }
   .moeai-markdown strong { font-weight: 700; }
   .moeai-markdown em { font-style: italic; }
   .moeai-markdown s { opacity: 0.72; }
@@ -175,8 +184,9 @@ export const CHAT_MARKDOWN_CSS = `
   .moeai-markdown hr { width: 100%; border: 0; border-top: 1px solid currentColor; opacity: 0.35; }
   .moeai-math-inline { display: inline-block; direction: ltr; unicode-bidi: isolate; margin: 0 0.08em; max-width: 100%; }
   .moeai-math-display { display: block; direction: ltr; text-align: center; margin: 0.45em 0; width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
-  .moeai-markdown math { font-size: 1.08em; color: inherit; max-width: 100%; }
-  .moeai-math-display math { display: block; margin: 0 auto; }
+  .moeai-markdown .katex { font-size: 1.08em; }
+  .moeai-math-display .katex-display { margin: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .moeai-markdown .katex-mathml { position: absolute; clip: rect(1px, 1px, 1px, 1px); padding: 0; border: 0; height: 1px; width: 1px; overflow: hidden; }
 `;
 
 const safeColor = (value) => /^#[0-9a-f]{3,8}$/i.test(value || '') || /^rgba?\([\d\s.,%]+\)$/i.test(value || '') ? value : '#111111';
@@ -191,6 +201,7 @@ export function createMarkdownDocument(value, { color, fontSize, lineHeight, tex
 <html dir="${direction}">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="${KATEX_CSS}" />
     <style>
       html, body { margin: 0; padding: 0; width: 100%; max-width: 100%; background: transparent; overflow: hidden; }
       body { color: ${safeColor(color)}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: ${size}px; line-height: ${leading}px; text-align: ${alignment}; }

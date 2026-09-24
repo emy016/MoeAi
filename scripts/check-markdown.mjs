@@ -42,8 +42,8 @@ check("inline math is found", hasMathContent("so $f(x)$ approaches"), true);
 check("a price is not math", hasMathContent("it costs $5"), false);
 check("math splits out of text", splitMathSegments("a $x^2$ b").map(s => s.type), ["text", "math", "text"]);
 check("display math is marked as display", splitMathSegments("$$E = mc^2$$")[0].displayMode, true);
-check("inline math renders as MathML", /<span class="moeai-math-inline"><span class="katex"><math/.test(html("so $f(x)$ approaches")), true);
-check("display math renders as a block", /<span class="moeai-math-display"><span class="katex"><math[^>]*display="block"/.test(html("$$\\lim_{x\\to 0}\\frac{\\sin x}{x}=1$$")), true);
+check("inline math renders as KaTeX HTML with MathML for screen readers", /<span class="moeai-math-inline"><span class="katex"><span class="katex-mathml"><math/.test(html("so $f(x)$ approaches")) && html("so $f(x)$ approaches").includes('class="katex-html"'), true);
+check("display math renders as a block", /<span class="moeai-math-display"><span class="katex-display">/.test(html("$$\\lim_{x\\to 0}\\frac{\\sin x}{x}=1$$")), true);
 check("broken LaTeX does not throw", typeof html("$\\frac{1}{$"), "string");
 
 check("raw HTML is escaped, never injected", html("<img src=x onerror=alert(1)>").includes("<img"), false);

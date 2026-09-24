@@ -14,10 +14,17 @@ function normalizeMessage(message) {
     text: String(message?.text || ''),
     files: Array.isArray(message?.files) ? message.files : [],
     createdAt: message?.createdAt || new Date().toISOString(),
-    status: ['pending', 'failed'].includes(message?.status) ? message.status : 'complete',
+    status: ['pending', 'streaming', 'failed', 'stopped'].includes(message?.status) ? message.status : 'complete',
     provider: message?.provider ? String(message.provider) : null,
     model: message?.model ? String(message.model) : null,
   };
+}
+
+/** A reply that was still arriving when the app closed is kept as far as it got. */
+function settleMessage(message) {
+  if (message.status !== 'pending' && message.status !== 'streaming') return message;
+  const text = message.text === '…' ? '' : message.text;
+  return text ? { ...message, text, status: 'stopped' } : { ...message, text: 'MoeAI did not finish this reply. Try again.', status: 'failed' };
 }
 
 function normalizeThread(thread) {
@@ -27,7 +34,7 @@ function normalizeThread(thread) {
     createdAt: thread?.createdAt || new Date().toISOString(),
     updatedAt: thread?.updatedAt || thread?.createdAt || new Date().toISOString(),
     pinned: Boolean(thread?.pinned),
-    messages: Array.isArray(thread?.messages) ? thread.messages.map(normalizeMessage) : [],
+    messages: Array.isArray(thread?.messages) ? thread.messages.map(normalizeMessage).map(settleMessage) : [],
   };
 }
 
@@ -80,6 +87,61 @@ export function useLectureChatStore() {
     return thread.id;
   }, []);
 
+  // One AbortController per reply in flight, so Stop reaches the right one.
+  const inFlight = useRef(new Map());
+
+  const patchMessage = useCallback((key, threadId, messageId, patch) => {
+    setChats((current) => ({
+      ...current,
+      [key]: (current[key] || []).map((thread) => thread.id !== threadId ? thread : {
+        ...thread,
+        updatedAt: new Date().toISOString(),
+        messages: thread.messages.map((message) => message.id !== messageId ? message : { ...message, ...(typeof patch === 'function' ? patch(message) : patch) }),
+      }),
+    }));
+  }, []);
+
+  /** Streams the reply to `userMessage` into `assistantMessage`, which must already be in the thread. */
+  const streamReply = useCallback(async (key, threadId, assistantId, { text, files, history, subject, lecture }) => {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    if (controller) inFlight.current.set(assistantId, controller);
+    // Re-rendering on every token would make long answers stutter on phones.
+    let pendingText = null;
+    let flushTimer = null;
+    const flush = () => {
+      flushTimer = null;
+      if (pendingText === null) return;
+      const next = pendingText;
+      pendingText = null;
+      patchMessage(key, threadId, assistantId, { text: next, status: 'streaming' });
+    };
+    try {
+      const result = await generateMoeAIReply({
+        text, files, lectureFiles: lecture?.files || [], history, subject, lecture,
+        signal: controller?.signal,
+        onDelta: (_chunk, full) => { pendingText = full; if (!flushTimer) flushTimer = setTimeout(flush, 60); },
+      });
+      if (flushTimer) clearTimeout(flushTimer);
+      patchMessage(key, threadId, assistantId, {
+        text: result.text || '',
+        status: result.stopped ? (result.text ? 'stopped' : 'failed') : 'complete',
+        ...(result.stopped && !result.text ? { text: 'Stopped.' } : {}),
+        provider: result.provider,
+        model: result.model,
+      });
+      return result;
+    } catch (error) {
+      if (flushTimer) clearTimeout(flushTimer);
+      patchMessage(key, threadId, assistantId, {
+        text: error?.message || 'MoeAI could not reach an AI model. Please try again.',
+        status: 'failed',
+      });
+      return null;
+    } finally {
+      inFlight.current.delete(assistantId);
+    }
+  }, [patchMessage]);
+
   const sendMessage = useCallback(async (subjectId, lectureId, threadId, {
     text = '', files = [], subject = null, lecture = null,
   }) => {
@@ -88,7 +150,7 @@ export function useLectureChatStore() {
     const key = lectureChatKey(subjectId, lectureId);
     const now = new Date();
     const userMessage = normalizeMessage({ id: makeId('message'), role: 'user', text: clean, files, createdAt: now.toISOString() });
-    const assistantMessage = normalizeMessage({ id: makeId('message'), role: 'assistant', text: '…', status: 'pending', createdAt: new Date(now.getTime() + 1).toISOString() });
+    const assistantMessage = normalizeMessage({ id: makeId('message'), role: 'assistant', text: '', status: 'pending', createdAt: new Date(now.getTime() + 1).toISOString() });
     const existingThreads = chatsRef.current[key] || [];
     const existingThread = existingThreads.find((thread) => thread.id === threadId);
     const history = existingThread?.messages || [];
@@ -105,48 +167,31 @@ export function useLectureChatStore() {
       };
       return { ...current, [key]: [updated, ...threads.filter((thread) => thread.id !== threadId)] };
     });
+    return streamReply(key, threadId, assistantMessage.id, { text: clean, files, history, subject, lecture });
+  }, [streamReply]);
 
-    try {
-      const result = await generateMoeAIReply({
-        text: clean,
-        files,
-        lectureFiles: lecture?.files || [],
-        history,
-        subject,
-        lecture,
-      });
-      setChats((current) => ({
-        ...current,
-        [key]: (current[key] || []).map((thread) => thread.id !== threadId ? thread : {
-          ...thread,
-          updatedAt: new Date().toISOString(),
-          messages: thread.messages.map((message) => message.id !== assistantMessage.id ? message : {
-            ...message,
-            text: result.text,
-            status: 'complete',
-            provider: result.provider,
-            model: result.model,
-          }),
-        }),
-      }));
-      return result;
-    } catch (error) {
-      const failureText = error?.message || 'MoeAI could not reach an AI model. Please try again.';
-      setChats((current) => ({
-        ...current,
-        [key]: (current[key] || []).map((thread) => thread.id !== threadId ? thread : {
-          ...thread,
-          updatedAt: new Date().toISOString(),
-          messages: thread.messages.map((message) => message.id !== assistantMessage.id ? message : {
-            ...message,
-            text: failureText,
-            status: 'failed',
-          }),
-        }),
-      }));
-      return null;
-    }
+  /** Stops whatever reply is arriving in this thread; the part already written stays. */
+  const stopReply = useCallback((subjectId, lectureId, threadId) => {
+    const thread = (chatsRef.current[lectureChatKey(subjectId, lectureId)] || []).find((item) => item.id === threadId);
+    thread?.messages.forEach((message) => inFlight.current.get(message.id)?.abort());
   }, []);
+
+  /** Answers the last question again, replacing the last reply. */
+  const regenerateReply = useCallback((subjectId, lectureId, threadId, { subject = null, lecture = null } = {}) => {
+    const key = lectureChatKey(subjectId, lectureId);
+    const thread = (chatsRef.current[key] || []).find((item) => item.id === threadId);
+    if (!thread) return null;
+    const messages = thread.messages;
+    const lastAssistant = messages.length - 1;
+    if (lastAssistant < 1 || messages[lastAssistant].role !== 'assistant' || inFlight.current.has(messages[lastAssistant].id)) return null;
+    const question = messages[lastAssistant - 1];
+    if (question?.role !== 'user') return null;
+    const assistantId = messages[lastAssistant].id;
+    patchMessage(key, threadId, assistantId, { text: '', status: 'pending' });
+    return streamReply(key, threadId, assistantId, {
+      text: question.text, files: question.files, history: messages.slice(0, lastAssistant - 1), subject, lecture,
+    });
+  }, [patchMessage, streamReply]);
 
   const removeLectureChats = useCallback((subjectId, lectureId) => {
     const key = lectureChatKey(subjectId, lectureId);
@@ -193,5 +238,5 @@ export function useLectureChatStore() {
     setChats((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${subjectId}:`))));
   }, []);
 
-  return { chats, ready, startChat, sendMessage, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats };
+  return { chats, ready, startChat, sendMessage, stopReply, regenerateReply, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats };
 }
