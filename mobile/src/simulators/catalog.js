@@ -8,6 +8,8 @@
  * belongs to, and the Simulators tab shows only those.
  */
 
+import { PHET_SIMS } from './phet';
+
 const LOGIC = /logic|digital|boolean|circuit design|computer (architecture|organi[sz]ation)|embedded|microprocessor/;
 const DISCRETE = /discrete|mathematics? (for|of) comput|set theory|combinatoric|graph theory/;
 const PROGRAMMING = /python|programming|computer science|\bcs\b|computing|coding|software|algorithm|data structure|\boop\b|object.oriented/;
@@ -277,6 +279,25 @@ requestAnimationFrame(loop);
 </script>`,
   },
 ];
+
+// PhET's own simulations, run from phet.colorado.edu: a few per field, after MoeAI's.
+const phet = (sim, matches, blurb) => ({ id: `phet-${sim}`, title: `${PHET_SIMS[sim].title} (PhET)`, blurb, matches, kind: 'phet', code: JSON.stringify({ sim }) });
+SIMULATORS.push(
+  phet('circuit-construction-kit-dc', new RegExp(`${LOGIC.source}|${ELECTRIC.source}`), 'Build real circuits with batteries, bulbs, switches and meters.'),
+  phet('ohms-law', ELECTRIC, 'Change voltage and resistance and watch the current respond.'),
+  phet('calculus-grapher', MATH, 'Draw a function and see its derivative and integral live.'),
+  phet('graphing-quadratics', MATH, 'Vertex, roots and coefficients of a parabola, interactively.'),
+  phet('trig-tour', MATH, 'The unit circle, sine, cosine and tangent, together.'),
+  phet('vector-addition', new RegExp(`${MATH.source}|${PHYSICS.source}`), 'Add vectors tip to tail and read off components.'),
+  phet('projectile-motion', PHYSICS, 'Cannons, drag and trajectories, measured.'),
+  phet('masses-and-springs', PHYSICS, 'Springs, oscillation and energy with real controls.'),
+  phet('wave-on-a-string', PHYSICS, 'Frequency, amplitude, damping and standing waves.'),
+  phet('plinko-probability', STATS, 'Binomial distributions from falling balls.'),
+  phet('curve-fitting', STATS, 'Fit polynomials to data and watch χ² change.'),
+  phet('gas-properties', CHEM, 'Pressure, volume and temperature, particle by particle.'),
+  phet('build-an-atom', CHEM, 'Protons, neutrons, electrons: build and identify atoms.'),
+  phet('molecule-shapes', CHEM, 'VSEPR shapes and bond angles in 3D.'),
+);
 
 /** Shown when none of a student's courses matches any simulator yet. */
 export const STARTER_IDS = ['function-plotter', 'python-ide', 'truth-table'];

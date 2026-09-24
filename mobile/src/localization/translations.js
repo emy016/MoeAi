@@ -129,7 +129,7 @@ export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_META);
 // Interactive replies: cards, streaming controls and follow-ups. Other locales
 // fall back to English through t() until they are translated.
 Object.assign(en, {
-  blockVisualizer: 'Visualizer', blockChart: 'Chart', blockDiagram: 'Diagram', blockSteps: 'Steps', blockQuiz: 'Quick check',
+  blockVisualizer: 'Visualizer', blockPhet: 'Simulation', phetUnknown: 'This simulation could not be found.', phetOpen: 'Open on PhET', phetTell: 'Tell MoeAI what I saw', phetExplored: 'I explored it', phetAsk: 'I tried the {title} simulation ({done}). What should I have noticed, and what does it show about the concept?', blockChart: 'Chart', blockDiagram: 'Diagram', blockSteps: 'Steps', blockQuiz: 'Quick check',
   block3d: '3D scene', blockAnimation: 'Animation', blockCode: 'Code', blockRun: 'Run', blockStop: 'Stop', blockExpand: 'Full screen',
   blockDownload: 'Download', blockCopy: 'Copy', blockFix: 'Fix it', blockBuilding: 'Building the {what}…',
   blockFixPrompt: 'The {what} you made shows an error: "{error}". Please fix it and send the whole {what} again.',
@@ -138,7 +138,7 @@ Object.assign(en, {
   followExplain: 'Explain it differently', followExample: 'Give me an example', followVisual: 'Show me visually', followQuiz: 'Quiz me on this',
 });
 Object.assign(ar, {
-  blockVisualizer: 'محاكاة تفاعلية', blockChart: 'رسم بياني', blockDiagram: 'مخطط', blockSteps: 'خطوات', blockQuiz: 'سؤال سريع',
+  blockVisualizer: 'محاكاة تفاعلية', blockPhet: 'محاكاة', phetUnknown: 'مش لاقي المحاكاة دي.', phetOpen: 'افتح على PhET', phetTell: 'قول لـ MoeAI شفت إيه', phetExplored: 'جربتها', phetAsk: 'جربت محاكاة {title} ({done}). المفروض ألاحظ إيه، وده بيوضح إيه في الفكرة؟', blockChart: 'رسم بياني', blockDiagram: 'مخطط', blockSteps: 'خطوات', blockQuiz: 'سؤال سريع',
   block3d: 'مشهد ثلاثي الأبعاد', blockAnimation: 'شرح متحرك', blockCode: 'كود', blockRun: 'تشغيل', blockStop: 'إيقاف', blockExpand: 'ملء الشاشة',
   blockDownload: 'تحميل', blockCopy: 'نسخ', blockFix: 'صلّحها', blockBuilding: 'بيتعمل الـ{what}…',
   blockFixPrompt: 'الـ{what} اللي عملته فيه error: "{error}". صلّحه وابعته كامل تاني.',
@@ -151,7 +151,7 @@ Object.assign(ar, {
 Object.assign(en, {
   guest: 'Guest', signInShort: 'Tap to sign in', student: 'Student', signIn: 'Sign in', createAccount: 'Create account', yourAccount: 'Your account',
   accountPitch: 'Sign in to keep your courses, progress, chats and calendar on every device, and so MoeAI remembers how you learn.',
-  yourName: 'Your name', email: 'Email', password: 'Password', continueGoogle: 'Continue with Google',
+  yourName: 'Your name', email: 'Email', password: 'Password', continueGoogle: 'Continue with Google', signInUniversity: 'Sign in with your university', nudgeGo: "Let's go", nudgeLater: 'Later', nudgeResume: "You're {percent}% through {lecture} in {subject}. Want a 5-minute recap so you can finish it today?", nudgeResumePrompt: 'Give me a 5-minute recap of {lecture} ({subject}) so I can finish it, then one question to check I understood.', fromYourCourse: 'FROM YOUR COURSE MATERIAL', orPersonal: 'or use a personal account', universityLinked: 'Your courses and lectures come from your faculty.',
   noAccountYet: 'New here? Create an account', haveAccount: 'Already have an account? Sign in', signOut: 'Sign out',
   accountError: 'Something went wrong. Try again.', syncSaved: 'Saved to your account', syncSaving: 'Saving…',
   syncOffline: 'Offline, your changes will save when you are back online',
@@ -160,7 +160,7 @@ Object.assign(en, {
 Object.assign(ar, {
   guest: 'زائر', signInShort: 'اضغط لتسجيل الدخول', student: 'طالب', signIn: 'تسجيل الدخول', createAccount: 'إنشاء حساب', yourAccount: 'حسابك',
   accountPitch: 'سجّل دخولك عشان موادك وتقدمك ومحادثاتك وتقويمك يبقوا معاك على أي جهاز، وعشان MoeAI يفتكر إزاي بتذاكر.',
-  yourName: 'اسمك', email: 'الإيميل', password: 'كلمة السر', continueGoogle: 'كمّل بجوجل',
+  yourName: 'اسمك', email: 'الإيميل', password: 'كلمة السر', continueGoogle: 'كمّل بجوجل', signInUniversity: 'سجّل دخول بحساب جامعتك', nudgeGo: 'يلا بينا', nudgeLater: 'بعدين', nudgeResume: 'خلصت {percent}% من {lecture} في {subject}. تحب ملخص في ٥ دقايق عشان تخلصها النهارده؟', nudgeResumePrompt: 'اديني ملخص في ٥ دقايق لـ {lecture} ({subject}) عشان أخلصها، وبعدين سؤال واحد تتأكد إني فهمت.', fromYourCourse: 'من مادة الكورس بتاعك', orPersonal: 'أو استخدم حساب شخصي', universityLinked: 'موادك ومحاضراتك جاية من كليتك.',
   noAccountYet: 'جديد هنا؟ اعمل حساب', haveAccount: 'عندك حساب؟ سجّل دخول', signOut: 'تسجيل الخروج',
   accountError: 'حصلت مشكلة، جرّب تاني.', syncSaved: 'متسجّل في حسابك', syncSaving: 'بيتحفظ…',
   syncOffline: 'مفيش نت، التغييرات هتتحفظ أول ما النت يرجع',

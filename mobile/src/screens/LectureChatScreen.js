@@ -177,6 +177,29 @@ function FollowUps({ onPick }) {
   );
 }
 
+/** Where a course-grounded answer came from: the lecturer's file and page, tap for the passage. */
+function Sources({ items }) {
+  const { colors, type, isRTL, t } = usePreferences();
+  const [open, setOpen] = useState(-1);
+  return (
+    <View style={styles.sources}>
+      <Text style={[{ color: colors.textMuted, textAlign: isRTL ? 'right' : 'left' }, type(10, 'bold', 13)]}>{t('fromYourCourse')}</Text>
+      <View style={[styles.followUps, { marginTop: 4, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        {items.map((item, index) => (
+          <Pressable key={`${item.title}-${item.ref}-${index}`} onPress={() => setOpen(open === index ? -1 : index)} accessibilityRole="button"
+            style={[styles.followUp, { backgroundColor: open === index ? colors.cardButtonPressed : colors.cardButton, flexDirection: 'row', alignItems: 'center', gap: 5, maxWidth: '100%' }]}>
+            <DocumentIcon size={12} color={colors.accent} />
+            <Text numberOfLines={1} style={[{ color: colors.textSecondary, flexShrink: 1 }, type(11, 'semiBold', 15)]}>{item.title}{item.ref ? ` · ${item.ref}` : ''}</Text>
+          </Pressable>
+        ))}
+      </View>
+      {open >= 0 && items[open]?.excerpt ? (
+        <Text style={[styles.sourceExcerpt, { color: colors.textSecondary, borderColor: colors.border, textAlign: isRTL ? 'right' : 'left' }, type(12, 'regular', 17)]}>{items[open].excerpt}…</Text>
+      ) : null}
+    </View>
+  );
+}
+
 const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, onRegenerate, onFix, onFollowUp }) {
   const { colors, type, isRTL, motion, t } = usePreferences();
   const { width } = useWindowDimensions();
@@ -244,6 +267,7 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, 
           ))}
           {streaming ? <View style={styles.streamingDots}><LoadingDots /></View> : null}
         </View>
+        {!user && !pending && !!message.citations?.length ? <Sources items={message.citations} /> : null}
         {!user && !pending && !streaming && !!message.text && (
           <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
@@ -781,6 +805,8 @@ const styles = StyleSheet.create({
   streamingDots: { marginTop: 2 },
   followUps: { flexWrap: 'wrap', gap: 6, marginTop: 8 },
   followUp: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
+  sources: { marginTop: 6, marginBottom: 2, marginHorizontal: 4 },
+  sourceExcerpt: { marginTop: 6, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   root: { flex: 1 },
   header: { minHeight: 72, paddingHorizontal: Spacing.md, paddingBottom: 9, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   headerButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },

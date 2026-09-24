@@ -38,7 +38,7 @@ export function AccountProvider({ children }) {
   const refresh = useCallback(async () => {
     try {
       const me = await call('/api/auth');
-      setAccount(me?.signedIn ? { status: 'signedIn', name: me.name, email: me.email } : { status: 'guest' });
+      setAccount(me?.signedIn ? { status: 'signedIn', name: me.name, email: me.email, org: me.org || null } : { status: 'guest' });
     } catch (_) {
       setAccount({ status: 'guest', offline: true });
     }
@@ -70,6 +70,22 @@ export function AccountProvider({ children }) {
     else Linking.openURL(url);
   }, []);
 
+  // A university account's courses: what its faculty set up, replacing the sample subjects.
+  const [orgCourses, setOrgCourses] = useState([]);
+  useEffect(() => {
+    if (account.status !== 'signedIn' || !account.org) { setOrgCourses([]); return undefined; }
+    let alive = true;
+    call('/api/org/courses').then((data) => { if (alive) setOrgCourses(Array.isArray(data?.courses) ? data.courses : []); }).catch(() => {});
+    return () => { alive = false; };
+  }, [account.status, account.org]);
+
+  /** The university sign-in lives on the site; it comes back to the app signed in. */
+  const signInWithUniversity = useCallback(() => {
+    const url = `${API_BASE_URL}/sso?next=/moeai`;
+    if (Platform.OS === 'web' && typeof window !== 'undefined') window.location.assign(url);
+    else Linking.openURL(url);
+  }, []);
+
   const signOut = useCallback(async () => {
     await syncRef.current?.flush().catch?.(() => {});
     await call('/api/auth', { action: 'logout' }).catch(() => {});
@@ -78,17 +94,17 @@ export function AccountProvider({ children }) {
   }, []);
 
   const value = useMemo(() => ({
-    account, sync, revision, sheetOpen,
+    account, sync, revision, sheetOpen, orgCourses, signInWithUniversity,
     openAccount: () => setSheetOpen(true),
     closeAccount: () => setSheetOpen(false),
     refresh, signIn, signUp, signInWithGoogle, signOut,
-  }), [account, refresh, revision, sheetOpen, signIn, signInWithGoogle, signOut, signUp, sync]);
+  }), [account, orgCourses, refresh, revision, sheetOpen, signIn, signInWithGoogle, signInWithUniversity, signOut, signUp, sync]);
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }
 
 export function useAccount() {
-  return useContext(AccountContext) || { account: { status: 'guest' }, sync: { state: 'idle' }, revision: 0, sheetOpen: false, openAccount() {}, closeAccount() {} };
+  return useContext(AccountContext) || { account: { status: 'guest' }, sync: { state: 'idle' }, revision: 0, sheetOpen: false, orgCourses: [], openAccount() {}, closeAccount() {}, signInWithUniversity() {} };
 }
 
 /** "Mariam Adel" and "@mariam.adel" for the profile pill; guests see a sign-in prompt. */

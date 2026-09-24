@@ -17,6 +17,7 @@ function normalizeMessage(message) {
     status: ['pending', 'streaming', 'failed', 'stopped'].includes(message?.status) ? message.status : 'complete',
     provider: message?.provider ? String(message.provider) : null,
     model: message?.model ? String(message.model) : null,
+    citations: Array.isArray(message?.citations) ? message.citations.slice(0, 8) : [],
   };
 }
 
@@ -128,6 +129,7 @@ export function useLectureChatStore() {
         ...(result.stopped && !result.text ? { text: 'Stopped.' } : {}),
         provider: result.provider,
         model: result.model,
+        citations: result.citations || [],
       });
       return result;
     } catch (error) {

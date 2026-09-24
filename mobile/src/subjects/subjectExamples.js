@@ -63,3 +63,31 @@ export const SUBJECT_EXAMPLES = [
 ];
 
 export default SUBJECT_EXAMPLES;
+
+/**
+ * A university account's courses as Home subjects: each published lecture file
+ * is a lecture, in week order. `orgCourseId` is what the tutor retrieves from.
+ */
+export function orgSubjects(courses) {
+  return (Array.isArray(courses) ? courses : []).map((course) => ({
+    id: `org-${course.id}`,
+    orgCourseId: course.id,
+    code: course.code,
+    name: course.title,
+    owner: 'university',
+    iconQuery: course.title,
+    overview: course.overview || '',
+    lectures: (course.materials || []).filter((m) => m.status === 'ready').map((m, index) => ({
+      id: `material-${m.id}`,
+      materialId: m.id,
+      title: m.week ? `Week ${m.week}: ${m.title}` : m.title,
+      summary: m.summary || '',
+      progress: 0,
+      createdAt: `2026-09-${String(Math.min(28, 1 + index * 3)).padStart(2, '0')}T09:00:00.000Z`,
+      files: [],
+    })),
+  }));
+}
+
+/** The subjects a student starts from: their faculty's when signed in through it, the samples otherwise. */
+export const baseSubjects = (orgCourses) => (orgCourses?.length ? orgSubjects(orgCourses) : SUBJECT_EXAMPLES);

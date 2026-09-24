@@ -105,6 +105,7 @@ function createStreamParser(onDelta) {
   let buffer = '';
   let text = '';
   let streamError = '';
+  let citations = [];
   const consume = (chunk) => {
     buffer += chunk;
     const lines = buffer.split('\n');
@@ -114,13 +115,14 @@ function createStreamParser(onDelta) {
       if (!trimmed) continue;
       let event;
       try { event = JSON.parse(trimmed); } catch (_) { continue; }
-      if (typeof event.delta === 'string' && event.delta) { text += event.delta; onDelta?.(event.delta, text); }
+      if (Array.isArray(event.citations)) citations = event.citations.slice(0, 8).map((c) => ({ title: String(c?.title || ''), ref: String(c?.ref || ''), excerpt: String(c?.excerpt || '').slice(0, 300) }));
+      else if (typeof event.delta === 'string' && event.delta) { text += event.delta; onDelta?.(event.delta, text); }
       else if (event.error) streamError = String(event.error);
     }
   };
   return {
     consume,
-    finish() { if (buffer.trim()) consume('\n'); return { text: text.trim(), streamError }; },
+    finish() { if (buffer.trim()) consume('\n'); return { text: text.trim(), streamError, citations }; },
   };
 }
 
@@ -152,7 +154,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       body: JSON.stringify({
         surface: 'app',
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
-        learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials },
+        learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}) },
         attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (
           fileText !== undefined ? { name, mimeType, text: fileText } : { name, mimeType, data }
         )),
@@ -187,7 +189,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     signal?.removeEventListener?.('abort', onStop);
   }
 
-  const { text: answer, streamError } = parser.finish();
+  const { text: answer, streamError, citations } = parser.finish();
   if (!response.ok && !answer) {
     let message = response.status === 429
       ? 'MoeAI is busy right now. Please try again in a moment.'
@@ -203,5 +205,5 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     throw failure;
   }
   // A stream that broke midway still delivered real text; keep it.
-  return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError) };
+  return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError), citations };
 }

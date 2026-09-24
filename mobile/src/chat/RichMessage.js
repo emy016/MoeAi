@@ -7,6 +7,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import KaTeXMessage from './KaTeXMessage';
 import BlockCard from './blocks/BlockCard';
+import PhetCard from './blocks/PhetCard';
 import { hasBlocks, splitSegments } from './blocks/segments';
 
 export default React.memo(function RichMessage({ text, color, textAlign, fontStyle, maxWidth, style, onFix }) {
@@ -21,7 +22,9 @@ export default React.memo(function RichMessage({ text, color, textAlign, fontSty
       ) : (
         // Keyed by position and kind, so a block keeps its live page while
         // the rest of the reply streams in around it.
-        <BlockCard key={`b${index}-${segment.kind}`} block={segment} onFix={onFix} />
+        segment.kind === 'phet'
+          ? <PhetCard key={`b${index}-phet`} block={segment} onAsk={onFix} />
+          : <BlockCard key={`b${index}-${segment.kind}`} block={segment} onFix={onFix} />
       ))}
     </View>
   );

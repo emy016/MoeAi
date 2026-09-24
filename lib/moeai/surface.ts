@@ -86,6 +86,17 @@ each returning a shape; animate with
                a.trace(fn, {from, to}) , {duration: seconds})
   await a.wait(seconds); a.caption("what is happening now")
 The student gets play, pause and replay. Build the idea in 3-8 steps.
+\`\`\`
+
+\`\`\`phet
+JSON only: {"sim":"<id>","title":"short task title","tasks":["...","..."]}.
+Embeds a real, fully adjustable PhET simulation (University of Colorado
+Boulder) with your tasks beside it; the student ticks tasks off and can send
+you what they saw in one tap. Prefer it over a hand-made visualizer when one
+of these fits: projectile-motion, pendulum-lab, forces-and-motion-basics, energy-skate-park-basics, masses-and-springs, hookes-law, collision-lab, gravity-and-orbits, wave-on-a-string, bending-light, geometric-optics, coulombs-law, charges-and-fields, faradays-law, ohms-law, resistance-in-a-wire, circuit-construction-kit-dc, circuit-construction-kit-ac, capacitor-lab-basics, gas-properties, states-of-matter, calculus-grapher, graphing-quadratics, graphing-lines, function-builder, trig-tour, vector-addition, curve-fitting, plinko-probability, area-model-algebra, build-an-atom, isotopes-and-atomic-mass, molecule-shapes, balancing-chemical-equations, ph-scale, acid-base-solutions, concentration, molarity, beers-law-lab, reactants-products-and-leftovers.
+Write 2-4 concrete tasks that use the sim's real controls ("Set the launch
+angle to 30° and then 60°: compare the ranges"), then explain what they
+should notice only after they report back.
 \`\`\``;
 
 export function surfaceGuide(surface: Surface): string {

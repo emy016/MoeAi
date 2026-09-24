@@ -78,6 +78,12 @@ export type GeminiRequest = {
   temperature?: number;
   maxOutputTokens?: number;
   signal?: AbortSignal;
+  /** Gemini tools, e.g. [{ google_search: {} }] to let the model research on the web. */
+  tools?: unknown[];
+  /** Ask for a JSON body (not combinable with tools). */
+  json?: boolean;
+  /** Sees each raw stream event, for metadata such as search grounding sources. */
+  onEvent?: (event: Record<string, unknown>) => void;
 };
 
 export class ProvidersUnavailable extends Error {
@@ -115,7 +121,12 @@ export async function* streamGemini(req: GeminiRequest): AsyncGenerator<string, 
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: req.system }] },
             contents: req.contents,
-            generationConfig: { temperature: req.temperature ?? 0.65, maxOutputTokens: req.maxOutputTokens ?? 8192 },
+            generationConfig: {
+              temperature: req.temperature ?? 0.65,
+              maxOutputTokens: req.maxOutputTokens ?? 8192,
+              ...(req.json ? { responseMimeType: "application/json" } : {}),
+            },
+            ...(req.tools ? { tools: req.tools } : {}),
           }),
           signal: req.signal ? AbortSignal.any([req.signal, firstByte.signal]) : firstByte.signal,
           cache: "no-store",
@@ -149,6 +160,7 @@ export async function* streamGemini(req: GeminiRequest): AsyncGenerator<string, 
             if (!payload) continue;
             const data = JSON.parse(payload);
             if (data.error) throw new Error(`stream error ${data.error.code ?? ""}`);
+            req.onEvent?.(data);
             const parts = data.candidates?.[0]?.content?.parts ?? [];
             // Thought summaries, when a model sends them, are not the answer.
             const text = parts.filter((p: { thought?: boolean }) => !p.thought).map((p: { text?: string }) => p.text ?? "").join("");

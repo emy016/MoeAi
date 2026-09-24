@@ -531,3 +531,284 @@ do $$ begin
     revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
   end if;
 end $$;
+
+
+-- ============================================================================
+-- University models: organization -> program -> year -> course, each course
+-- its own retrieval namespace (pgvector + full text), MoeAI's organized
+-- "brain" per course, and the staff upload bucket.
+-- Demo accounts (FUE student 20251938, staff CS-STAFF-01) were seeded
+-- directly in the project and are deliberately not in this file.
+-- ============================================================================
+
+-- MoeAI university models: one organization (FUE) -> program (Computer
+-- Science) -> year -> course, each course its own retrieval namespace.
+create extension if not exists vector with schema extensions;
+
+-- Courses belong to an organization and a program.
+alter table public.courses add column if not exists org_id uuid references public.organizations(id);
+alter table public.courses add column if not exists program text default 'Computer Science';
+update public.courses set org_id = (select id from public.organizations where slug = 'fue') where org_id is null;
+
+-- Nobody adds themselves to an organization any more: memberships come from
+-- university sign-in (security definer code). Reading and leaving stay.
+drop policy if exists org_members_self on public.org_members;
+create policy org_members_leave on public.org_members for delete to authenticated using (user_id = auth.uid());
+
+create or replace function public.is_org_teacher(org uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.org_members m where m.org_id = org and m.user_id = auth.uid() and m.role in ('teacher','owner'));
+$$;
+
+-- University identities: an organization's own ID (student number, staff ID)
+-- mapped to the MoeAI account it signs in as.
+create table if not exists public.org_identities (
+  org_id uuid not null references public.organizations(id) on delete cascade,
+  external_id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'student' check (role in ('student','teacher','owner')),
+  display_name text,
+  program text default 'Computer Science',
+  year int default 1,
+  created_at timestamptz default now(),
+  primary key (org_id, external_id)
+);
+alter table public.org_identities enable row level security;
+create policy org_identities_self on public.org_identities for select to authenticated using (user_id = auth.uid() or public.is_org_teacher(org_id));
+
+create table if not exists public.course_enrollments (
+  course_id uuid not null references public.courses(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'student' check (role in ('student','teacher')),
+  created_at timestamptz default now(),
+  primary key (course_id, user_id)
+);
+alter table public.course_enrollments enable row level security;
+create policy enrollments_read on public.course_enrollments for select to authenticated
+  using (user_id = auth.uid() or public.is_org_teacher((select c.org_id from public.courses c where c.id = course_id)));
+
+create or replace function public.can_teach_course(course uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.courses c where c.id = course and public.is_org_teacher(c.org_id))
+      or exists (select 1 from public.course_enrollments e where e.course_id = course and e.user_id = auth.uid() and e.role = 'teacher');
+$$;
+create or replace function public.can_read_course(course uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select public.can_teach_course(course)
+      or exists (select 1 from public.course_enrollments e where e.course_id = course and e.user_id = auth.uid());
+$$;
+
+-- Course material uploaded by staff, and what MoeAI made of it.
+create table if not exists public.course_materials (
+  id uuid primary key default gen_random_uuid(),
+  course_id uuid not null references public.courses(id) on delete cascade,
+  title text not null,
+  kind text not null default 'pdf' check (kind in ('pdf','slides','text','notes','generated')),
+  storage_path text,
+  week int,
+  status text not null default 'queued' check (status in ('queued','processing','ready','failed','pending_review')),
+  error text,
+  pages int,
+  char_count int default 0,
+  chunk_count int default 0,
+  summary text,
+  uploaded_by uuid references auth.users(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+alter table public.course_materials enable row level security;
+create policy materials_read on public.course_materials for select to authenticated
+  using (public.can_teach_course(course_id) or (public.can_read_course(course_id) and status = 'ready'));
+create policy materials_write on public.course_materials for all to authenticated
+  using (public.can_teach_course(course_id)) with check (public.can_teach_course(course_id));
+
+create table if not exists public.course_chunks (
+  id uuid primary key default gen_random_uuid(),
+  material_id uuid not null references public.course_materials(id) on delete cascade,
+  course_id uuid not null references public.courses(id) on delete cascade,
+  idx int not null default 0,
+  heading text,
+  page int,
+  content text not null,
+  embedding extensions.vector(768),
+  search_tsv tsvector generated always as (to_tsvector('english', coalesce(heading,'') || ' ' || content) || to_tsvector('simple', coalesce(heading,'') || ' ' || content)) stored,
+  created_at timestamptz default now()
+);
+alter table public.course_chunks enable row level security;
+create policy chunks_read on public.course_chunks for select to authenticated using (public.can_read_course(course_id));
+create policy chunks_write on public.course_chunks for all to authenticated
+  using (public.can_teach_course(course_id)) with check (public.can_teach_course(course_id));
+create index if not exists course_chunks_course on public.course_chunks (course_id);
+create index if not exists course_chunks_tsv on public.course_chunks using gin (search_tsv);
+create index if not exists course_chunks_embedding on public.course_chunks using hnsw (embedding extensions.vector_cosine_ops);
+
+-- The course's "brain": what MoeAI organized out of all of its material.
+create table if not exists public.course_brain (
+  course_id uuid primary key references public.courses(id) on delete cascade,
+  outline jsonb default '[]'::jsonb,
+  glossary jsonb default '[]'::jsonb,
+  formulas jsonb default '[]'::jsonb,
+  mistakes jsonb default '[]'::jsonb,
+  practice jsonb default '[]'::jsonb,
+  gaps jsonb default '[]'::jsonb,
+  overview text,
+  updated_at timestamptz default now()
+);
+alter table public.course_brain enable row level security;
+create policy brain_read on public.course_brain for select to authenticated using (public.can_read_course(course_id));
+create policy brain_write on public.course_brain for all to authenticated
+  using (public.can_teach_course(course_id)) with check (public.can_teach_course(course_id));
+
+-- Hybrid retrieval inside one course: vector similarity and keyword match,
+-- fused by reciprocal rank. Runs as the caller, so RLS decides access.
+create or replace function public.match_course_chunks(course uuid, query_embedding extensions.vector(768), query_text text, match_count int default 6)
+returns table (id uuid, material_id uuid, material_title text, heading text, page int, content text, score double precision)
+language sql stable set search_path = public, extensions as $$
+  with v as (
+    select c.id, row_number() over (order by c.embedding <=> query_embedding) as r
+    from public.course_chunks c where c.course_id = course and c.embedding is not null and query_embedding is not null
+    order by c.embedding <=> query_embedding limit 24
+  ), k as (
+    select c.id, row_number() over (order by ts_rank(c.search_tsv, q) desc) as r
+    from public.course_chunks c, websearch_to_tsquery('english', coalesce(query_text,'')) q
+    where c.course_id = course and c.search_tsv @@ q limit 24
+  ), fused as (
+    select coalesce(v.id, k.id) as id, coalesce(1.0/(60+v.r),0) + coalesce(1.0/(60+k.r),0) as score
+    from v full outer join k on v.id = k.id
+  )
+  select c.id, c.material_id, m.title, c.heading, c.page, c.content, f.score
+  from fused f join public.course_chunks c on c.id = f.id join public.course_materials m on m.id = c.material_id
+  where m.status in ('ready','pending_review')
+  order by f.score desc limit greatest(1, least(match_count, 12));
+$$;
+
+-- Private bucket for uploaded course files: <course_id>/<file>.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('course-files', 'course-files', false, 52428800)
+on conflict (id) do nothing;
+create policy course_files_teacher_write on storage.objects for insert to authenticated
+  with check (bucket_id = 'course-files' and public.can_teach_course(((storage.foldername(name))[1])::uuid));
+create policy course_files_teacher_read on storage.objects for select to authenticated
+  using (bucket_id = 'course-files' and public.can_teach_course(((storage.foldername(name))[1])::uuid));
+create policy course_files_teacher_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'course-files' and public.can_teach_course(((storage.foldername(name))[1])::uuid));
+
+-- University sign-in looks up which account an ID signs in as.
+create or replace function public.org_login_email(org_slug text, external text) returns text
+language sql stable security definer set search_path = public, auth as $$
+  select u.email from public.org_identities i join public.organizations o on o.id = i.org_id join auth.users u on u.id = i.user_id
+  where o.slug = org_slug and i.external_id = external;
+$$;
+revoke execute on function public.org_login_email(text, text) from public, authenticated;
+grant execute on function public.org_login_email(text, text) to anon, authenticated;
+
+
+-- ============================================================================
+-- Proactive MoeAI: nudges written for the signed-in student on demand.
+-- ============================================================================
+
+alter table public.nudges drop constraint if exists nudges_kind_check;
+alter table public.nudges add constraint nudges_kind_check
+  check (kind = any (array['revisit','dormant','streak','misconception','new_material','practice']));
+alter table public.nudges add column if not exists course_id uuid references public.courses(id) on delete cascade;
+alter table public.nudges add column if not exists material_id uuid references public.course_materials(id) on delete cascade;
+create index if not exists nudges_user_unseen on public.nudges (user_id, created_at desc) where seen_at is null;
+
+-- MoeAI reaching out first. Runs as the student when their app opens, and
+-- only ever writes nudges for auth.uid(): new lectures their staff published,
+-- one practice question a day from the course brain, and a misconception
+-- they have not revisited in two days. Deterministic, no model call.
+create or replace function public.refresh_nudges()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  me uuid := auth.uid();
+  r record;
+begin
+  if me is null then return; end if;
+
+  -- 1. New lecture material in a course they take (last 14 days, once per file).
+  for r in
+    select m.id, m.title, m.course_id, c.code
+    from course_materials m
+    join course_enrollments e on e.course_id = m.course_id and e.user_id = me and e.role = 'student'
+    join courses c on c.id = m.course_id
+    where m.status = 'ready' and m.kind <> 'generated'
+      and m.updated_at > now() - interval '14 days'
+      and not exists (select 1 from nudges n where n.user_id = me and n.material_id = m.id)
+    order by m.updated_at desc
+    limit 2
+  loop
+    insert into nudges (user_id, kind, body, prompt, action_url, course_id, material_id)
+    values (me, 'new_material',
+      format('New in %s: "%s" was just published. Want me to walk you through it before your next lecture?', r.code, r.title),
+      format('Walk me through "%s" from %s: start with the big picture, then check my understanding with one question.', r.title, r.code),
+      '/moeai', r.course_id, r.id);
+  end loop;
+
+  -- 2. One practice question a day, from the course brain.
+  for r in
+    select b.course_id, c.code, b.practice
+    from course_brain b
+    join course_enrollments e on e.course_id = b.course_id and e.user_id = me and e.role = 'student'
+    join courses c on c.id = b.course_id
+    where jsonb_typeof(b.practice) = 'array' and jsonb_array_length(b.practice) > 0
+      and not exists (select 1 from nudges n where n.user_id = me and n.kind = 'practice' and n.created_at > now() - interval '20 hours')
+    order by random()
+    limit 1
+  loop
+    declare q text := r.practice -> (floor(random() * jsonb_array_length(r.practice)))::int ->> 'question';
+    begin
+      if q is not null then
+        insert into nudges (user_id, kind, body, prompt, action_url, course_id)
+        values (me, 'practice',
+          format('Quick %s check before you forget: %s', r.code, left(q, 220)),
+          format('Quiz me on this %s question, let me answer first, then correct me: %s', r.code, q),
+          '/moeai', r.course_id);
+      end if;
+    end;
+  end loop;
+
+  -- 3. A misconception not revisited in two days (spaced repetition).
+  for r in
+    select value from student_memory
+    where user_id = me and kind = 'misconception' and updated_at < now() - interval '2 days'
+      and not exists (select 1 from nudges n where n.user_id = me and n.kind = 'misconception' and n.created_at > now() - interval '2 days')
+    order by updated_at asc limit 1
+  loop
+    insert into nudges (user_id, kind, body, prompt, action_url)
+    values (me, 'misconception',
+      format('Two days ago you mixed something up: %s. Ready to make sure it stuck?', left(r.value, 160)),
+      format('Two days ago I had this misconception: %s. Give me one short question to check I understand it now.', r.value),
+      '/moeai');
+  end loop;
+end;
+$$;
+
+revoke all on function public.refresh_nudges() from public, anon;
+grant execute on function public.refresh_nudges() to authenticated;
+
+
+-- ============================================================================
+-- Live Ranked: rating changes stream over the Realtime websocket.
+-- ============================================================================
+
+-- Live Ranked: rating changes stream to every open leaderboard over the
+-- Realtime websocket. RLS still applies (ranked_read_all: signed-in only).
+do $$ begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'ranked_profiles') then
+    alter publication supabase_realtime add table public.ranked_profiles;
+  end if;
+end $$;
+
+
+-- Course access helpers are for RLS on signed-in requests only.
+revoke execute on function public.can_read_course(uuid) from public, anon;
+revoke execute on function public.can_teach_course(uuid) from public, anon;
+revoke execute on function public.is_org_teacher(uuid) from public, anon;
+grant execute on function public.can_read_course(uuid) to authenticated;
+grant execute on function public.can_teach_course(uuid) to authenticated;
+grant execute on function public.is_org_teacher(uuid) to authenticated;

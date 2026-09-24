@@ -10,6 +10,7 @@
  */
 import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { orgIdentity } from "@/lib/org";
 
 export const runtime = "nodejs";
 
@@ -19,16 +20,17 @@ export async function GET() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return Response.json({ signedIn: false });
 
-  const { data: profile } = await sb
-    .from("profiles")
-    .select("display_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: profile }, org] = await Promise.all([
+    sb.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+    orgIdentity(sb, user.id).catch(() => null),
+  ]);
 
   return Response.json({
     signedIn: true,
-    email: user.email,
-    name: profile?.display_name || user.email?.split("@")[0] || "Student",
+    // A university account's address is internal; show the university ID instead.
+    email: org ? `${org.externalId} · ${org.orgName}` : user.email,
+    name: profile?.display_name || org?.displayName || user.email?.split("@")[0] || "Student",
+    org,
   });
 }
 

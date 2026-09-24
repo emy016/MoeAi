@@ -27,6 +27,7 @@ import { supabaseServer, supabaseAdmin } from "@/lib/supabase-server";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
+import { courseBlock, courseBrain, retrieve } from "@/lib/rag/retrieve";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -143,7 +144,33 @@ export async function POST(req: NextRequest) {
   /** What the answer was built on, so the workspace can show it and the student
    *  can go read the passage rather than take MoeAI's word for it. */
   const citations: { title: string; ref: string; source: string; excerpt: string }[] = [];
-  if (sb && userId) {
+  // A university course the student is enrolled in: retrieve from what its
+  // staff uploaded (RLS limits this to their own courses), and lead with it.
+  const courseId = (raw?.learning as { courseId?: unknown } | undefined)?.courseId;
+  if (sb && userId && typeof courseId === "string" && /^[0-9a-f-]{36}$/i.test(courseId)) {
+    try {
+      const recent = messages.filter((m) => m.role === "user").slice(-2).map((m) => m.content).join("\n");
+      const [{ data: course }, passages, brain] = await Promise.all([
+        sb.from("courses").select("code, title").eq("id", courseId).maybeSingle(),
+        retrieve(sb, courseId, recent),
+        courseBrain(sb, courseId),
+      ]);
+      if (course) {
+        grounded = passages.length;
+        for (const p of passages) {
+          citations.push({
+            title: p.material_title,
+            ref: p.page ? `p.${p.page}` : p.heading || "",
+            source: "course",
+            excerpt: p.content.replace(/\s+/g, " ").slice(0, 420).trim(),
+          });
+        }
+        extra.push(courseBlock(course, passages, brain));
+      }
+    } catch {
+      // Retrieval is an enhancement; without it MoeAI still teaches, just ungrounded.
+    }
+  } else if (sb && userId) {
     try {
       const { data } = await sb.rpc("search_material", {
         q: question, scope: null, max_results: 4, room: roomId,

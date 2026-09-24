@@ -18,6 +18,8 @@ import { useSubjectStore } from '../subjects/subjectStore';
 import FullCalendarScreen from './FullCalendarScreen';
 import LectureChatScreen from './LectureChatScreen';
 import { useAccount } from '../account/AccountContext';
+import MoeAINudge from '../components/MoeAINudge';
+import { useNudges } from '../nudges/useNudges';
 
 export default function HomeScreen({ registerCurrentWeekReset, active = false, onOpenSettings }) {
   const { t } = usePreferences();
@@ -108,6 +110,17 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
     if (chatTarget) removeChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
   }, [chatTarget, removeChat]);
   const { openAccount } = useAccount();
+  const { nudge, dismiss: dismissNudge } = useNudges(subjects, t);
+  // Taking MoeAI up on it: open that lecture's chat with the question already asked.
+  const acceptNudge = useCallback((item) => {
+    const subject = subjects.find((s) => s.id === item.subjectId) || subjects.find((s) => s.lectures.length);
+    const lecture = subject?.lectures.find((l) => l.id === item.lectureId) || subject?.lectures[0];
+    dismissNudge(item);
+    if (!subject || !lecture) return;
+    const threadId = startChat(subject.id, lecture.id, t('newChat'));
+    setChatTarget({ subjectId: subject.id, lectureId: lecture.id });
+    sendMessage(subject.id, lecture.id, threadId, { text: item.prompt, subject, lecture });
+  }, [dismissNudge, sendMessage, startChat, subjects, t]);
   const selectChatProfileItem = useCallback((id) => {
     if (id === 'profile') { openAccount(); return; }
     if (id !== 'settings') return;
@@ -131,6 +144,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
       <View style={styles.calendarSection}>
         <CalendarStrip registerReset={registerCurrentWeekReset} objects={objects} onSelectDay={openTimeline} onOpenMonth={openFullCalendar} />
       </View>
+      <MoeAINudge nudge={nudge} onAccept={acceptNudge} onDismiss={dismissNudge} />
       <SubjectDashboard subjects={subjects} active={active} onOpenSubject={openSubject} onCreateSubject={startCreateSubject} onLongPressSubject={longPressSubject} />
 
       <FullCalendarScreen visible={fullCalendarOpen} objects={objects} onClose={closeFullCalendar} onSelectDay={openTimeline} onCreateEvent={openEditor} onDeleteEvent={requestCalendarDelete} />

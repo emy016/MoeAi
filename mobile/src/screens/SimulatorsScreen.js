@@ -17,11 +17,14 @@ import Card from '../components/Card';
 import ElasticPressable from '../components/ElasticPressable';
 import SubjectIcon from '../components/SubjectIcon';
 import SandboxFrame from '../chat/blocks/SandboxFrame';
+import PhetFrame from '../chat/blocks/PhetFrame';
+import { PHET_CREDIT, parsePhet, phetUrl } from '../simulators/phet';
 import { blockDocument, themeFrom } from '../chat/blocks/document';
 import { Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 import { onStorageWrite, readStoredValue, storageKey } from '../storage/persistedStorage';
-import { SUBJECT_EXAMPLES } from '../subjects/subjectExamples';
+import { baseSubjects } from '../subjects/subjectExamples';
+import { useAccount } from '../account/AccountContext';
 import { SIMULATORS, STARTER_IDS, simulatorsForSubjects } from '../simulators/catalog';
 
 const SUBJECTS_KEY = storageKey('user-subjects-v1');
@@ -38,7 +41,8 @@ function useCourseList() {
     const unsubscribe = onStorageWrite((key, value) => { if (key === SUBJECTS_KEY) apply(value); });
     return () => { alive = false; unsubscribe(); };
   }, []);
-  return useMemo(() => [...SUBJECT_EXAMPLES, ...userSubjects], [userSubjects]);
+  const { orgCourses } = useAccount();
+  return useMemo(() => [...baseSubjects(orgCourses), ...userSubjects], [orgCourses, userSubjects]);
 }
 
 function SimTile({ sim, onOpen }) {
@@ -57,10 +61,11 @@ function SimTile({ sim, onOpen }) {
 }
 
 function SimulatorView({ sim, onClose }) {
-  const { colors, effectiveTheme, type } = usePreferences();
+  const { colors, effectiveTheme, type, language } = usePreferences();
+  const phetLink = useMemo(() => (sim.kind === 'phet' ? phetUrl(parsePhet(sim.code)?.sim, language) : null), [language, sim]);
   const insets = useSafeAreaInsets();
   const frameId = useMemo(() => `moeai-sim-${sim.id}-${Date.now().toString(36)}`, [sim.id]);
-  const html = useMemo(() => blockDocument({
+  const html = useMemo(() => sim.kind === 'phet' ? '' : blockDocument({
     id: frameId, kind: sim.kind, language: sim.language, code: sim.code, theme: themeFrom(colors, effectiveTheme !== 'light'), fullscreen: true,
   }), [colors, effectiveTheme, frameId, sim]);
   return (
@@ -69,13 +74,15 @@ function SimulatorView({ sim, onClose }) {
         <View style={[styles.fullHeader, { borderBottomColor: colors.border }]}>
           <View style={styles.tileText}>
             <Text style={[{ color: colors.textPrimary }, type(16, 'bold', 21)]} numberOfLines={1}>{sim.title}</Text>
-            <Text style={[{ color: colors.textMuted }, type(11, 'regular', 15)]} numberOfLines={1}>{sim.blurb}</Text>
+            <Text style={[{ color: colors.textMuted }, type(11, 'regular', 15)]} numberOfLines={1}>{phetLink ? PHET_CREDIT : sim.blurb}</Text>
           </View>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Close"
             style={[styles.close, { backgroundColor: colors.cardButton }]}><XMarkIcon size={20} color={colors.textPrimary} /></Pressable>
         </View>
         <View style={[styles.fullBody, { paddingBottom: insets.bottom }]}>
-          <SandboxFrame html={html} frameId={frameId} height="100%" onMessage={() => {}} title={sim.title} style={{ flex: 1 }} />
+          {phetLink
+            ? <PhetFrame url={phetLink} height="100%" title={sim.title} style={{ flex: 1 }} />
+            : <SandboxFrame html={html} frameId={frameId} height="100%" onMessage={() => {}} title={sim.title} style={{ flex: 1 }} />}
         </View>
       </View>
     </Modal>

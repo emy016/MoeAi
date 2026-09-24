@@ -14,10 +14,10 @@ const ALIASES = {
   js: 'javascript', javascript: 'javascript', mjs: 'javascript', node: 'javascript',
   mermaid: 'mermaid', visualizer: 'visualizer', visualiser: 'visualizer', widget: 'visualizer',
   chart: 'chart', steps: 'steps', checklist: 'steps', quiz: 'quiz',
-  scene3d: 'scene3d', '3d': 'scene3d', animation: 'animation', manim: 'animation',
+  scene3d: 'scene3d', '3d': 'scene3d', animation: 'animation', manim: 'animation', phet: 'phet', simulation: 'phet',
 };
 
-export const LIVE_KINDS = new Set(['mermaid', 'visualizer', 'chart', 'steps', 'quiz', 'scene3d', 'animation']);
+export const LIVE_KINDS = new Set(['mermaid', 'visualizer', 'chart', 'steps', 'quiz', 'scene3d', 'animation', 'phet']);
 export const RUNNABLE = new Set(['python', 'javascript']);
 
 /** kind: one of LIVE_KINDS, or 'code' with `language` set. */

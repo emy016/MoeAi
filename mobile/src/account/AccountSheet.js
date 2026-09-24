@@ -49,7 +49,7 @@ function syncLine(sync, t) {
 
 export default function AccountSheet() {
   const { colors, type, t } = usePreferences();
-  const { account, sync, sheetOpen, closeAccount, signIn, signUp, signInWithGoogle, signOut } = useAccount();
+  const { account, sync, sheetOpen, closeAccount, signIn, signUp, signInWithGoogle, signInWithUniversity, signOut } = useAccount();
   const [mode, setMode] = useState('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -92,11 +92,14 @@ export default function AccountSheet() {
             <SyncIcon size={16} color={sync.state === 'offline' ? colors.danger : colors.accent} />
             <Text style={[{ color: colors.textSecondary, flex: 1 }, type(12, 'semiBold', 16)]}>{line.text}</Text>
           </View>
+          {account.org ? <Text style={[{ color: colors.textSecondary }, type(12, 'semiBold', 17)]}>{t('universityLinked')}</Text> : null}
           <Text style={[{ color: colors.textMuted }, type(12, 'regular', 17)]}>{t('syncExplain')}</Text>
           <Button label={t('signOut')} ghost busy={busy === 'out'} onPress={() => run('out', async () => { await signOut(); closeAccount(); })} />
         </View>
       ) : (
         <View style={styles.body}>
+          <Button label={t('signInUniversity')} busy={busy === 'uni'} onPress={() => run('uni', async () => signInWithUniversity())} />
+          <Text style={[{ color: colors.textMuted, textAlign: 'center' }, type(12, 'regular', 16)]}>{t('orPersonal')}</Text>
           <Text style={[{ color: colors.textSecondary }, type(13, 'regular', 18)]}>{t('accountPitch')}</Text>
           {mode === 'signup' ? <Field value={name} onChangeText={setName} placeholder={t('yourName')} autoComplete="name" /> : null}
           <Field value={email} onChangeText={setEmail} placeholder={t('email')} keyboardType="email-address" autoComplete="email" />
