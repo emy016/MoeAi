@@ -118,3 +118,14 @@ export function accountLabels(account, t) {
   const handle = account.handle || String(account.email || '').split('@')[0];
   return { displayName: account.name || handle || t('student'), handle: handle ? `@${handle}` : '' };
 }
+
+/**
+ * The name of the MoeAI a university account is on: its faculty's model,
+ * e.g. "MoeAI · FUE Computer Science". Null for everyone else.
+ */
+export function modelLabel(account) {
+  const org = account?.org;
+  if (!org) return null;
+  const school = String(org.orgSlug || '').toUpperCase() || org.orgName;
+  return `MoeAI · ${school}${org.program ? ` ${org.program}` : ''}`;
+}

@@ -18,6 +18,8 @@ function normalizeMessage(message) {
     provider: message?.provider ? String(message.provider) : null,
     model: message?.model ? String(message.model) : null,
     citations: Array.isArray(message?.citations) ? message.citations.slice(0, 8) : [],
+    feedback: message?.feedback === 1 || message?.feedback === -1 ? message.feedback : 0,
+    editedAt: message?.editedAt || null,
   };
 }
 
@@ -195,6 +197,36 @@ export function useLectureChatStore() {
     });
   }, [patchMessage, streamReply]);
 
+  /**
+   * Edit a question and ask it again: everything after it in the thread is
+   * replaced by the new answer, like editing a message in Claude or Gemini.
+   */
+  const editAndResend = useCallback((subjectId, lectureId, threadId, messageId, text, { subject = null, lecture = null } = {}) => {
+    const clean = String(text || '').trim();
+    const key = lectureChatKey(subjectId, lectureId);
+    const thread = (chatsRef.current[key] || []).find((item) => item.id === threadId);
+    const index = thread ? thread.messages.findIndex((message) => message.id === messageId && message.role === 'user') : -1;
+    if (!clean || index < 0) return null;
+    thread.messages.slice(index).forEach((message) => inFlight.current.get(message.id)?.abort());
+    const original = thread.messages[index];
+    const now = new Date();
+    const userMessage = normalizeMessage({ ...original, id: makeId('message'), text: clean, createdAt: now.toISOString(), editedAt: now.toISOString() });
+    const assistantMessage = normalizeMessage({ id: makeId('message'), role: 'assistant', text: '', status: 'pending', createdAt: new Date(now.getTime() + 1).toISOString() });
+    const history = thread.messages.slice(0, index);
+    setChats((current) => ({
+      ...current,
+      [key]: (current[key] || []).map((item) => item.id !== threadId ? item : {
+        ...item, updatedAt: assistantMessage.createdAt, messages: [...history, userMessage, assistantMessage],
+      }),
+    }));
+    return streamReply(key, threadId, assistantMessage.id, { text: clean, files: original.files, history, subject, lecture });
+  }, [streamReply]);
+
+  /** Thumbs up (1), down (-1) or cleared (0) on one answer; kept with the chat. */
+  const setFeedback = useCallback((subjectId, lectureId, threadId, messageId, rating) => {
+    patchMessage(lectureChatKey(subjectId, lectureId), threadId, messageId, { feedback: rating });
+  }, [patchMessage]);
+
   const removeLectureChats = useCallback((subjectId, lectureId) => {
     const key = lectureChatKey(subjectId, lectureId);
     setChats((current) => {
@@ -240,5 +272,5 @@ export function useLectureChatStore() {
     setChats((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${subjectId}:`))));
   }, []);
 
-  return { chats, ready, startChat, sendMessage, stopReply, regenerateReply, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats };
+  return { chats, ready, startChat, sendMessage, stopReply, regenerateReply, editAndResend, setFeedback, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats };
 }

@@ -19,6 +19,7 @@ import FullCalendarScreen from './FullCalendarScreen';
 import LectureChatScreen from './LectureChatScreen';
 import { useAccount } from '../account/AccountContext';
 import MoeAINudge from '../components/MoeAINudge';
+import ModelBanner from '../components/ModelBanner';
 import { useNudges } from '../nudges/useNudges';
 
 export default function HomeScreen({ registerCurrentWeekReset, active = false, onOpenSettings }) {
@@ -36,7 +37,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const [chatTarget, setChatTarget] = useState(null);
   const { events: userEvents, addEvent, removeEvent } = useUserCalendarEvents();
   const { subjects, addSubject, renameSubject, removeSubject, addLecture, removeLecture, toggleLectureComplete } = useSubjectStore();
-  const { chats, startChat, sendMessage, stopReply, regenerateReply, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
+  const { chats, startChat, sendMessage, stopReply, regenerateReply, editAndResend, setFeedback, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
   const objects = userEvents;
   const selectedSubject = useMemo(() => subjects.find((subject) => subject.id === selectedSubjectId) || null, [selectedSubjectId, subjects]);
   const chatSubject = useMemo(() => subjects.find((subject) => subject.id === chatTarget?.subjectId) || null, [chatTarget?.subjectId, subjects]);
@@ -100,6 +101,12 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const regenerateLectureReply = useCallback((threadId) => {
     if (chatTarget) regenerateReply(chatTarget.subjectId, chatTarget.lectureId, threadId, { subject: chatSubject, lecture: chatLecture });
   }, [chatLecture, chatSubject, chatTarget, regenerateReply]);
+  const editLectureMessage = useCallback((threadId, messageId, text) => {
+    if (chatTarget) editAndResend(chatTarget.subjectId, chatTarget.lectureId, threadId, messageId, text, { subject: chatSubject, lecture: chatLecture });
+  }, [chatLecture, chatSubject, chatTarget, editAndResend]);
+  const rateLectureMessage = useCallback((threadId, messageId, rating) => {
+    if (chatTarget) setFeedback(chatTarget.subjectId, chatTarget.lectureId, threadId, messageId, rating);
+  }, [chatTarget, setFeedback]);
   const renameLectureChat = useCallback((threadId, title) => {
     if (chatTarget) renameChat(chatTarget.subjectId, chatTarget.lectureId, threadId, title);
   }, [chatTarget, renameChat]);
@@ -109,7 +116,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const deleteLectureChat = useCallback((threadId) => {
     if (chatTarget) removeChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
   }, [chatTarget, removeChat]);
-  const { openAccount } = useAccount();
+  const { openAccount, openSite, account } = useAccount();
   const { nudge, dismiss: dismissNudge } = useNudges(subjects, t);
   // Taking MoeAI up on it: open that lecture's chat with the question already asked.
   const acceptNudge = useCallback((item) => {
@@ -123,10 +130,11 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   }, [dismissNudge, sendMessage, startChat, subjects, t]);
   const selectChatProfileItem = useCallback((id) => {
     if (id === 'profile') { openAccount(); return; }
+    if (id === 'plan') { if (account.status === 'signedIn') openSite('/account#plan'); else openAccount(); return; }
     if (id !== 'settings') return;
     setChatTarget(null);
     requestAnimationFrame(() => onOpenSettings?.());
-  }, [onOpenSettings, openAccount]);
+  }, [account.status, onOpenSettings, openAccount, openSite]);
   const confirmContentDelete = useCallback(() => {
     if (deleteTarget?.type === 'subject') {
       removeSubjectChats(deleteTarget.subject.id);
@@ -141,6 +149,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
 
   return (
     <ScreenContainer>
+      <ModelBanner subjects={subjects} onOpenSubject={openSubject} />
       <View style={styles.calendarSection}>
         <CalendarStrip registerReset={registerCurrentWeekReset} objects={objects} onSelectDay={openTimeline} onOpenMonth={openFullCalendar} />
       </View>
@@ -158,7 +167,7 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
       <SubjectEditorModal visible={!!lectureEditorSubjectId} title={t('newLectureChat')} placeholder={t('lectureName')} allowFiles onCancel={() => setLectureEditorSubjectId(null)} onConfirm={saveLecture} />
       <SubjectActionOverlay visible={!!subjectActions} anchor={subjectActions?.anchor} onClose={() => setSubjectActions(null)} onRename={startRenameSubject} onDelete={requestSubjectDelete} />
       <CalendarAlertModal visible={!!deleteTarget} title={deleteTarget?.type === 'subject' ? t('deleteSubject') : t('deleteLecture')} message={deleteTarget?.type === 'subject' ? t('deleteSubjectConfirm') : t('deleteLectureConfirm')} onClose={() => setDeleteTarget(null)} onConfirm={confirmContentDelete} destructive />
-      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onStop={stopLectureReply} onRegenerate={regenerateLectureReply} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onDeleteChat={deleteLectureChat} onProfileSelect={selectChatProfileItem} />
+      <LectureChatScreen key={chatTarget ? lectureChatKey(chatTarget.subjectId, chatTarget.lectureId) : 'closed-chat'} visible={!!chatTarget && !!chatLecture} subject={chatSubject} lecture={chatLecture} threads={chatThreads} onClose={closeLectureChat} onStartChat={startLectureChat} onSend={sendLectureMessage} onStop={stopLectureReply} onRegenerate={regenerateLectureReply} onEditResend={editLectureMessage} onFeedback={rateLectureMessage} onRenameChat={renameLectureChat} onTogglePinChat={toggleLectureChatPin} onDeleteChat={deleteLectureChat} onProfileSelect={selectChatProfileItem} />
     </ScreenContainer>
   );
 }

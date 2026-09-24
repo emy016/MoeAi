@@ -17,7 +17,7 @@ export default function Legal() {
     <div className="stack">
       <section className="card" id="terms">
         <h1>Terms of Service</h1>
-        <p>Last updated: September 2026.</p>
+        <p>Last updated: September 2026 · version 2026-09. When you create an account you accept this version; if it changes, you will be asked again.</p>
         <p>
           EduMoe is a free educational platform. By using it you agree to use it for
           learning, not to submit its output as your own graded work. MoeAI is a tutor:
@@ -34,6 +34,23 @@ export default function Legal() {
           We may rate-limit or suspend accounts that abuse the service, attempt to
           extract the system configuration, or attack the infrastructure.
         </p>
+        <p>
+          <strong>Your account.</strong> One account per person. Keep your password
+          and any sign-in method you connect (Google, Apple) to yourself; you can turn
+          on two-step verification in Account settings.
+        </p>
+        <p>
+          <strong>Organizations.</strong> If you use MoeAI through a university, school
+          or other organization, that organization decides who is a member and can
+          suspend or remove your membership there; your personal account stays yours.
+          Whoever creates an organization is its owner and is responsible for inviting
+          only people who belong to it.
+        </p>
+        <p>
+          <strong>Plans.</strong> MoeAI currently offers a Free plan. Paid plans are
+          listed but not yet available, and nothing is charged. Prices and terms for
+          paid plans will be published here before they can be bought.
+        </p>
       </section>
 
       <section className="card" id="privacy">
@@ -45,7 +62,11 @@ export default function Legal() {
         </p>
         <p><strong>What we store:</strong></p>
         <ul>
-          <li>Your account: email, display name, university, faculty, year.</li>
+          <li>Your account: email, display name, handle, and optionally a phone number; which sign-in methods you connected; your university, faculty and year.</li>
+          <li>Which organizations you belong to, your role there and whether your membership is active.</li>
+          <li>Which version of these terms and this policy you accepted, and when.</li>
+          <li>A security log of sign-ins and account changes (never your password, codes or tokens), so you can spot anything you did not do.</li>
+          <li>Thumbs up or down you give an answer. In a university course, that course&rsquo;s staff can see it, to fix where MoeAI falls short on their material.</li>
           <li>Your conversations with MoeAI, so it has context next time.</li>
           <li>
             Study notes MoeAI derives about you — topics you struggled with, stated
@@ -64,9 +85,18 @@ export default function Legal() {
           OpenRouter) to generate a reply. Their handling is governed by their own terms.
         </p>
         <p>
+          <strong>Voice.</strong> Voice mode and read-aloud use the speech features
+          built into your browser or phone. MoeAI receives only the text. Some browsers
+          (for example Chrome) send audio to their own speech service to transcribe it;
+          that is governed by the browser&rsquo;s terms.
+        </p>
+        <p>
           <strong>Your rights:</strong> you can view and delete everything MoeAI
-          remembers about you from your dashboard, and you can delete your account,
-          which removes your conversations and memory.
+          remembers about you from your dashboard; download everything we store about
+          you as a file from Account settings; and delete your account there, which
+          removes your profile, conversations, memory and progress. Content that belongs
+          to an organization (for example lectures its staff uploaded) stays with that
+          organization.
         </p>
         <p>
           If you are under 18, use EduMoe with the awareness of a parent or guardian.
@@ -85,6 +115,21 @@ export default function Legal() {
           product analytics, this page will say so before it ships and consent will be
           asked for.
         </p>
+      </section>
+
+      <section className="card" id="licenses">
+        <h2>Open-source licenses</h2>
+        <p>EduMoe and MoeAI are built on open-source work. With thanks to:</p>
+        <ul>
+          <li>Next.js, React, React Native and Expo (MIT)</li>
+          <li>Supabase client libraries (MIT)</li>
+          <li>KaTeX, Mermaid, highlight.js (MIT, MIT, BSD-3-Clause)</li>
+          <li>math.js and pdf.js (Apache-2.0)</li>
+          <li>Heroicons (MIT) and Lucide (ISC)</li>
+          <li>Nunito Sans and Inter fonts (SIL Open Font License 1.1)</li>
+          <li>Twemoji graphics (CC BY 4.0)</li>
+          <li>PhET Interactive Simulations, University of Colorado Boulder (CC BY 4.0), shown from PhET&rsquo;s own site</li>
+        </ul>
       </section>
     </div>
   );

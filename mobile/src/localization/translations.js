@@ -179,6 +179,38 @@ Object.assign(ar, {
   emailOrPhone: 'الإيميل أو رقم التليفون', setupPending: 'اختار اسم مستخدم ووافق على الشروط عشان تكمّل حسابك.',
 });
 
+// Chat: voice, read-aloud, feedback, editing, the lecture reader, the model banner.
+Object.assign(en, {
+  readAloud: 'Read aloud', stopReading: 'Stop reading', goodAnswer: 'Good answer', badAnswer: 'Bad answer',
+  editMessage: 'Edit', editedEdit: 'Edited · Edit', editingMessage: 'Editing your message. Send to ask it again.',
+  voiceMode: 'Voice mode', voiceListening: 'Listening…', voiceHeard: 'Go on, or pause to send', voiceThinking: 'Thinking…',
+  voiceSpeaking: 'MoeAI is talking', voicePaused: 'Paused', voiceTapToInterrupt: 'Tap the circle to interrupt',
+  voicePause: 'Pause', voiceResume: 'Resume listening', voiceEnd: 'End voice mode',
+  voiceUnavailableShort: 'Voice input is not available', voiceNoSpeech: 'This browser cannot read answers aloud; they still appear in the chat.',
+  readLecture: 'Read the lecture', askAboutPage: 'Ask about this page', pageN: 'Page {n}', loadingLecture: 'Opening the lecture…',
+  lectureUnavailable: 'This lecture is not available to your account.', lectureOffline: 'The lecture could not be loaded. Check your connection.',
+  askPagePrompt: 'Explain page {n} of this lecture ({heading}) step by step.',
+  suggestSummary: 'Summarize this lecture', suggestExplain: 'Explain the main idea simply', suggestExample: 'Walk me through a worked example', suggestQuiz: 'Quiz me on this lecture',
+  groundedNote: "I answer from your lecturer's own slides and cite the page, so you can check.",
+  youAreOn: "YOU'RE ON", ragBadge: 'Course-grounded', modelPitch: 'Your tutor answers from your faculty\'s own material: {courses} courses, {lectures} lectures, cited to the page. Pick a course to start.',
+  cancel: 'Cancel',
+});
+Object.assign(ar, {
+  readAloud: 'اقرأ بصوت عالي', stopReading: 'وقف القراءة', goodAnswer: 'إجابة كويسة', badAnswer: 'إجابة مش كويسة',
+  editMessage: 'تعديل', editedEdit: 'متعدّلة · تعديل', editingMessage: 'بتعدّل رسالتك. ابعتها عشان تسأل تاني.',
+  voiceMode: 'وضع الصوت', voiceListening: 'بسمعك…', voiceHeard: 'كمّل، أو اسكت شوية عشان تبعت', voiceThinking: 'بفكّر…',
+  voiceSpeaking: 'MoeAI بيتكلم', voicePaused: 'متوقف', voiceTapToInterrupt: 'دوس على الدايرة عشان تقاطعه',
+  voicePause: 'إيقاف مؤقت', voiceResume: 'كمّل الاستماع', voiceEnd: 'اقفل وضع الصوت',
+  voiceUnavailableShort: 'الإدخال بالصوت مش متاح', voiceNoSpeech: 'المتصفح ده مش بيقرا الإجابات بصوت، بس هتلاقيها مكتوبة في المحادثة.',
+  readLecture: 'اقرأ المحاضرة', askAboutPage: 'اسأل عن الصفحة دي', pageN: 'صفحة {n}', loadingLecture: 'بفتح المحاضرة…',
+  lectureUnavailable: 'المحاضرة دي مش متاحة لحسابك.', lectureOffline: 'مقدرناش نحمّل المحاضرة. اتأكد من النت.',
+  askPagePrompt: 'اشرحلي صفحة {n} من المحاضرة دي ({heading}) خطوة بخطوة.',
+  suggestSummary: 'لخّصلي المحاضرة', suggestExplain: 'اشرحلي الفكرة الأساسية ببساطة', suggestExample: 'حل معايا مثال خطوة بخطوة', suggestQuiz: 'اختبرني في المحاضرة',
+  groundedNote: 'بجاوب من سلايدات الدكتور نفسها وبقولك رقم الصفحة، عشان تتأكد بنفسك.',
+  youAreOn: 'إنت على', ragBadge: 'مبني على موادك', modelPitch: 'المساعد بتاعك بيجاوب من مواد كليتك نفسها: {courses} مواد و{lectures} محاضرة، ومعاها رقم الصفحة. اختار مادة وابدأ.',
+  cancel: 'إلغاء',
+});
+
 // Simulators tab.
 Object.assign(en, {
   simulatorsForYou: 'Picked for the courses on your Home tab. Add a course there and its simulators appear here.',

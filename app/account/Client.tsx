@@ -33,8 +33,8 @@ const EVENT_LABEL: Record<string, string> = {
   subscription_changed: "Plan changed", account_export: "Data exported", onboarding_completed: "Setup finished",
 };
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="org-card st-card"><div className="org-section"><h2>{title}</h2>{children}</div></section>;
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
+  return <section id={id} className="org-card st-card"><div className="org-section"><h2>{title}</h2>{children}</div></section>;
 }
 
 export default function Client() {
@@ -146,7 +146,7 @@ export default function Client() {
           <Link href="/moeai" className="st-back"><ArrowLeft size={15} aria-hidden="true" /> MoeAI</Link>
         </div>
 
-        <Section title="Profile">
+        <Section id="plan" title="Profile and plan">
           <form className="org-form" onSubmit={saveProfile} style={{ marginTop: 8 }}>
             <div className="st-two">
               <label className="st-field">Display name<input className="org-input" value={profile.displayName} onChange={(e) => setProfile((s) => ({ ...s, displayName: e.target.value }))} /></label>
@@ -228,7 +228,7 @@ export default function Client() {
           </div>
         </Section>
 
-        <Section title="Your data">
+        <Section id="delete" title="Your data">
           <p className="org-muted">Download everything MoeAI stores about you, as JSON.</p>
           <a className="org-btn ghost small" href="/api/account" download style={{ marginTop: 8, display: "inline-flex" }}><Download size={14} aria-hidden="true" /> Export my data</a>
           <div className="org-form" style={{ marginTop: 18 }}>
