@@ -39,7 +39,7 @@ function Section({ title, children }) {
 
 function Inner({ title, description, children, onPress, danger=false, stack=false }) {
   const { colors, type, isRTL } = usePreferences();
-  const content = <View style={[s.inner,stack&&s.innerStack,{backgroundColor:colors.cardButton,flexDirection:stack?'column':(isRTL?'row-reverse':'row')}]}><View style={[s.copy,stack&&s.stackCopy]}><Text numberOfLines={2} style={[{color:danger?colors.danger:colors.textPrimary,textAlign:isRTL?'right':'left'},type(14,'semiBold')]}>{title}</Text>{description?<Text style={[{color:colors.textMuted,textAlign:isRTL?'right':'left'},type(12,'regular',16)]}>{description}</Text>:null}</View>{children}{onPress&&!stack?<ChevronRightIcon size={18} color={colors.textMuted} style={{transform:[{scaleX:isRTL?-1:1}]}}/>:null}</View>;
+  const content = <View style={[s.inner,stack&&s.innerStack,{backgroundColor:colors.cardButton,flexDirection:stack?'column':(isRTL?'row-reverse':'row')}]}><View style={stack?s.stackCopy:s.copy}><Text numberOfLines={2} style={[{color:danger?colors.danger:colors.textPrimary,textAlign:isRTL?'right':'left'},type(14,'semiBold')]}>{title}</Text>{description?<Text style={[{color:colors.textMuted,textAlign:isRTL?'right':'left'},type(12,'regular',16)]}>{description}</Text>:null}</View>{children}{onPress&&!stack?<ChevronRightIcon size={18} color={colors.textMuted} style={{transform:[{scaleX:isRTL?-1:1}]}}/>:null}</View>;
   return onPress?<ElasticPressable style={s.full} pressableStyle={s.full} onPress={onPress} accessibilityRole="button" accessibilityLabel={title}>{content}</ElasticPressable>:content;
 }
 
@@ -161,7 +161,7 @@ const s=StyleSheet.create({
  root:{flex:1},
  scroll:{padding:Spacing.md,paddingBottom:Spacing.xl},
  section:{padding:Spacing.md,marginBottom:Spacing.md},sectionTitle:{marginBottom:Spacing.md},sectionBody:{gap:Spacing.sm},
- full:{width:'100%'},inner:{minHeight:68,borderRadius:Radius.md,padding:Spacing.md,alignItems:'center',gap:Spacing.sm},innerStack:{alignItems:'stretch'},copy:{flex:1,minWidth:0},stackCopy:{width:'100%',flex:0},
+ full:{width:'100%'},inner:{minHeight:68,borderRadius:Radius.md,padding:Spacing.md,alignItems:'center',gap:Spacing.sm},innerStack:{alignItems:'stretch'},copy:{flex:1,minWidth:0},stackCopy:{width:'100%',minWidth:0,flexGrow:0,flexShrink:0},
  segmented:{borderRadius:Radius.pill,padding:3,maxWidth:210,minWidth:136,position:'relative'},segmentIndicator:{position:'absolute',top:3,bottom:3,left:3,borderRadius:Radius.pill},segmentWrap:{flex:1,zIndex:1,alignSelf:'stretch'},segment:{flex:1,width:'100%',minHeight:32,paddingHorizontal:6,borderRadius:Radius.pill,alignItems:'center',justifyContent:'center',backgroundColor:'transparent'},
  accentBlock:{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'flex-start'},swatches:{flexDirection:'row',gap:SWATCH_GAP,flexShrink:0,position:'relative'},swatchSlot:{width:SWATCH_SIZE,height:SWATCH_SIZE,zIndex:1},swatch:{width:SWATCH_SIZE,height:SWATCH_SIZE,borderRadius:SWATCH_SIZE/2,alignItems:'center',justifyContent:'center'},swatchSelectionPosition:{position:'absolute',left:-2,top:-2,width:SWATCH_SIZE+4,height:SWATCH_SIZE+4,zIndex:0},swatchSelectionCircle:{width:'100%',height:'100%',borderRadius:(SWATCH_SIZE+4)/2},
  valueWrap:{maxWidth:118},switchTrack:{width:48,height:28,borderRadius:14,justifyContent:'center'},switchThumb:{width:24,height:24,borderRadius:12},

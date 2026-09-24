@@ -152,3 +152,11 @@ out/
 # Expo's install for the web export. The built bundle in public/ is committed;
 # this is 500 MB of toolchain that rebuilds with npm run build:app.
 mobile/node_modules/
+mobile/web-build/
+mobile/.expo/
+
+# The web export puts the app's fonts under assets/node_modules/, mirroring
+# where they came from. They are part of the built app, not dependencies, and
+# the node_modules/ rule above kept them off Vercel: /moeai rendered in the
+# fallback font. Re-include them.
+!public/assets/node_modules/

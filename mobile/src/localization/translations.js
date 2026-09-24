@@ -106,6 +106,14 @@ Object.assign(de,{pinned:'Angepinnt',recent:'Zuletzt',renameChat:'Chat umbenenne
 Object.assign(zh,{pinned:'已置顶',recent:'最近',renameChat:'重命名聊天',chatName:'聊天名称',pinChat:'置顶聊天',unpinChat:'取消置顶'});
 Object.assign(hi,{pinned:'पिन किए गए',recent:'हाल के',renameChat:'चैट का नाम बदलें',chatName:'चैट का नाम',pinChat:'चैट पिन करें',unpinChat:'चैट अनपिन करें'});
 
+Object.assign(en,{deleteChat:'Delete chat?',deleteChatConfirm:'This chat and all of its messages will be permanently deleted.',aiThinking:'MoeAI is thinking',copyMessage:'Copy message',copied:'Copied!'});
+Object.assign(ar,{deleteChat:'حذف المحادثة؟',deleteChatConfirm:'سيتم حذف هذه المحادثة وجميع رسائلها نهائيًا.',aiThinking:'MoeAI يفكر',copyMessage:'نسخ الرسالة',copied:'تم النسخ!'});
+Object.assign(es,{deleteChat:'¿Eliminar chat?',deleteChatConfirm:'Este chat y todos sus mensajes se eliminarán permanentemente.',aiThinking:'MoeAI está pensando',copyMessage:'Copiar mensaje',copied:'¡Copiado!'});
+Object.assign(fr,{deleteChat:'Supprimer la discussion ?',deleteChatConfirm:'Cette discussion et tous ses messages seront définitivement supprimés.',aiThinking:'MoeAI réfléchit',copyMessage:'Copier le message',copied:'Copié !'});
+Object.assign(de,{deleteChat:'Chat löschen?',deleteChatConfirm:'Dieser Chat und alle seine Nachrichten werden dauerhaft gelöscht.',aiThinking:'MoeAI denkt nach',copyMessage:'Nachricht kopieren',copied:'Kopiert!'});
+Object.assign(zh,{deleteChat:'删除聊天？',deleteChatConfirm:'此聊天及其全部消息将被永久删除。',aiThinking:'MoeAI 正在思考',copyMessage:'复制消息',copied:'已复制！'});
+Object.assign(hi,{deleteChat:'चैट हटाएँ?',deleteChatConfirm:'यह चैट और इसके सभी संदेश स्थायी रूप से हटा दिए जाएँगे।',aiThinking:'MoeAI सोच रहा है',copyMessage:'संदेश कॉपी करें',copied:'कॉपी हो गया!'});
+
 const CHAT_LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\nUt enim ad minim veniam, quis nostrud exercitation ullamco.\nLaboris nisi ut aliquip ex ea commodo consequat.\nDuis aute irure dolor in reprehenderit in voluptate velit esse.\nCillum dolore eu fugiat nulla pariatur.\nExcepteur sint occaecat cupidatat non proident.';
 Object.assign(en,{aiUnavailable:CHAT_LOREM,camera:'Camera',images:'Images',files:'Files',attachment:'Attachment',holdToDictate:'Hold to dictate',voiceUnavailable:'Speech recognition unavailable',voiceUnavailableDesc:'Speech recognition is unavailable or microphone permission was not granted on this device.',cameraPermission:'Camera permission required',cameraPermissionDesc:'Allow camera access to take a photo for this chat.',messageNavigator:'Open sent-message navigator'});
 Object.assign(ar,{aiUnavailable:CHAT_LOREM,camera:'الكاميرا',images:'الصور',files:'الملفات',attachment:'مرفق',holdToDictate:'اضغط مطولًا للإملاء',voiceUnavailable:'التعرّف على الكلام غير متاح',voiceUnavailableDesc:'التعرّف على الكلام غير متاح أو لم يُمنح إذن الميكروفون على هذا الجهاز.',cameraPermission:'إذن الكاميرا مطلوب',cameraPermissionDesc:'اسمح بالوصول إلى الكاميرا لالتقاط صورة لهذه المحادثة.',messageNavigator:'فتح متصفح الرسائل المرسلة'});
@@ -118,12 +126,55 @@ Object.assign(hi,{aiUnavailable:CHAT_LOREM,camera:'कैमरा',images:'च�
 export const translations = { en, ar, es, fr, de, zh, hi };
 export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_META);
 
-// The tutor is wired up now, so "unavailable" is no longer the right word:
-// aiUnreachable is what the student sees when the request never reached it.
-Object.assign(en,{aiUnreachable:'MoeAI could not be reached. Check your connection and try again.',builtOnPassage:'Built on one passage from your material',builtOnPassages:'Built on {count} passages from your material',yourLibrary:'Your library',courseMaterial:'Course material',stopReply:'Stop replying'});
-Object.assign(ar,{aiUnreachable:'تعذّر الوصول إلى MoeAI. تأكد من اتصالك وحاول مرة أخرى.',builtOnPassage:'مبني على مقطع واحد من موادك',builtOnPassages:'مبني على {count} مقاطع من موادك',yourLibrary:'مكتبتك',courseMaterial:'مادة المقرر',stopReply:'إيقاف الرد'});
-Object.assign(es,{aiUnreachable:'No se pudo contactar con MoeAI. Comprueba tu conexión e inténtalo de nuevo.'});
-Object.assign(fr,{aiUnreachable:'MoeAI est injoignable. Vérifiez votre connexion et réessayez.'});
-Object.assign(de,{aiUnreachable:'MoeAI ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.'});
-Object.assign(zh,{aiUnreachable:'无法连接到 MoeAI。请检查网络后重试。'});
-Object.assign(hi,{aiUnreachable:'MoeAI से संपर्क नहीं हो सका। अपना कनेक्शन जाँचें और फिर से प्रयास करें।'});
+// Interactive replies: cards, streaming controls and follow-ups. Other locales
+// fall back to English through t() until they are translated.
+Object.assign(en, {
+  blockVisualizer: 'Visualizer', blockPhet: 'Simulation', phetUnknown: 'This simulation could not be found.', phetOpen: 'Open on PhET', phetTell: 'Tell MoeAI what I saw', phetExplored: 'I explored it', phetAsk: 'I tried the {title} simulation ({done}). What should I have noticed, and what does it show about the concept?', blockChart: 'Chart', blockDiagram: 'Diagram', blockSteps: 'Steps', blockQuiz: 'Quick check',
+  block3d: '3D scene', blockAnimation: 'Animation', blockCode: 'Code', blockRun: 'Run', blockStop: 'Stop', blockExpand: 'Full screen',
+  blockDownload: 'Download', blockCopy: 'Copy', blockFix: 'Fix it', blockBuilding: 'Building the {what}…',
+  blockFixPrompt: 'The {what} you made shows an error: "{error}". Please fix it and send the whole {what} again.',
+  regenerate: 'Regenerate', tryAgain: 'Try again', replyStopped: 'Stopped · regenerate', stopReply: 'Stop replying',
+  blockOffline: "This card's tools could not be downloaded. Check your connection.",
+  followExplain: 'Explain it differently', followExample: 'Give me an example', followVisual: 'Show me visually', followQuiz: 'Quiz me on this',
+});
+Object.assign(ar, {
+  blockVisualizer: 'محاكاة تفاعلية', blockPhet: 'محاكاة', phetUnknown: 'مش لاقي المحاكاة دي.', phetOpen: 'افتح على PhET', phetTell: 'قول لـ MoeAI شفت إيه', phetExplored: 'جربتها', phetAsk: 'جربت محاكاة {title} ({done}). المفروض ألاحظ إيه، وده بيوضح إيه في الفكرة؟', blockChart: 'رسم بياني', blockDiagram: 'مخطط', blockSteps: 'خطوات', blockQuiz: 'سؤال سريع',
+  block3d: 'مشهد ثلاثي الأبعاد', blockAnimation: 'شرح متحرك', blockCode: 'كود', blockRun: 'تشغيل', blockStop: 'إيقاف', blockExpand: 'ملء الشاشة',
+  blockDownload: 'تحميل', blockCopy: 'نسخ', blockFix: 'صلّحها', blockBuilding: 'بيتعمل الـ{what}…',
+  blockFixPrompt: 'الـ{what} اللي عملته فيه error: "{error}". صلّحه وابعته كامل تاني.',
+  regenerate: 'إعادة الإجابة', tryAgain: 'جرّب تاني', replyStopped: 'اتوقف · أعد الإجابة', stopReply: 'وقف الرد',
+  blockOffline: 'مقدرناش نحمّل أدوات الكارت ده. اتأكد من النت.',
+  followExplain: 'اشرحها بطريقة تانية', followExample: 'اديني مثال', followVisual: 'وريهالي بصريًا', followQuiz: 'اختبرني فيها',
+});
+
+// Account and sync.
+Object.assign(en, {
+  guest: 'Guest', signInShort: 'Tap to sign in', student: 'Student', signIn: 'Sign in', createAccount: 'Create account', yourAccount: 'Your account',
+  accountPitch: 'Sign in to keep your courses, progress, chats and calendar on every device, and so MoeAI remembers how you learn.',
+  yourName: 'Your name', email: 'Email', password: 'Password', continueGoogle: 'Continue with Google', signInUniversity: 'Sign in with your university', nudgeGo: "Let's go", nudgeLater: 'Later', nudgeResume: "You're {percent}% through {lecture} in {subject}. Want a 5-minute recap so you can finish it today?", nudgeResumePrompt: 'Give me a 5-minute recap of {lecture} ({subject}) so I can finish it, then one question to check I understood.', fromYourCourse: 'FROM YOUR COURSE MATERIAL', orPersonal: 'or use a personal account', universityLinked: 'Your courses and lectures come from your faculty.',
+  noAccountYet: 'New here? Create an account', haveAccount: 'Already have an account? Sign in', signOut: 'Sign out',
+  accountError: 'Something went wrong. Try again.', syncSaved: 'Saved to your account', syncSaving: 'Saving…',
+  syncOffline: 'Offline, your changes will save when you are back online',
+  syncExplain: 'Courses, lecture progress, chats, calendar events and settings sync to your account. This device keeps its own copy too.',
+});
+Object.assign(ar, {
+  guest: 'زائر', signInShort: 'اضغط لتسجيل الدخول', student: 'طالب', signIn: 'تسجيل الدخول', createAccount: 'إنشاء حساب', yourAccount: 'حسابك',
+  accountPitch: 'سجّل دخولك عشان موادك وتقدمك ومحادثاتك وتقويمك يبقوا معاك على أي جهاز، وعشان MoeAI يفتكر إزاي بتذاكر.',
+  yourName: 'اسمك', email: 'الإيميل', password: 'كلمة السر', continueGoogle: 'كمّل بجوجل', signInUniversity: 'سجّل دخول بحساب جامعتك', nudgeGo: 'يلا بينا', nudgeLater: 'بعدين', nudgeResume: 'خلصت {percent}% من {lecture} في {subject}. تحب ملخص في ٥ دقايق عشان تخلصها النهارده؟', nudgeResumePrompt: 'اديني ملخص في ٥ دقايق لـ {lecture} ({subject}) عشان أخلصها، وبعدين سؤال واحد تتأكد إني فهمت.', fromYourCourse: 'من مادة الكورس بتاعك', orPersonal: 'أو استخدم حساب شخصي', universityLinked: 'موادك ومحاضراتك جاية من كليتك.',
+  noAccountYet: 'جديد هنا؟ اعمل حساب', haveAccount: 'عندك حساب؟ سجّل دخول', signOut: 'تسجيل الخروج',
+  accountError: 'حصلت مشكلة، جرّب تاني.', syncSaved: 'متسجّل في حسابك', syncSaving: 'بيتحفظ…',
+  syncOffline: 'مفيش نت، التغييرات هتتحفظ أول ما النت يرجع',
+  syncExplain: 'المواد وتقدم المحاضرات والمحادثات والتقويم والإعدادات بتتحفظ في حسابك، والجهاز ده كمان محتفظ بنسخة.',
+});
+
+// Simulators tab.
+Object.assign(en, {
+  simulatorsForYou: 'Picked for the courses on your Home tab. Add a course there and its simulators appear here.',
+  simulatorsEmpty: 'None of your courses has a simulator yet. Add courses on your Home tab, like Logic Design, Discrete Math, Python, Calculus or Physics, to unlock theirs. Here are a few to start with.',
+  simulatorsStarter: 'To get you started',
+});
+Object.assign(ar, {
+  simulatorsForYou: 'مختارة حسب المواد اللي في الصفحة الرئيسية. ضيف مادة هناك وهتلاقي المحاكاة بتاعتها هنا.',
+  simulatorsEmpty: 'لسه مفيش محاكاة لموادك. ضيف موادك في الصفحة الرئيسية زي Logic Design أو Discrete Math أو Python أو Calculus أو Physics عشان تفتح بتاعتها. ودي شوية تبدأ بيهم.',
+  simulatorsStarter: 'عشان تبدأ',
+});

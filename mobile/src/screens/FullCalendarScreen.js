@@ -407,8 +407,10 @@ const styles = StyleSheet.create({
   weekdayName: { width: `${100 / 7}%`, textAlign: 'center', textTransform: 'capitalize' },
   weekRow: { position: 'relative' },
   dayCell: { alignItems: 'center', paddingTop: 2, overflow: 'hidden' },
-  monthMarkerSlot: { justifyContent: 'center' },
-  monthMarker: { textAlign: 'center', maxWidth: '94%' },
+  // A stable, full-cell width prevents React Native Web from resolving the
+  // percentage against a shrink-wrapped parent and ellipsizing "SEP" to "S…".
+  monthMarkerSlot: { alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
+  monthMarker: { width: '100%', paddingHorizontal: 1, textAlign: 'center' },
   dateSelectionWrap: { width: Calendar.MONTH_DATE_SIZE, height: Calendar.MONTH_DATE_SIZE, borderRadius: Calendar.MONTH_DATE_SIZE / 2, alignItems: 'center', justifyContent: 'center' },
   dateCircle: { borderRadius: Calendar.MONTH_DATE_SIZE / 2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   monthIconsOverlay: { alignItems: 'flex-end', zIndex: 3 },

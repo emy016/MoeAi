@@ -57,7 +57,8 @@ for (const [file, text] of Object.entries(source)) {
   for (const match of text.matchAll(/(?:from|require\()\s*['"](\.[^'"]+)['"]/g)) {
     checked++;
     const target = resolve(dirname(file), match[1]);
-    const found = [target, `${target}.js`, `${target}.jsx`, `${target}.json`, resolve(target, "index.js")]
+    // Metro picks KaTeXMessage.web.js or KaTeXMessage.native.js per platform.
+    const found = [target, `${target}.js`, `${target}.jsx`, `${target}.json`, `${target}.web.js`, `${target}.native.js`, resolve(target, "index.js")]
       .some(candidate => existsSync(candidate));
     if (!found) broken.push([match[1], file]);
   }

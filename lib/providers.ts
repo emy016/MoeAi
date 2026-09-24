@@ -3,6 +3,7 @@
 // silent leak of those keys into the browser bundle.
 import "server-only";
 import { providerKeys, type Provider as KeyProvider } from "./keys";
+import { streamGemini, type GeminiContent } from "./ai/gemini";
 /**
  * AI provider chain with multi-key rotation and streaming.
  *
@@ -106,46 +107,35 @@ async function withTimeout(url: string, init: RequestInit): Promise<Response> {
 }
 
 // ── Gemini ──────────────────────────────────────────────────────────────────
+// Same path as the tutor: native API, automatic model choice, key rotation
+// (lib/ai/gemini.ts). The generator is adapted to this module's text stream.
 
 async function callGemini(
   messages: ChatMessage[],
   maxTokens: number,
   onDone?: (full: string) => void,
 ): Promise<StreamResult> {
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
-  const contents = messages
+  const contents: GeminiContent[] = messages
     .filter((m) => m.role !== "system")
-    .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-  let lastError = "no gemini key";
-  for (const key of usableKeys("gemini")) {
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent` +
-      `?alt=sse&key=${encodeURIComponent(key)}`;
-    const res = await withTimeout(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: system ? { parts: [{ text: system }] } : undefined,
-        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
-      }),
-    });
-
-    if (res.status === 429) { markCold(key); lastError = "gemini 429"; continue; }
-    if (!res.ok || !res.body) { lastError = `gemini ${res.status}`; continue; }
-
-    return {
-      provider: "gemini",
-      model,
-      stream: sseToText(res.body, (j) => j?.candidates?.[0]?.content?.parts?.[0]?.text, onDone),
-    };
-  }
-  throw new Error(lastError);
+    .map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
+  const deltas = streamGemini({ system, contents, maxOutputTokens: maxTokens, temperature: 0.7 });
+  // Pull the first delta now, so a total failure throws here and the chain
+  // moves on to the next provider instead of returning an empty stream.
+  const first = await deltas.next();
+  if (first.done) throw new Error("gemini empty reply");
+  const encoder = new TextEncoder();
+  let full = first.value;
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) { controller.enqueue(encoder.encode(first.value)); },
+    async pull(controller) {
+      const next = await deltas.next();
+      if (next.done) { onDone?.(full); controller.close(); return; }
+      full += next.value;
+      controller.enqueue(encoder.encode(next.value));
+    },
+  });
+  return { provider: "gemini", model: "auto", stream };
 }
 
 // ── OpenAI-compatible (Groq, OpenRouter, and anything else that speaks it) ──
@@ -206,7 +196,7 @@ const PROVIDERS: Record<string, Provider> = {
       "groq",
       "https://api.groq.com/openai/v1/chat/completions",
       "groq",
-      process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      process.env.GROQ_MODEL || "openai/gpt-oss-120b",
       m, t, {}, d,
     ),
 

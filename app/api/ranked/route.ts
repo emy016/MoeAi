@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
   const [{ data: current }, { data: profile }] = await Promise.all([
     sb.from("ranked_profiles")
-      .select("rating, wins, losses, draws, matches, best_streak, display_name")
+      .select("rating, wins, losses, draws, matches, best_streak, display_name, achievements")
       .eq("user_id", user.id)
       .maybeSingle(),
     sb.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
@@ -90,7 +90,8 @@ export async function POST(req: NextRequest) {
     draws: monotonic(body.draws, current?.draws ?? 0),
     matches: monotonic(body.matches, current?.matches ?? 0),
     best_streak: Math.max(current?.best_streak ?? 0, Number(body.bestStreak) || 0),
-    achievements: Array.isArray(body.achievements) ? body.achievements.slice(0, 60) : [],
+    // A live match reports no achievements; that must not wipe the ones saved.
+    achievements: Array.isArray(body.achievements) ? body.achievements.slice(0, 60) : (current?.achievements ?? []),
     updated_at: new Date().toISOString(),
   };
 

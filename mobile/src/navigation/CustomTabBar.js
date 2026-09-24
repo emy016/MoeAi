@@ -47,7 +47,7 @@
  * ---------------------------------------------------------------------
  */
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, Easing, StyleSheet } from 'react-native';
+import { View, Animated, Easing, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeIcon, BookOpenIcon, CpuChipIcon, UserGroupIcon, PlusIcon } from 'react-native-heroicons/outline';
 import {
@@ -165,12 +165,13 @@ function CustomTabBar({ index: tabIndex, onSelect }) {
   const plusSpin = fabPop.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
 
   return (
-    // Outer wrapper: fills the dock area with the app background so no
-    // default (white) surface can show through around the floating pill.
-    // Holds the safe-area + floating margins.
+    // Outer wrapper only holds the safe-area + floating margins. It stays
+    // transparent so the navbar reads as a floating pill on web as well as
+    // native, without a full-width rectangular dock behind it.
     <View
       style={[
         styles.outer,
+        Platform.OS === 'web' && styles.webOuter,
         {
           // Bottom: floating gap + gesture-bar / home-indicator height,
           // re-measured on rotation/fold via context — fully dynamic.
@@ -179,7 +180,7 @@ function CustomTabBar({ index: tabIndex, onSelect }) {
           // pill + outer tabs are never clipped.
           paddingLeft: insets.left,
           paddingRight: insets.right,
-          backgroundColor: colors.background,
+          backgroundColor: Platform.OS === 'web' ? 'transparent' : colors.background,
         },
       ]}
     >
@@ -295,6 +296,13 @@ export default React.memo(CustomTabBar);
 
 const styles = StyleSheet.create({
   outer: {
+  },
+  webOuter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 30,
   },
   pill: {
     height: TabBar.HEIGHT,

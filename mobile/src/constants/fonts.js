@@ -22,12 +22,13 @@
  * ---------------------------------------------------------------------
  */
 import { useFonts } from 'expo-font';
-import {
-  NunitoSans_400Regular,
-  NunitoSans_600SemiBold,
-  NunitoSans_700Bold,
-  NunitoSans_900Black,
-} from '@expo-google-fonts/nunito-sans';
+// Each weight from its own entry point: the package root requires all 18
+// Nunito Sans files (every weight, upright and italic), and the bundler ships
+// every file that is required, used or not.
+import { NunitoSans_400Regular } from '@expo-google-fonts/nunito-sans/400Regular';
+import { NunitoSans_600SemiBold } from '@expo-google-fonts/nunito-sans/600SemiBold';
+import { NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans/700Bold';
+import { NunitoSans_900Black } from '@expo-google-fonts/nunito-sans/900Black';
 
 export const FontFamily = {
   regular: 'NunitoSans_400Regular', // body copy

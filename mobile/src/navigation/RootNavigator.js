@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import SimulatorsScreen from '../screens/SimulatorsScreen';
 import { Pager } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
+import { useAccount } from '../account/AccountContext';
 import CustomTabBar, { TAB_ORDER } from './CustomTabBar';
 
 const COMPONENTS={Home:React.memo(HomeScreen),Practice:React.memo(PracticeScreen),Simulators:React.memo(SimulatorsScreen),Community:React.memo(CommunityScreen)};
@@ -30,7 +31,8 @@ export default function RootNavigator(){
  const openSettings=useCallback(()=>{setMenuOpen(false);setRoute('settings');},[]);
  const toggleMenu=useCallback(()=>setMenuOpen(open=>!open),[]);
  const closeMenu=useCallback(()=>setMenuOpen(false),[]);
- const selectMenuItem=useCallback((id)=>{if(id==='settings')openSettings();},[openSettings]);
+ const {openAccount}=useAccount();
+ const selectMenuItem=useCallback((id)=>{if(id==='settings')openSettings();else if(id==='profile')openAccount();},[openAccount,openSettings]);
  return <View style={[s.root,{backgroundColor:colors.background}]}><Header title={settings?t('settings'):t(TITLE_KEYS[TAB_ORDER[tabIndex]])} direction={direction} menuOpen={menuOpen} settings={settings} onBack={closeSettings} onPillPress={toggleMenu}/><View pointerEvents={settings?'none':'auto'} style={[s.viewport,settings&&s.hidden]} {...swipe.panHandlers}><Animated.View style={[s.strip,{width:width*TAB_ORDER.length,transform:[{translateX}]}]}>{TAB_ORDER.map((name,index)=>{const Screen=COMPONENTS[name];return <View key={name} style={[s.page,{width}]}><Screen active={!settings&&index===tabIndex} registerCurrentWeekReset={name==='Home'?registerHomeReset:undefined} onOpenSettings={name==='Home'?openSettings:undefined}/></View>;})}</Animated.View></View>{settings?<View style={s.viewport}><SettingsScreen/></View>:<CustomTabBar index={tabIndex} onSelect={select}/>}<ProfileMenu visible={menuOpen&&!settings} onClose={closeMenu} onSelect={selectMenuItem}/></View>;
 }
 const s=StyleSheet.create({root:{flex:1},viewport:{flex:1,overflow:'hidden'},hidden:{display:'none'},strip:{flex:1,flexDirection:'row'},page:{flex:1}});

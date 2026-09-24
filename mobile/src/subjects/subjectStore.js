@@ -1,7 +1,8 @@
 /** Persistent user-created subjects and lecture/chat metadata. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
-import { SUBJECT_EXAMPLES } from './subjectExamples';
+import { baseSubjects } from './subjectExamples';
+import { useAccount } from '../account/AccountContext';
 
 const STORAGE_KEY = storageKey('user-subjects-v1');
 const COMPLETION_KEY = storageKey('lecture-completion-overrides-v1');
@@ -126,9 +127,10 @@ export function useSubjectStore() {
     });
   }, []);
 
-  const subjects = useMemo(() => [...SUBJECT_EXAMPLES, ...userSubjects].map((subject) => ({
+  const { orgCourses } = useAccount();
+  const subjects = useMemo(() => [...baseSubjects(orgCourses), ...userSubjects].map((subject) => ({
     ...subject,
     lectures: subject.lectures.map((lecture) => ({ ...lecture, completedOverride: Boolean(completionOverrides[completionKey(subject.id, lecture.id)]) })),
-  })), [completionOverrides, userSubjects]);
+  })), [completionOverrides, orgCourses, userSubjects]);
   return { subjects, userSubjects, ready, addSubject, renameSubject, removeSubject, addLecture, removeLecture, toggleLectureComplete };
 }

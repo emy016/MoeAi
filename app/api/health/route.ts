@@ -23,7 +23,7 @@ function present(name: string) {
 }
 
 export async function GET() {
-  const voice = await personalityStatus();
+  const voice = personalityStatus();
 
   let security = 0;
   try {

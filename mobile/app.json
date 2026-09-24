@@ -13,7 +13,8 @@
     "android": {
       "package": "com.moeai.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#181920"
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/adaptive-icon.png"
       }
     },
     "plugins": [
@@ -36,6 +37,10 @@
           ]
         }
       ]
-    ]
+    ],
+    "icon": "./assets/icon.png",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }

@@ -20,12 +20,13 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Bars3Icon, CameraIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, StopIcon, XMarkIcon } from 'react-native-heroicons/solid';
-import { ClipboardDocumentIcon } from 'react-native-heroicons/outline';
+import { Bars3Icon, CameraIcon, ClipboardDocumentIcon as SolidClipboardDocumentIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, StopIcon, TrashIcon, XMarkIcon } from 'react-native-heroicons/solid';
+import { ArrowPathIcon, ClipboardDocumentIcon as OutlineClipboardDocumentIcon } from 'react-native-heroicons/outline';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MarkdownText from '../chat/MarkdownText';
-import Citations from '../chat/Citations';
 import useHoldToDictate from '../chat/useHoldToDictate';
+import KaTeXMessage from '../chat/KaTeXMessage';
+import RichMessage from '../chat/RichMessage';
+import CalendarAlertModal from '../components/CalendarAlertModal';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
 import ElasticPressable from '../components/ElasticPressable';
 import ProfileMenu from '../components/ProfileMenu';
@@ -56,10 +57,161 @@ const normalizeImage = (asset) => ({
 });
 const imageFile = (file) => file?.kind === 'image' || file?.mimeType?.startsWith('image/');
 const fileExtension = (name = '') => name.includes('.') ? name.split('.').pop().slice(0, 4).toUpperCase() : 'FILE';
+const COPY_ICON_SIZE = 17;
+const COPY_FILL_MAX = COPY_ICON_SIZE * 1.8;
+const COPY_ICON_CENTER = COPY_ICON_SIZE / 2;
 
-const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }) {
-  const { colors, type, isRTL, motion } = usePreferences();
+function LoadingDots() {
+  const { colors, type, motion, t } = usePreferences();
+  const dots = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
+  useEffect(() => {
+    dots.forEach((dot) => dot.setValue(0));
+    if (!motion) return undefined;
+    const bounce = (dot) => Animated.sequence([
+      Animated.timing(dot, { toValue: 1, duration: 150, easing: Easing.out(Easing.quad), useNativeDriver: true, isInteraction: false }),
+      Animated.timing(dot, { toValue: 0, duration: 170, easing: Easing.in(Easing.quad), useNativeDriver: true, isInteraction: false }),
+    ]);
+    const animation = Animated.loop(Animated.sequence([
+      Animated.stagger(110, dots.map(bounce)),
+      Animated.delay(500),
+    ]));
+    animation.start();
+    return () => animation.stop();
+  }, [dots, motion]);
+  return (
+    <View style={styles.loadingDots} accessible accessibilityRole="progressbar" accessibilityLabel={t('aiThinking')}>
+      {dots.map((dot, index) => (
+        <Animated.Text
+          key={index}
+          style={[styles.loadingDot, { color: colors.textPrimary, opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.58, 1] }), transform: [{ translateY: dot.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }] }, type(17, 'bold', 18)]}
+        >.</Animated.Text>
+      ))}
+    </View>
+  );
+}
+
+function CopyFeedback({ text, onCopy }) {
+  const { colors, type, motion, isRTL, t } = usePreferences();
+  const [copied, setCopied] = useState(false);
+  const progress = useRef(new Animated.Value(0)).current;
+  const resetTimer = useRef(null);
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    progress.stopAnimation();
+  }, [progress]);
+
+  const copy = useCallback(() => {
+    onCopy(text);
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    setCopied(true);
+    progress.stopAnimation();
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: motion ? 180 : 0,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+      isInteraction: false,
+    }).start();
+    resetTimer.current = setTimeout(() => {
+      progress.stopAnimation();
+      Animated.timing(progress, {
+        toValue: 0,
+        duration: motion ? 180 : 0,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+        isInteraction: false,
+      }).start(({ finished }) => {
+        if (finished) setCopied(false);
+      });
+    }, 3000);
+  }, [motion, onCopy, progress, text]);
+
+  const outlineOpacity = progress.interpolate({
+    inputRange: [0, 0.45, 0.7, 1],
+    outputRange: [1, 0.55, 0, 0],
+  });
+  const fillOpacity = progress.interpolate({
+    inputRange: [0, 0.06, 1],
+    outputRange: [0, 1, 1],
+  });
+  return (
+    <Pressable
+      hitSlop={9}
+      onPress={copy}
+      style={[styles.copyButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+      accessibilityRole="button"
+      accessibilityLabel={copied ? t('copied') : t('copyMessage')}
+    >
+      <View style={styles.copyIconStack}>
+        <Animated.View style={[styles.copyIconLayer, { opacity: outlineOpacity }]}>
+          <OutlineClipboardDocumentIcon size={COPY_ICON_SIZE} color={colors.textMuted} />
+        </Animated.View>
+        <Animated.View style={[styles.copyFillMask, { opacity: fillOpacity, transform: [{ scale: progress }] }]}>
+          <View style={styles.copyFillInner}>
+            <SolidClipboardDocumentIcon size={COPY_ICON_SIZE} color={colors.accent} />
+          </View>
+        </Animated.View>
+      </View>
+      <Animated.Text
+        pointerEvents="none"
+        accessibilityLiveRegion="polite"
+        style={[{ color: colors.accent, opacity: progress, transform: [{ translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [isRTL ? 4 : -4, 0] }) }] }, type(11, 'semiBold', 15)]}
+      >{t('copied')}</Animated.Text>
+    </Pressable>
+  );
+}
+
+const FOLLOW_UPS = ['followExplain', 'followExample', 'followVisual', 'followQuiz'];
+
+function FollowUps({ onPick }) {
+  const { colors, type, isRTL, t } = usePreferences();
+  return (
+    <View style={[styles.followUps, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      {FOLLOW_UPS.map((key) => (
+        <ElasticPressable key={key} shape="pill" onPress={() => onPick(t(key))} accessibilityRole="button">
+          <View style={[styles.followUp, { backgroundColor: colors.cardButton }]}><Text style={[{ color: colors.textSecondary }, type(11, 'semiBold', 15)]}>{t(key)}</Text></View>
+        </ElasticPressable>
+      ))}
+    </View>
+  );
+}
+
+/** Where a course-grounded answer came from: the lecturer's file and page, tap for the passage. */
+function Sources({ items }) {
+  const { colors, type, isRTL, t } = usePreferences();
+  const [open, setOpen] = useState(-1);
+  return (
+    <View style={styles.sources}>
+      <Text style={[{ color: colors.textMuted, textAlign: isRTL ? 'right' : 'left' }, type(10, 'bold', 13)]}>{t('fromYourCourse')}</Text>
+      <View style={[styles.followUps, { marginTop: 4, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        {items.map((item, index) => (
+          <Pressable key={`${item.title}-${item.ref}-${index}`} onPress={() => setOpen(open === index ? -1 : index)} accessibilityRole="button"
+            style={[styles.followUp, { backgroundColor: open === index ? colors.cardButtonPressed : colors.cardButton, flexDirection: 'row', alignItems: 'center', gap: 5, maxWidth: '100%' }]}>
+            <DocumentIcon size={12} color={colors.accent} />
+            <Text numberOfLines={1} style={[{ color: colors.textSecondary, flexShrink: 1 }, type(11, 'semiBold', 15)]}>{item.title}{item.ref ? ` · ${item.ref}` : ''}</Text>
+          </Pressable>
+        ))}
+      </View>
+      {open >= 0 && items[open]?.excerpt ? (
+        <Text style={[styles.sourceExcerpt, { color: colors.textSecondary, borderColor: colors.border, textAlign: isRTL ? 'right' : 'left' }, type(12, 'regular', 17)]}>{items[open].excerpt}…</Text>
+      ) : null}
+    </View>
+  );
+}
+
+const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, onRegenerate, onFix, onFollowUp }) {
+  const { colors, type, isRTL, motion, t } = usePreferences();
+  const { width } = useWindowDimensions();
   const user = message.role === 'user';
+  const pending = !user && (message.status === 'pending' || (message.status === 'streaming' && !message.text));
+  const streaming = !user && message.status === 'streaming' && !!message.text;
+  const messageTextStyle = type(14, 'regular', 20);
+  const availableWidth = Math.max(0, width - Spacing.md * 2);
+  const columnWidth = user
+    ? Math.min(440, Math.floor(availableWidth * 0.82))
+    : Math.min(760, availableWidth);
+  const messageTextWidth = Math.max(1, columnWidth - (user ? 26 : 14));
   const progress = useRef(new Animated.Value(motion ? 0 : 1)).current;
   useEffect(() => {
     if (!motion) { progress.setValue(1); return undefined; }
@@ -77,9 +229,12 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
     <Animated.View style={[styles.messageRow, user ? styles.userRow : styles.assistantRow, { opacity: progress, transform: user
       ? [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }]
       : [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }, { scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.84, 1] }) }] }] }>
-      <View style={styles.messageColumn}>
+      <View style={[styles.messageColumn, user ? styles.userMessageColumn : styles.assistantMessageColumn]}>
         {!user && <Text style={[styles.aiLabel, { color: colors.textMuted, textAlign: isRTL ? 'right' : 'left' }, type(10, 'bold', 13)]}>MoeAI</Text>}
-        <View style={[styles.bubble, user ? { backgroundColor: colors.accent, borderBottomRightRadius: 5 } : { backgroundColor: colors.cardButton, borderBottomLeftRadius: 5 }]}>
+        <View style={user
+          ? [styles.userBubble, { backgroundColor: colors.accent, borderBottomRightRadius: 5 }]
+          : styles.assistantContent}
+        >
           {!!message.files?.length && <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false} style={styles.sentAttachmentScroll} contentContainerStyle={styles.sentAttachments}>{message.files.map((file, index) => imageFile(file) ? (
             <Pressable key={file.id || file.name} onPress={() => onPreview(message.files, index)}><Image source={{ uri: file.uri }} style={styles.sentImage} /></Pressable>
           ) : (
@@ -88,21 +243,49 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy }
               <Text numberOfLines={1} style={[styles.fileName, { color: user ? colors.white : colors.textPrimary }, type(11, 'semiBold', 15)]}>{file.name}</Text>
             </Pressable>
           ))}</ScrollView>}
-          {!!message.text && (user
-            ? <Text style={[message.files?.length && styles.messageAfterFiles, { color: colors.white, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}>{message.text}</Text>
-            : <View style={message.files?.length ? styles.messageAfterFiles : null}>
-                <MarkdownText text={message.text} colors={colors} type={type} isRTL={isRTL} baseColor={colors.textPrimary} />
-              </View>)}
-          {!user && message.pending && !message.text && <TypingDots color={colors.textMuted} motion={motion} />}
-          {!user && !message.pending && <Citations items={message.citations} />}
+          {pending ? (
+            <View style={message.files?.length && styles.messageAfterFiles}><LoadingDots /></View>
+          ) : !!message.text && (user ? (
+            <KaTeXMessage
+              text={message.text}
+              color={colors.white}
+              textAlign={isRTL ? 'right' : 'left'}
+              fontStyle={messageTextStyle}
+              maxWidth={messageTextWidth}
+              style={message.files?.length && styles.messageAfterFiles}
+            />
+          ) : (
+            <RichMessage
+              text={message.text}
+              color={message.status === 'failed' ? colors.danger : colors.textPrimary}
+              textAlign={isRTL ? 'right' : 'left'}
+              fontStyle={messageTextStyle}
+              maxWidth={messageTextWidth}
+              style={message.files?.length && styles.messageAfterFiles}
+              onFix={onFix}
+            />
+          ))}
+          {streaming ? <View style={styles.streamingDots}><LoadingDots /></View> : null}
         </View>
-        {!user && !!message.text && !message.pending && <Pressable hitSlop={9} onPress={() => onCopy(message.text)} style={styles.copyButton} accessibilityRole="button"><ClipboardDocumentIcon size={17} color={colors.textMuted} /></Pressable>}
+        {!user && !pending && !!message.citations?.length ? <Sources items={message.citations} /> : null}
+        {!user && !pending && !streaming && !!message.text && (
+          <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
+            {isLast ? (
+              <Pressable hitSlop={9} onPress={onRegenerate} accessibilityRole="button" accessibilityLabel={t('regenerate')} style={[styles.regenerate, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <ArrowPathIcon size={COPY_ICON_SIZE} color={colors.textMuted} />
+                {message.status === 'failed' || message.status === 'stopped' ? <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>{t(message.status === 'failed' ? 'tryAgain' : 'replyStopped')}</Text> : null}
+              </Pressable>
+            ) : null}
+          </View>
+        )}
+        {isLast && !user && message.status === 'complete' && !!message.text ? <FollowUps onPick={onFollowUp} /> : null}
       </View>
     </Animated.View>
   );
 });
 
-function ChatActionPill({ pinned, onRename, onTogglePin }) {
+function ChatActionPill({ pinned, onRename, onTogglePin, onDelete }) {
   const { colors, motion, t } = usePreferences();
   const progress = useRef(new Animated.Value(motion ? 0 : 1)).current;
   useEffect(() => {
@@ -119,33 +302,14 @@ function ChatActionPill({ pinned, onRename, onTogglePin }) {
       <ElasticPressable shape="circle" onPress={onTogglePin} accessibilityRole="button" accessibilityLabel={pinned ? t('unpinChat') : t('pinChat')}>
         <View style={styles.chatAction}><SolidPinIcon size={18} color={pinned ? colors.accent : colors.textPrimary} /></View>
       </ElasticPressable>
+      <ElasticPressable shape="circle" onPress={onDelete} accessibilityRole="button" accessibilityLabel={t('deleteChat')}>
+        <View style={styles.chatAction}><TrashIcon size={18} color={colors.danger} /></View>
+      </ElasticPressable>
     </Animated.View>
   );
 }
 
-/** Three dots, breathing in sequence, while the first token is still on its way. */
-const TypingDots = React.memo(function TypingDots({ color, motion }) {
-  const dots = [useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current];
-  useEffect(() => {
-    if (!motion) return undefined;
-    const animations = dots.map((dot, index) => Animated.loop(Animated.sequence([
-      Animated.delay(index * 160),
-      Animated.timing(dot, { toValue: 1, duration: 340, useNativeDriver: true, isInteraction: false }),
-      Animated.timing(dot, { toValue: 0.3, duration: 340, useNativeDriver: true, isInteraction: false }),
-      Animated.delay((2 - index) * 160),
-    ])));
-    animations.forEach((animation) => animation.start());
-    return () => animations.forEach((animation) => animation.stop());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [motion]);
-  return (
-    <View style={styles.typingRow}>
-      {dots.map((dot, index) => <Animated.View key={index} style={[styles.typingDot, { backgroundColor: color, opacity: dot }]} />)}
-    </View>
-  );
-});
-
-export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onStopReply, onRenameChat, onTogglePinChat, onProfileSelect }) {
+export default function LectureChatScreen({ visible, subject, lecture, threads, onClose, onStartChat, onSend, onStop, onRegenerate, onRenameChat, onTogglePinChat, onDeleteChat, onProfileSelect }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { colors, type, t, motion, isRTL, language } = usePreferences();
@@ -157,12 +321,14 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const [profileOpen, setProfileOpen] = useState(false);
   const [actionThreadId, setActionThreadId] = useState(null);
   const [renameTarget, setRenameTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [pendingAttachments, setPendingAttachments] = useState([]);
   const [attachmentOpen, setAttachmentOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [micHeld, setMicHeld] = useState(false);
   const [navigatorUnlocked, setNavigatorUnlocked] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [webInputHeight, setWebInputHeight] = useState(40);
   const screenProgress = useRef(new Animated.Value(visible && !motion ? 1 : 0)).current;
   const drawerProgress = useRef(new Animated.Value(0)).current;
   const plusProgress = useRef(new Animated.Value(0)).current;
@@ -171,6 +337,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const closing = useRef(false);
   const pendingThreadId = useRef(null);
   const listRef = useRef(null);
+  const inputRef = useRef(null);
   const sawFirstMessage = useRef(false);
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 10 }).current;
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -182,8 +349,9 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   const activeThread = useMemo(() => threads.find((thread) => thread.id === threadId) || null, [threadId, threads]);
   const messages = activeThread?.messages || [];
-  // The reply still arriving, if there is one: the send button becomes a stop.
-  const streaming = useMemo(() => messages.find((message) => message.pending) || null, [messages]);
+  const replying = messages.some((message) => message.role === 'assistant' && (message.status === 'pending' || message.status === 'streaming'));
+  const lastText = messages[messages.length - 1]?.text || '';
+  const nearBottom = useRef(true);
   const userMessages = useMemo(() => messages.filter((message) => message.role === 'user'), [messages]);
   const dashCount = Math.min(7, userMessages.length);
   const pinnedThreads = useMemo(() => threads.filter((thread) => thread.pinned), [threads]);
@@ -198,7 +366,22 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   ]), [historySections]);
 
   const dictationUnavailable = useCallback(() => Alert.alert(t('voiceUnavailable'), t('voiceUnavailableDesc')), [t]);
-  const { listening, start: startDictation, stop: stopDictation } = useHoldToDictate({ value: draft, onChange: setDraft, language, onUnavailable: dictationUnavailable });
+  const updateDraft = useCallback((text) => {
+    setDraft(text);
+    if (Platform.OS !== 'web') return;
+    // Reset before measuring so an input that previously reached its maximum
+    // height can shrink again after text is deleted or sent.
+    setWebInputHeight(40);
+    requestAnimationFrame(() => {
+      const nextHeight = Math.min(96, Math.max(40, Math.ceil(inputRef.current?.scrollHeight || 40)));
+      setWebInputHeight(nextHeight);
+    });
+  }, []);
+  const { listening, start: startDictation, stop: stopDictation } = useHoldToDictate({ value: draft, onChange: updateDraft, language, onUnavailable: dictationUnavailable });
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && !draft) setWebInputHeight(40);
+  }, [draft]);
 
   useEffect(() => {
     plusProgress.stopAnimation();
@@ -255,6 +438,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
       setHistoryOpen(false);
       setProfileOpen(false);
       setActionThreadId(null);
+      setDeleteTarget(null);
       drawerProgress.setValue(0);
     }
   }, [drawerProgress, visible]);
@@ -264,6 +448,14 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     const id = requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: motion }));
     return () => cancelAnimationFrame(id);
   }, [messages.length, motion]);
+
+  // Follow a reply as it streams in, but only while the student is already
+  // at the bottom; scrolling up to reread something must not be yanked back.
+  useEffect(() => {
+    if (!replying || !nearBottom.current) return undefined;
+    const id = requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }));
+    return () => cancelAnimationFrame(id);
+  }, [lastText.length, replying]);
 
   useEffect(() => {
     sawFirstMessage.current = false;
@@ -307,11 +499,38 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     if (!clean && !files.length) return;
     const targetId = threadId || onStartChat();
     if (!threadId) setThreadId(targetId);
-    onSend(targetId, { text: clean, files, unavailableText: t('aiUnavailable'), lectureTitle: lecture?.title, subjectTitle: subject?.name });
+    onSend(targetId, { text: clean, files });
     setDraft('');
     setPendingAttachments([]);
     setAttachmentOpen(false);
-  }, [draft, lecture, onSend, onStartChat, pendingAttachments, subject, t, threadId]);
+  }, [draft, onSend, onStartChat, pendingAttachments, threadId]);
+
+  const stopReplying = useCallback(() => { if (threadId) onStop?.(threadId); }, [onStop, threadId]);
+  const regenerate = useCallback(() => { if (threadId && !replying) onRegenerate?.(threadId); }, [onRegenerate, replying, threadId]);
+  // Follow-ups and "fix it" requests send on their own, leaving the draft alone.
+  const sendText = useCallback((text) => {
+    const clean = String(text || '').trim();
+    if (replying || !clean) return;
+    const targetId = threadId || onStartChat();
+    if (!threadId) setThreadId(targetId);
+    onSend(targetId, { text: clean, files: [] });
+  }, [onSend, onStartChat, replying, threadId]);
+
+  const sendFromComposer = useCallback(() => {
+    if (replying) return;
+    send();
+    // Mobile browsers may try to blur the textarea when the adjacent send
+    // control is tapped. Focusing during the same gesture keeps the virtual
+    // keyboard open; the animation-frame focus covers browsers that resize
+    // their visual viewport immediately after the tap.
+    inputRef.current?.focus();
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, [send]);
+
+  const keepComposerFocused = useCallback((event) => {
+    if (Platform.OS === 'web') event?.preventDefault?.();
+    inputRef.current?.focus();
+  }, []);
 
   const addAttachments = useCallback((next) => {
     setPendingAttachments((current) => [...current, ...next].filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index));
@@ -369,18 +588,40 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     onTogglePinChat?.(thread.id);
   }, [onTogglePinChat]);
 
+  const requestDelete = useCallback((thread) => {
+    setActionThreadId(null);
+    setDeleteTarget(thread);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (!deleteTarget) return;
+    const nextThread = threads.find((thread) => thread.id !== deleteTarget.id) || null;
+    onDeleteChat?.(deleteTarget.id);
+    if (threadId === deleteTarget.id) {
+      const nextId = nextThread?.id || onStartChat();
+      pendingThreadId.current = nextThread ? null : nextId;
+      setThreadId(nextId);
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, onDeleteChat, onStartChat, threadId, threads]);
+
   const selectProfileItem = useCallback((id) => {
     setProfileOpen(false);
     onProfileSelect?.(id);
   }, [onProfileSelect]);
 
+  const lastId = messages[messages.length - 1]?.id;
   const renderMessage = useCallback(({ item }) => (
     <ChatBubble
       message={item}
       onPreview={openPreview}
       onCopy={copyMessage}
+      isLast={item.id === lastId}
+      onRegenerate={regenerate}
+      onFix={sendText}
+      onFollowUp={sendText}
     />
-  ), [copyMessage, openPreview]);
+  ), [copyMessage, lastId, openPreview, regenerate, sendText]);
   const renderNavigatorMessage = useCallback(({ item }) => (
     <ElasticPressable shape="pill" onPress={() => jumpToMessage(item)}>
       <View style={[styles.navigatorMessage, { backgroundColor: colors.cardButton }]}><Text numberOfLines={2} style={[{ color: colors.textSecondary, textAlign: isRTL ? 'right' : 'left' }, type(10, 'semiBold', 14)]}>{item.text || item.files?.map((file) => file.name).join(', ') || t('attachment')}</Text></View>
@@ -392,7 +633,10 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   return (
     <Modal visible={mounted || visible} transparent animationType="none" presentationStyle="overFullScreen" statusBarTranslucent navigationBarTranslucent hardwareAccelerated onRequestClose={dismiss}>
       <Animated.View style={[styles.root, { backgroundColor: colors.background, opacity: screenProgress, transform: [{ translateY: screenProgress.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }, { scale: screenProgress.interpolate({ inputRange: [0, 1], outputRange: [0.985, 1] }) }] }]}>
-        <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView
+          style={styles.root}
+          behavior={Platform.OS === 'ios' ? 'padding' : Platform.OS === 'android' ? 'height' : undefined}
+        >
           <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.background }]}>
             <ElasticPressable shape="circle" onPress={() => animateDrawer(true)} accessibilityRole="button" accessibilityLabel={t('openChatHistory')}>
               <View style={[styles.headerButton, { backgroundColor: colors.cardButton }]}><Bars3Icon size={23} color={colors.textPrimary} /></View>
@@ -420,6 +664,11 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
             viewabilityConfig={viewabilityConfig}
             onViewableItemsChanged={onViewableItemsChanged}
             onScrollBeginDrag={() => { setAttachmentOpen(false); setNavigatorOpen(false); }}
+            onScroll={(event) => {
+              const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+              nearBottom.current = contentSize.height - contentOffset.y - layoutMeasurement.height < 140;
+            }}
+            scrollEventThrottle={100}
             onTouchStart={() => setAttachmentOpen(false)}
             onScrollToIndexFailed={(info) => {
               listRef.current?.scrollToOffset({ offset: Math.max(0, info.averageItemLength * info.index), animated: true });
@@ -456,29 +705,39 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                 <View style={[styles.composerButton, { backgroundColor: colors.cardButton }]}><PlusIcon size={21} color={colors.textPrimary} /></View>
               </ElasticPressable>
               <TextInput
+                ref={inputRef}
                 value={draft}
-                onChangeText={setDraft}
+                onChangeText={updateDraft}
                 placeholder={t('messagePlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 selectionColor={colors.accent}
                 multiline
+                {...(Platform.OS === 'web' ? { rows: 1 } : {})}
                 returnKeyType="send"
                 enterKeyHint="send"
                 submitBehavior="submit"
-                style={[styles.input, { color: colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}
+                blurOnSubmit={false}
+                style={[styles.input, Platform.OS === 'web' && { height: webInputHeight }, { color: colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}
                 onFocus={() => setAttachmentOpen(false)}
-                onSubmitEditing={() => send()}
+                onSubmitEditing={sendFromComposer}
               />
               <Pressable onPressIn={() => { setMicHeld(true); startDictation(); }} onPressOut={() => { setMicHeld(false); stopDictation(); }} onTouchCancel={() => { setMicHeld(false); stopDictation(); }} hitSlop={7} style={styles.micButton} accessibilityRole="button" accessibilityLabel={t('holdToDictate')}>
                 <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.accent, opacity: micProgress, transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] }]} />
                 <MicrophoneIcon size={20} color={listening || micHeld ? colors.background : colors.textSecondary} />
               </Pressable>
-              {streaming ? (
-                <ElasticPressable shape="circle" onPress={() => onStopReply?.(streaming.id)} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
-                  <View style={[styles.sendButton, { backgroundColor: colors.cardButton }]}><StopIcon size={17} color={colors.textPrimary} /></View>
+              {replying ? (
+                <ElasticPressable shape="circle" onPress={stopReplying} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
+                  <View style={[styles.sendButton, { backgroundColor: colors.accent }]}><StopIcon size={18} color={colors.background} /></View>
                 </ElasticPressable>
               ) : (
-                <ElasticPressable shape="circle" onPress={() => send()} disabled={!draft.trim() && !pendingAttachments.length} accessibilityRole="button" accessibilityLabel={t('sendMessage')}>
+                <ElasticPressable
+                  shape="circle"
+                  onPressIn={keepComposerFocused}
+                  onPress={sendFromComposer}
+                  disabled={!draft.trim() && !pendingAttachments.length}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('sendMessage')}
+                >
                   <View style={[styles.sendButton, { backgroundColor: colors.accent, opacity: draft.trim() || pendingAttachments.length ? 1 : 0.45 }]}><PaperAirplaneIcon size={20} color={colors.background} /></View>
                 </ElasticPressable>
               )}
@@ -512,7 +771,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                       </View>
                     </ElasticPressable>
                     {actionThreadId === item.id && (
-                      <ChatActionPill pinned={item.pinned} onRename={() => { setActionThreadId(null); setRenameTarget(item); }} onTogglePin={() => togglePin(item)} />
+                      <ChatActionPill pinned={item.pinned} onRename={() => { setActionThreadId(null); setRenameTarget(item); }} onTogglePin={() => togglePin(item)} onDelete={() => requestDelete(item)} />
                     )}
                   </View>
                 )}
@@ -535,11 +794,19 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
       </Animated.View>
       <ChatAttachmentPreview visible={!!preview} attachments={preview?.attachments || []} initialIndex={preview?.index || 0} onClose={() => setPreview(null)} />
       <SubjectEditorModal visible={!!renameTarget} title={t('renameChat')} initialValue={renameTarget?.title || ''} placeholder={t('chatName')} onCancel={() => setRenameTarget(null)} onConfirm={saveRename} />
+      <CalendarAlertModal visible={!!deleteTarget} title={t('deleteChat')} message={t('deleteChatConfirm')} onClose={() => setDeleteTarget(null)} onConfirm={confirmDelete} destructive />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  replyActions: { alignItems: 'center', gap: 12 },
+  regenerate: { alignItems: 'center', gap: 5, paddingVertical: 4 },
+  streamingDots: { marginTop: 2 },
+  followUps: { flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  followUp: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
+  sources: { marginTop: 6, marginBottom: 2, marginHorizontal: 4 },
+  sourceExcerpt: { marginTop: 6, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   root: { flex: 1 },
   header: { minHeight: 72, paddingHorizontal: Spacing.md, paddingBottom: 9, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   headerButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
@@ -553,19 +820,26 @@ const styles = StyleSheet.create({
   messageRow: { width: '100%', marginBottom: 10 },
   userRow: { alignItems: 'flex-end' },
   assistantRow: { alignItems: 'flex-start' },
-  typingRow: { flexDirection: 'row', gap: 5, paddingVertical: 5 },
-  typingDot: { width: 6, height: 6, borderRadius: 3 },
-  messageColumn: { maxWidth: '82%' },
+  messageColumn: { minWidth: 0, flexShrink: 1 },
+  userMessageColumn: { maxWidth: '82%' },
+  assistantMessageColumn: { width: '100%', maxWidth: 760 },
   aiLabel: { marginBottom: 3, marginHorizontal: 7 },
-  bubble: { borderRadius: 18, paddingHorizontal: 13, paddingVertical: 10 },
-  sentAttachmentScroll: { maxWidth: 250, height: 80, flexGrow: 0 },
+  userBubble: { maxWidth: '100%', minWidth: 0, flexShrink: 1, overflow: 'hidden', borderRadius: 18, paddingHorizontal: 13, paddingVertical: 10 },
+  assistantContent: { maxWidth: '100%', minWidth: 0, flexShrink: 1, paddingHorizontal: 7, paddingVertical: 3 },
+  loadingDots: { minWidth: 35, height: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 2 },
+  loadingDot: { textAlign: 'center' },
+  sentAttachmentScroll: { maxWidth: '100%', height: 80, flexGrow: 0 },
   sentAttachments: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   sentImage: { width: 80, height: 80, borderRadius: Radius.md },
   messageAfterFiles: { marginTop: 4 },
   fileChip: { minWidth: 128, maxWidth: 210, minHeight: 42, borderRadius: Radius.sm, alignItems: 'center', gap: 7, paddingHorizontal: 9, paddingVertical: 6 },
   fileType: { alignItems: 'center', justifyContent: 'center', width: 28 },
   fileName: { flexShrink: 1 },
-  copyButton: { alignSelf: 'flex-start', marginTop: 4, marginHorizontal: 7, padding: 2 },
+  copyButton: { alignSelf: 'flex-start', marginTop: 4, marginHorizontal: 7, padding: 2, alignItems: 'center', gap: 5 },
+  copyIconStack: { width: COPY_ICON_SIZE, height: COPY_ICON_SIZE, alignItems: 'center', justifyContent: 'center' },
+  copyIconLayer: { alignItems: 'center', justifyContent: 'center' },
+  copyFillMask: { position: 'absolute', left: COPY_ICON_CENTER - COPY_FILL_MAX / 2, top: COPY_ICON_CENTER - COPY_FILL_MAX / 2, width: COPY_FILL_MAX, height: COPY_FILL_MAX, borderRadius: Radius.pill, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  copyFillInner: { width: COPY_ICON_SIZE, height: COPY_ICON_SIZE, alignItems: 'center', justifyContent: 'center' },
   navigatorRail: { position: 'absolute', right: 5, top: '50%', zIndex: 18, padding: 5, gap: 5, alignItems: 'flex-end', transform: [{ translateY: -25 }] },
   navigatorDash: { width: 15, height: 3, borderRadius: Radius.pill, opacity: 0.42 },
   navigatorLayer: { zIndex: 24, elevation: 24 },
@@ -582,12 +856,12 @@ const styles = StyleSheet.create({
   attachmentMenu: { position: 'absolute', left: Spacing.md, bottom: 61, minWidth: 150, borderRadius: Radius.lg, padding: 5, zIndex: 28, elevation: 28 },
   attachmentMenuWithPending: { bottom: 155 },
   attachmentOption: { minHeight: 40, borderRadius: Radius.md, flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 10 },
-  composer: { minHeight: 52, maxHeight: 116, borderRadius: 28, flexDirection: 'row', alignItems: 'flex-end', padding: 6, gap: 7 },
-  composerButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
-  sendButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
-  micButton: { width: 31, height: 40, alignItems: 'center', justifyContent: 'center' },
+  composer: { width: '100%', maxWidth: '100%', minWidth: 0, minHeight: 52, maxHeight: 116, borderRadius: 28, flexDirection: 'row', alignItems: 'flex-end', padding: 6, gap: 7 },
+  composerButton: { width: 40, height: 40, flexShrink: 0, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
+  sendButton: { width: 40, height: 40, flexShrink: 0, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
+  micButton: { width: 31, height: 40, flexShrink: 0, alignItems: 'center', justifyContent: 'center' },
   micFill: { position: 'absolute', width: 34, height: 34, borderRadius: Radius.pill },
-  input: { flex: 1, minHeight: 40, maxHeight: 96, paddingHorizontal: 4, paddingVertical: 9 },
+  input: { flex: 1, minWidth: 0, minHeight: 40, maxHeight: 96, paddingHorizontal: 4, paddingVertical: 9 },
   drawerLayer: { zIndex: 30, elevation: 30 },
   drawer: { height: '100%', paddingHorizontal: 10 },
   drawerTitle: { textAlign: 'center', marginBottom: Spacing.sm },

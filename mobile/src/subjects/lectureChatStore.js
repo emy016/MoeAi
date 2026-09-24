@@ -1,15 +1,7 @@
-/**
- * Persistent local lecture conversations.
- *
- * Sending is optimistic: the student's message and an empty assistant message
- * go in at once, then the reply streams into that assistant message as it
- * arrives from MoeAI. If the tutor cannot be reached the same message becomes
- * the notice this app showed before there was a tutor, so a dropped connection
- * looks like the old behaviour rather than a stuck spinner.
- */
+/** Persistent lecture conversations backed by the MoeAI provider fallback chain. */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { generateMoeAIReply } from '../ai/client';
 import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
-import { streamReply } from '../ai/moeai';
 
 const STORAGE_KEY = storageKey('lecture-chats-v1');
 const makeId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -22,12 +14,18 @@ function normalizeMessage(message) {
     text: String(message?.text || ''),
     files: Array.isArray(message?.files) ? message.files : [],
     createdAt: message?.createdAt || new Date().toISOString(),
-    // Streaming state. Never persisted as true: see the save effect below.
-    pending: Boolean(message?.pending),
-    failed: Boolean(message?.failed),
-    /** Passages the answer was built on, when it was grounded in course material. */
-    citations: Array.isArray(message?.citations) ? message.citations.slice(0, 6) : [],
+    status: ['pending', 'streaming', 'failed', 'stopped'].includes(message?.status) ? message.status : 'complete',
+    provider: message?.provider ? String(message.provider) : null,
+    model: message?.model ? String(message.model) : null,
+    citations: Array.isArray(message?.citations) ? message.citations.slice(0, 8) : [],
   };
+}
+
+/** A reply that was still arriving when the app closed is kept as far as it got. */
+function settleMessage(message) {
+  if (message.status !== 'pending' && message.status !== 'streaming') return message;
+  const text = message.text === '…' ? '' : message.text;
+  return text ? { ...message, text, status: 'stopped' } : { ...message, text: 'MoeAI did not finish this reply. Try again.', status: 'failed' };
 }
 
 function normalizeThread(thread) {
@@ -37,7 +35,7 @@ function normalizeThread(thread) {
     createdAt: thread?.createdAt || new Date().toISOString(),
     updatedAt: thread?.updatedAt || thread?.createdAt || new Date().toISOString(),
     pinned: Boolean(thread?.pinned),
-    messages: Array.isArray(thread?.messages) ? thread.messages.map(normalizeMessage) : [],
+    messages: Array.isArray(thread?.messages) ? thread.messages.map(normalizeMessage).map(settleMessage) : [],
   };
 }
 
@@ -62,7 +60,9 @@ function mergeChats(stored, current) {
 export function useLectureChatStore() {
   const [chats, setChats] = useState({});
   const [ready, setReady] = useState(false);
-  const streamRef = useRef({});
+  const chatsRef = useRef(chats);
+
+  useEffect(() => { chatsRef.current = chats; }, [chats]);
 
   useEffect(() => {
     let alive = true;
@@ -76,8 +76,7 @@ export function useLectureChatStore() {
 
   useEffect(() => {
     if (!ready) return;
-    const timer = setTimeout(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(chats, (key, value) =>
-      key === 'pending' ? false : value)).catch(() => {}), 0);
+    const timer = setTimeout(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(chats)).catch(() => {}), 0);
     return () => clearTimeout(timer);
   }, [chats, ready]);
 
@@ -89,88 +88,112 @@ export function useLectureChatStore() {
     return thread.id;
   }, []);
 
-  /** Rewrites one message in one thread, leaving every other object identical. */
+  // One AbortController per reply in flight, so Stop reaches the right one.
+  const inFlight = useRef(new Map());
+
   const patchMessage = useCallback((key, threadId, messageId, patch) => {
     setChats((current) => ({
       ...current,
       [key]: (current[key] || []).map((thread) => thread.id !== threadId ? thread : {
         ...thread,
         updatedAt: new Date().toISOString(),
-        messages: thread.messages.map((message) => message.id !== messageId ? message : { ...message, ...patch }),
+        messages: thread.messages.map((message) => message.id !== messageId ? message : { ...message, ...(typeof patch === 'function' ? patch(message) : patch) }),
       }),
     }));
   }, []);
 
-  const sendMessage = useCallback((subjectId, lectureId, threadId, { text = '', files = [], unavailableText, lectureTitle, subjectTitle }) => {
+  /** Streams the reply to `userMessage` into `assistantMessage`, which must already be in the thread. */
+  const streamReply = useCallback(async (key, threadId, assistantId, { text, files, history, subject, lecture }) => {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    if (controller) inFlight.current.set(assistantId, controller);
+    // Re-rendering on every token would make long answers stutter on phones.
+    let pendingText = null;
+    let flushTimer = null;
+    const flush = () => {
+      flushTimer = null;
+      if (pendingText === null) return;
+      const next = pendingText;
+      pendingText = null;
+      patchMessage(key, threadId, assistantId, { text: next, status: 'streaming' });
+    };
+    try {
+      const result = await generateMoeAIReply({
+        text, files, lectureFiles: lecture?.files || [], history, subject, lecture,
+        signal: controller?.signal,
+        onDelta: (_chunk, full) => { pendingText = full; if (!flushTimer) flushTimer = setTimeout(flush, 60); },
+      });
+      if (flushTimer) clearTimeout(flushTimer);
+      patchMessage(key, threadId, assistantId, {
+        text: result.text || '',
+        status: result.stopped ? (result.text ? 'stopped' : 'failed') : 'complete',
+        ...(result.stopped && !result.text ? { text: 'Stopped.' } : {}),
+        provider: result.provider,
+        model: result.model,
+        citations: result.citations || [],
+      });
+      return result;
+    } catch (error) {
+      if (flushTimer) clearTimeout(flushTimer);
+      patchMessage(key, threadId, assistantId, {
+        text: error?.message || 'MoeAI could not reach an AI model. Please try again.',
+        status: 'failed',
+      });
+      return null;
+    } finally {
+      inFlight.current.delete(assistantId);
+    }
+  }, [patchMessage]);
+
+  const sendMessage = useCallback(async (subjectId, lectureId, threadId, {
+    text = '', files = [], subject = null, lecture = null,
+  }) => {
     const clean = String(text || '').trim();
     if (!clean && !files.length) return;
     const key = lectureChatKey(subjectId, lectureId);
     const now = new Date();
     const userMessage = normalizeMessage({ id: makeId('message'), role: 'user', text: clean, files, createdAt: now.toISOString() });
-    const assistantMessage = normalizeMessage({
-      id: makeId('message'), role: 'assistant', text: '', pending: true,
-      createdAt: new Date(now.getTime() + 1).toISOString(),
-    });
-
-    let history = [];
+    const assistantMessage = normalizeMessage({ id: makeId('message'), role: 'assistant', text: '', status: 'pending', createdAt: new Date(now.getTime() + 1).toISOString() });
+    const existingThreads = chatsRef.current[key] || [];
+    const existingThread = existingThreads.find((thread) => thread.id === threadId);
+    const history = existingThread?.messages || [];
     setChats((current) => {
       const threads = current[key] || [];
       const existing = threads.find((thread) => thread.id === threadId);
       const base = existing || normalizeThread({ id: threadId, title: 'New chat', messages: [] });
       const firstTitle = clean || files[0]?.name || base.title;
-      history = [...base.messages, userMessage];
       const updated = {
         ...base,
         title: base.messages.length ? base.title : firstTitle.slice(0, 48),
         updatedAt: assistantMessage.createdAt,
-        messages: [...history, assistantMessage],
+        messages: [...base.messages, userMessage, assistantMessage],
       };
       return { ...current, [key]: [updated, ...threads.filter((thread) => thread.id !== threadId)] };
     });
+    return streamReply(key, threadId, assistantMessage.id, { text: clean, files, history, subject, lecture });
+  }, [streamReply]);
 
-    // Attachments are named, not uploaded — the tutor is told what was attached
-    // rather than handed a file it has no way to read yet.
-    const attached = files.map((file) => file?.name).filter(Boolean);
-    const question = attached.length ? `${clean}\n\n[Attached: ${attached.join(', ')}]` : clean;
-    const messages = [...history.slice(0, -1), { role: 'user', text: question }];
-
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    streamRef.current[assistantMessage.id] = controller;
-
-    streamReply(
-      {
-        messages,
-        context: { lecture: lectureTitle || null, course: subjectTitle || null, source: 'moeai-app' },
-        signal: controller?.signal,
-      },
-      (_delta, full) => patchMessage(key, threadId, assistantMessage.id, { text: full }),
-      (citations) => patchMessage(key, threadId, assistantMessage.id, { citations }),
-    )
-      .then((full) => patchMessage(key, threadId, assistantMessage.id, { text: full, pending: false }))
-      .catch((error) => {
-        // Stopping on purpose is not a failure: keep what arrived.
-        const cancelled = error?.message === 'Cancelled.';
-        patchMessage(key, threadId, assistantMessage.id, cancelled
-          ? { pending: false }
-          : {
-              // A refusal MoeAI actually sent (a spend cap, an outage) is worth
-              // showing word for word; a transport failure reads better in the
-              // app's own voice.
-              text: (error?.fromServer && error.message) || unavailableText || 'MoeAI could not be reached.',
-              pending: false,
-              failed: true,
-            });
-      })
-      .then(() => { delete streamRef.current[assistantMessage.id]; });
-  }, [patchMessage]);
-
-  /** Stops one reply mid-sentence, keeping whatever text already arrived. */
-  const stopReply = useCallback((messageId) => {
-    const controller = streamRef.current[messageId];
-    if (!controller) return;
-    try { controller.abort(); } catch (_) {}
-    delete streamRef.current[messageId];
+  /** Stops whatever reply is arriving in this thread; the part already written stays. */
+  const stopReply = useCallback((subjectId, lectureId, threadId) => {
+    const thread = (chatsRef.current[lectureChatKey(subjectId, lectureId)] || []).find((item) => item.id === threadId);
+    thread?.messages.forEach((message) => inFlight.current.get(message.id)?.abort());
   }, []);
+
+  /** Answers the last question again, replacing the last reply. */
+  const regenerateReply = useCallback((subjectId, lectureId, threadId, { subject = null, lecture = null } = {}) => {
+    const key = lectureChatKey(subjectId, lectureId);
+    const thread = (chatsRef.current[key] || []).find((item) => item.id === threadId);
+    if (!thread) return null;
+    const messages = thread.messages;
+    const lastAssistant = messages.length - 1;
+    if (lastAssistant < 1 || messages[lastAssistant].role !== 'assistant' || inFlight.current.has(messages[lastAssistant].id)) return null;
+    const question = messages[lastAssistant - 1];
+    if (question?.role !== 'user') return null;
+    const assistantId = messages[lastAssistant].id;
+    patchMessage(key, threadId, assistantId, { text: '', status: 'pending' });
+    return streamReply(key, threadId, assistantId, {
+      text: question.text, files: question.files, history: messages.slice(0, lastAssistant - 1), subject, lecture,
+    });
+  }, [patchMessage, streamReply]);
 
   const removeLectureChats = useCallback((subjectId, lectureId) => {
     const key = lectureChatKey(subjectId, lectureId);
@@ -200,9 +223,22 @@ export function useLectureChatStore() {
     }));
   }, []);
 
+  const removeChat = useCallback((subjectId, lectureId, threadId) => {
+    const key = lectureChatKey(subjectId, lectureId);
+    setChats((current) => {
+      const currentThreads = current[key] || [];
+      const nextThreads = currentThreads.filter((thread) => thread.id !== threadId);
+      if (nextThreads.length === currentThreads.length) return current;
+      if (nextThreads.length) return { ...current, [key]: nextThreads };
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }, []);
+
   const removeSubjectChats = useCallback((subjectId) => {
     setChats((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !key.startsWith(`${subjectId}:`))));
   }, []);
 
-  return { chats, ready, startChat, sendMessage, stopReply, renameChat, togglePinChat, removeLectureChats, removeSubjectChats };
+  return { chats, ready, startChat, sendMessage, stopReply, regenerateReply, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats };
 }

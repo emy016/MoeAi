@@ -19,15 +19,15 @@
  * Failures before the stream starts are a normal JSON body with a 4xx/5xx.
  */
 import { NextRequest } from "next/server";
-import { streamReply } from "@/lib/moeai/brain";
+import { resolveLanguage, streamReply } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
+import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
+import { surfaceGuide } from "@/lib/moeai/surface";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase-server";
-import { detectLanguage, languageDirective, type Target } from "@/lib/language";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { courseBlock, courseBrain, retrieve } from "@/lib/rag/retrieve";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -55,26 +55,6 @@ function allowByIp(ip: string): boolean {
   bucket.count += 1;
   ipBuckets.set(ip, bucket);
   return true;
-}
-
-/**
- * personality.md is the voice; prompts/SECURITY.md is the guardrail. The
- * personality file covers teaching, corrections and language at length but
- * says nothing about prompt injection, secret handling or the trust boundary
- * around retrieved documents, so that spec is loaded alongside it.
- *
- * Read once per instance — it never changes between requests.
- */
-let securitySpec: string | null = null;
-function security(): string {
-  if (securitySpec === null) {
-    try {
-      securitySpec = readFileSync(join(process.cwd(), "prompts", "SECURITY.md"), "utf8").trim();
-    } catch {
-      securitySpec = "";
-    }
-  }
-  return securitySpec;
 }
 
 function fail(status: number, error: string) {
@@ -115,7 +95,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let raw: { messages?: unknown; context?: unknown };
+  let raw: { messages?: unknown; context?: unknown; attachments?: unknown; learning?: unknown };
   let messages: { role: "user" | "assistant"; content: string }[];
   try {
     raw = await req.json();
@@ -164,7 +144,33 @@ export async function POST(req: NextRequest) {
   /** What the answer was built on, so the workspace can show it and the student
    *  can go read the passage rather than take MoeAI's word for it. */
   const citations: { title: string; ref: string; source: string; excerpt: string }[] = [];
-  if (sb && userId) {
+  // A university course the student is enrolled in: retrieve from what its
+  // staff uploaded (RLS limits this to their own courses), and lead with it.
+  const courseId = (raw?.learning as { courseId?: unknown } | undefined)?.courseId;
+  if (sb && userId && typeof courseId === "string" && /^[0-9a-f-]{36}$/i.test(courseId)) {
+    try {
+      const recent = messages.filter((m) => m.role === "user").slice(-2).map((m) => m.content).join("\n");
+      const [{ data: course }, passages, brain] = await Promise.all([
+        sb.from("courses").select("code, title").eq("id", courseId).maybeSingle(),
+        retrieve(sb, courseId, recent),
+        courseBrain(sb, courseId),
+      ]);
+      if (course) {
+        grounded = passages.length;
+        for (const p of passages) {
+          citations.push({
+            title: p.material_title,
+            ref: p.page ? `p.${p.page}` : p.heading || "",
+            source: "course",
+            excerpt: p.content.replace(/\s+/g, " ").slice(0, 420).trim(),
+          });
+        }
+        extra.push(courseBlock(course, passages, brain));
+      }
+    } catch {
+      // Retrieval is an enhancement; without it MoeAI still teaches, just ungrounded.
+    }
+  } else if (sb && userId) {
     try {
       const { data } = await sb.rpc("search_material", {
         q: question, scope: null, max_results: 4, room: roomId,
@@ -228,15 +234,25 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const spec = security();
-  if (spec) extra.push(spec);
+  // ── What the MoeAI app sent along with the message ──────────────────────
+  // The lecture the chat belongs to, and any files the student attached.
+  const learning = learningContext(raw?.learning);
+  if (learning) extra.push(learning);
+  const attached = await parseAttachments(raw?.attachments);
+  if (attached.material) extra.push(attached.material);
+  if (attached.described.length) {
+    extra.push(`Attachments that could not be included: ${attached.described.join("; ")}. Do not guess their contents.`);
+  }
+
+  // ── What the chat can render ────────────────────────────────────────────
+  // The MoeAI app draws diagrams, charts and interactive visualizers and runs
+  // code; the workspace renders Markdown, math and Mermaid.
+  extra.push(surfaceGuide((raw as { surface?: unknown })?.surface === "app" ? "app" : "workspace"));
 
   // ── Reply in the language they actually wrote in ───────────────────────
-  const previous = context.profile.language?.toLowerCase().includes("arabic")
-    ? ("ar" as Target)
-    : null;
-  const language = detectLanguage(question, previous);
-  extra.push(languageDirective(language));
+  // Decided here, from the student's own messages, exactly as the Telegram
+  // bot decides it; the directive goes last in the prompt (lib/emy).
+  const language = resolveLanguage(messages, context.profile.language);
 
   // ── Stream ────────────────────────────────────────────────────────────
   const controller = new AbortController();
@@ -251,7 +267,7 @@ export async function POST(req: NextRequest) {
         // Citations lead, so the workspace can show what it is reading from
         // while the answer is still arriving.
         if (citations.length) ctrl.enqueue(encoder.encode(JSON.stringify({ citations }) + "\n"));
-        for await (const delta of streamReply(messages, context, controller.signal, extra.join("\n\n"))) {
+        for await (const delta of streamReply({ messages, context, appContext: extra, images: attached.images, signal: controller.signal }, language)) {
           answer += delta;
           ctrl.enqueue(encoder.encode(JSON.stringify({ delta }) + "\n"));
         }
@@ -277,7 +293,7 @@ export async function POST(req: NextRequest) {
             .insert({
               user_id: userId,
               provider: "moeai",
-              model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+              model: process.env.GEMINI_MODELS || "gemini-auto",
               completion_tokens: Math.ceil(answer.length / 4),
               latency_ms: Date.now() - started,
               status: answer ? "ok" : "all_failed",

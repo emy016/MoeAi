@@ -17,9 +17,14 @@ export async function GET() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return Response.json({ nudges: [] });
 
+  // New lectures, today's practice question, a misconception to revisit:
+  // written for this student on the spot (refresh_nudges only writes for
+  // auth.uid()), so MoeAI reaches out even without the daily job.
+  await sb.rpc("refresh_nudges").then(() => {}, () => {});
+
   const { data } = await sb
     .from("nudges")
-    .select("id, kind, body, prompt, action_url, created_at")
+    .select("id, kind, body, prompt, action_url, course_id, material_id, created_at")
     .is("seen_at", null)
     .order("created_at", { ascending: false })
     .limit(3);

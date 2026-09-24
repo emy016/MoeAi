@@ -4,6 +4,11 @@
  * Expo hashes the bundle filename on every export. If the page is copied
  * without the bundle — or the bundle without the page — the result is a white
  * screen and a 404 in the console, with nothing in the build to warn you.
+ *
+ * The bundle then loads its own files — fonts, flag images — by absolute
+ * /assets/... path. Those went missing once without anyone noticing (the fonts
+ * sat under assets/node_modules/, which .gitignore excluded) and the app quietly
+ * rendered in a fallback font, so every one of them is checked too.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -13,6 +18,10 @@ if (!existsSync(page)) { console.log(`MISSING  ${page} — /moeai has nothing to
 
 const html = readFileSync(page, "utf8");
 const refs = [...html.matchAll(/(?:src|href)="(\/[^"]+)"/g)].map(m => m[1]);
+for (const bundle of refs.filter(ref => ref.endsWith(".js") && existsSync(join("public", ref)))) {
+  const code = readFileSync(join("public", bundle), "utf8");
+  refs.push(...new Set([...code.matchAll(/"(\/assets\/[^"?#]+\.[a-z0-9]+)"/gi)].map(m => m[1])));
+}
 const broken = refs.filter(ref => !existsSync(join("public", ref)));
 
 for (const ref of broken) console.log(`BROKEN   ${ref} — referenced by ${page}, not in public/`);

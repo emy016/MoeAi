@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check:language": "node --experimental-strip-types scripts/check-language.ts",
-    "verify": "npm run check:keys && npm run check:app && npm run check:language && npm run check:logic && npm run check:subjects && npm run check:calendar && npm run check:markdown && npm run check:mobile && npm run build",
+    "verify": "npm run check:keys && npm run check:app && npm run check:language && npm run check:emy && npm run check:logic && npm run check:subjects && npm run check:calendar && npm run check:markdown && npm run check:mobile && npm run build",
     "check:logic": "node --experimental-strip-types scripts/check-logic.ts",
     "check:markdown": "node scripts/check-markdown.mjs",
     "check:subjects": "node --experimental-strip-types scripts/check-subjects.ts",
@@ -20,7 +20,8 @@
     "check:calendar": "node --experimental-strip-types scripts/check-calendar.ts",
     "check:keys": "node --experimental-strip-types scripts/check-keys.ts",
     "build:app": "bash scripts/build-app.sh",
-    "check:app": "node scripts/check-app-bundle.mjs"
+    "check:app": "node scripts/check-app-bundle.mjs",
+    "check:emy": "node --experimental-strip-types scripts/check-emy.ts"
   },
   "dependencies": {
     "@heroui/react": "3.2.4",
@@ -28,6 +29,7 @@
     "@supabase/ssr": "0.12.6",
     "@supabase/supabase-js": "2.116.0",
     "highlight.js": "^11.11.1",
+    "jszip": "^3.10.2",
     "katex": "^0.18.7",
     "lucide-react": "1.42.0",
     "mathjs": "15.2.0",
