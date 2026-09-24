@@ -35,7 +35,8 @@ const nextConfig: NextConfig = {
   // Read at runtime by the MoeAI route, so it has to be traced into the
   // serverless bundle rather than left behind at build time.
   outputFileTracingIncludes: {
-    "/api/moeai": ["./lib/moeai/personality.md", "./prompts/**"],
+    "/api/moeai": ["./prompts/**"],
+    "/api/health": ["./prompts/**"],
   },
 
   async rewrites() {
