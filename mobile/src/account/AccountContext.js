@@ -11,6 +11,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { Linking, Platform } from 'react-native';
 import { API_BASE_URL } from '../ai/client';
 import { startCloudSync } from './cloudSync';
+import { storageKey } from '../storage/persistedStorage';
 
 const AccountContext = createContext(null);
 
@@ -55,10 +56,11 @@ export function AccountProvider({ children }) {
 
   useEffect(() => {
     if (account.status !== 'signedIn') return undefined;
-    const session = startCloudSync({ onStatus: setSync, onRemoteApplied: () => setRevision((n) => n + 1) });
+    const identity = account.email || account.handle || account.name;
+    const session = startCloudSync({ practiceKey: storageKey(`practice-v1-${encodeURIComponent(identity || 'guest')}`), onStatus: setSync, onRemoteApplied: () => setRevision((n) => n + 1) });
     syncRef.current = session;
     return () => { session.stop(); syncRef.current = null; };
-  }, [account.status]);
+  }, [account.status, account.email, account.handle, account.name]);
 
   const signIn = useCallback(async (identifier, password) => {
     const result = await call('/api/auth', { action: 'login', identifier, password });

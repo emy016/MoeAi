@@ -20,6 +20,8 @@ export const AccentPresets = {
   red: { dark: '#EB6674', light: '#C53F51' },
 };
 
+export const DifficultyColors = { easy: '#39B977', medium: '#D6A938', hard: '#E56670' };
+
 export function colorWithAlpha(hex, alpha) {
   const clean = hex.replace('#', '');
   if (clean.length !== 6) return hex;
