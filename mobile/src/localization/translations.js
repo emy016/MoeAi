@@ -167,6 +167,18 @@ Object.assign(ar, {
   syncExplain: 'المواد وتقدم المحاضرات والمحادثات والتقويم والإعدادات بتتحفظ في حسابك، والجهاز ده كمان محتفظ بنسخة.',
 });
 
+// Account: full onboarding lives on the site; the sheet links into it.
+Object.assign(en, {
+  continueApple: 'Continue with Apple', finishSetup: 'Finish setting up your account', accountSettings: 'Account settings',
+  createAccountFull: 'Create an account', signInEmail: 'Sign in with email or phone', forgotPassword: 'Forgot password?',
+  emailOrPhone: 'Email or phone number', setupPending: 'Pick a handle and accept the terms to finish your account.',
+});
+Object.assign(ar, {
+  continueApple: 'كمّل بأبل', finishSetup: 'كمّل إعداد حسابك', accountSettings: 'إعدادات الحساب',
+  createAccountFull: 'اعمل حساب', signInEmail: 'سجّل دخول بالإيميل أو التليفون', forgotPassword: 'نسيت كلمة السر؟',
+  emailOrPhone: 'الإيميل أو رقم التليفون', setupPending: 'اختار اسم مستخدم ووافق على الشروط عشان تكمّل حسابك.',
+});
+
 // Simulators tab.
 Object.assign(en, {
   simulatorsForYou: 'Picked for the courses on your Home tab. Add a course there and its simulators appear here.',
