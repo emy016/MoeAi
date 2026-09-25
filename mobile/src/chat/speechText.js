@@ -21,6 +21,7 @@ function speakMath(tex) {
 
 export function speechText(markdown) {
   return String(markdown || '')
+    .replace(/```(memory|skill)\s*\n[\s\S]*?(```|$)/gi, '')
     .replace(/```(\w+)?[\s\S]*?```/g, (_, lang) => ` (${BLOCK_NAMES[lang] || (lang ? `some ${lang} code` : 'a code block')} is on screen) `)
     .replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => ` ${speakMath(tex)}. `)
     .replace(/\$([^$\n]+)\$/g, (_, tex) => ` ${speakMath(tex)} `)

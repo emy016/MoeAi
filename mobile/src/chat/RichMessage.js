@@ -8,6 +8,7 @@ import { StyleSheet, View } from 'react-native';
 import KaTeXMessage from './KaTeXMessage';
 import BlockCard from './blocks/BlockCard';
 import PhetCard from './blocks/PhetCard';
+import QuestionCard from './blocks/QuestionCard';
 import { hasBlocks, splitSegments } from './blocks/segments';
 
 export default React.memo(function RichMessage({ text, color, textAlign, fontStyle, maxWidth, style, onFix }) {
@@ -24,7 +25,9 @@ export default React.memo(function RichMessage({ text, color, textAlign, fontSty
         // the rest of the reply streams in around it.
         segment.kind === 'phet'
           ? <PhetCard key={`b${index}-phet`} block={segment} onAsk={onFix} />
-          : <BlockCard key={`b${index}-${segment.kind}`} block={segment} onFix={onFix} />
+          : segment.kind === 'ask'
+            ? <QuestionCard key={`b${index}-ask`} block={segment} onSend={onFix} />
+            : <BlockCard key={`b${index}-${segment.kind}`} block={segment} onFix={onFix} />
       ))}
     </View>
   );

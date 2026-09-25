@@ -16,6 +16,8 @@ import { useAppFonts } from './src/constants/fonts';
 import { AppPreferencesProvider, usePreferences } from './src/context/AppPreferences';
 import { AccountProvider, useAccount } from './src/account/AccountContext';
 import AccountSheet from './src/account/AccountSheet';
+import { PersonalProvider } from './src/personal/PersonalContext';
+import PersonalSheet from './src/personal/PersonalSheet';
 
 // Keep the splash screen up until Nunito Sans is ready, so text never
 // flashes in the fallback font on first launch.
@@ -104,7 +106,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AccountProvider>
-        <SyncedApp />
+        <PersonalProvider>
+          <SyncedApp />
+        </PersonalProvider>
       </AccountProvider>
     </SafeAreaProvider>
   );
@@ -120,6 +124,7 @@ function SyncedApp() {
     <AppPreferencesProvider key={revision}>
       <ThemedApp />
       <AccountSheet />
+      <PersonalSheet />
     </AppPreferencesProvider>
   );
 }

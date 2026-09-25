@@ -28,7 +28,8 @@ import useHoldToDictate from '../chat/useHoldToDictate';
 import VoiceMode from '../chat/VoiceMode';
 import LectureReader from '../chat/LectureReader';
 import { speak as speakAloud, stop as stopSpeaking } from '../chat/speech';
-import { API_BASE_URL } from '../ai/client';
+import { API_BASE_URL, visibleText } from '../ai/client';
+import { usePersonal } from '../personal/PersonalContext';
 import { modelLabel, useAccount } from '../account/AccountContext';
 import KaTeXMessage from '../chat/KaTeXMessage';
 import RichMessage from '../chat/RichMessage';
@@ -257,6 +258,19 @@ function ChatEmptyState({ lecture, subject, model, onPick, onRead }) {
   );
 }
 
+/** MoeAI kept something from this reply; tapping shows exactly what, and lets the student change it. */
+function MemoryChip({ items }) {
+  const { colors, type, t, isRTL } = usePreferences();
+  const { openPanel } = usePersonal();
+  const summary = items.slice(0, 2).map((m) => String(m.key || '').replace(/_/g, ' ')).join(', ');
+  return (
+    <Pressable onPress={() => openPanel(items.some((m) => m.skill) ? 'skills' : 'memory')} accessibilityRole="button" accessibilityLabel={t('memoryUpdated')} style={[styles.memoryChip, { backgroundColor: colors.cardButton, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <SparklesIcon size={12} color={colors.accent} />
+      <Text numberOfLines={1} style={[{ color: colors.textSecondary, flexShrink: 1 }, type(11, 'semiBold', 15)]}>{t('memoryUpdated')}{summary ? ` · ${summary}` : ''}</Text>
+    </Pressable>
+  );
+}
+
 const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, isLastUser, canEdit, onRegenerate, onFix, onFollowUp, speaking, onSpeak, onFeedback, onEdit }) {
   const { colors, type, isRTL, motion, t } = usePreferences();
   const { width } = useWindowDimensions();
@@ -331,6 +345,7 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, 
           </Pressable>
         ) : null}
         {!user && !pending && !!message.citations?.length ? <Sources items={message.citations} /> : null}
+        {!user && !pending && !streaming && !!message.remembered?.length ? <MemoryChip items={message.remembered} /> : null}
         {!user && !pending && !streaming && !!message.text && (
           <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
@@ -649,7 +664,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   const removePending = useCallback((id) => setPendingAttachments((current) => current.filter((item) => item.id !== id)), []);
   const openPreview = useCallback((attachments, index) => setPreview({ attachments, index }), []);
-  const copyMessage = useCallback((text) => Clipboard.setStringAsync(text).catch(() => {}), []);
+  const copyMessage = useCallback((text) => Clipboard.setStringAsync(visibleText(text)).catch(() => {}), []);
   const speakMessage = useCallback((message) => {
     if (speakingId === message.id) { stopSpeaking(); setSpeakingId(null); return; }
     setSpeakingId(message.id);
@@ -945,6 +960,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 }
 
 const styles = StyleSheet.create({
+  memoryChip: { alignSelf: 'flex-start', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, marginTop: 6, maxWidth: '100%' },
   replyActions: { alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   iconAction: { padding: 3, marginTop: 4 },
   editButton: { alignSelf: 'flex-end', alignItems: 'center', gap: 4, marginTop: 4, marginHorizontal: 4, padding: 2 },
