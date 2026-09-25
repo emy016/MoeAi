@@ -5,7 +5,7 @@
  * lands in the chat, grounded in the course material, and can be followed up.
  */
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { AcademicCapIcon, DocumentTextIcon, PresentationChartBarIcon, RectangleStackIcon, ShareIcon, SpeakerWaveIcon } from 'react-native-heroicons/outline';
 import ElasticPressable from '../components/ElasticPressable';
 import { Radius } from '../constants/layout';
@@ -23,10 +23,12 @@ export const STUDIO_TOOLS = [
 /** A row of Studio tools; `onPick(text, { speak })` sends the request. */
 export default function Studio({ onPick, compact }) {
   const { colors, type, t, isRTL } = usePreferences();
+  const { width } = useWindowDimensions();
+  // The empty chat centers its content, so the row needs a real width or it grows past the screen.
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, !compact && { width: Math.min(width - 32, 720) }]}>
       <Text style={[{ color: colors.textMuted, textAlign: isRTL ? 'right' : 'left' }, type(11, 'bold', 14)]}>{t('studioTitle')}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={[styles.row, isRTL && { flexDirection: 'row-reverse' }]}>
+      <ScrollView horizontal style={styles.scroll} showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={[styles.row, isRTL && { flexDirection: 'row-reverse' }]}>
         {STUDIO_TOOLS.map((tool) => (
           <ElasticPressable key={tool.id} shape="pill" onPress={() => onPick(t(tool.prompt), { speak: Boolean(tool.speak), studio: tool.id })} accessibilityRole="button" accessibilityLabel={t(tool.label)}>
             <View style={[compact ? styles.chip : styles.tile, { backgroundColor: compact ? colors.cardButton : colors.card }]}>
@@ -42,6 +44,7 @@ export default function Studio({ onPick, compact }) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 8, alignSelf: 'stretch' },
+  scroll: { width: '100%', flexGrow: 0 },
   row: { gap: 8, paddingRight: 8 },
   tile: { width: 108, borderRadius: Radius.md, padding: 12, gap: 8 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: Radius.pill, paddingVertical: 6, paddingHorizontal: 10 },
