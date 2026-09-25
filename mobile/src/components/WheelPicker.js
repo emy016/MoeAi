@@ -50,14 +50,14 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
 
   const renderItem = useCallback(({ item, index }) => (
     <Pressable
-      onPress={() => { interacting.current = true; listRef.current?.scrollToOffset({ offset: index * ITEM_HEIGHT, animated: true }); }}
+      onPress={() => { interacting.current = true; selectIndex(index); listRef.current?.scrollToOffset({ offset: index * ITEM_HEIGHT, animated: true }); }}
       style={styles.item}
       accessibilityRole="button"
       accessibilityLabel={String(item.label)}
     >
       <Text numberOfLines={1} style={[styles.baseText, { color: colors.textMuted }, type(14, 'bold', 18)]}>{item.label}</Text>
     </Pressable>
-  ), [colors.textMuted, type]);
+  ), [colors.textMuted, selectIndex, type]);
 
   return (
     <View style={[styles.picker, { flex }]} accessibilityLabel={accessibilityLabel}>
@@ -80,7 +80,11 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
           if (interacting.current) selectIndex(Math.round(event.nativeEvent.contentOffset.y / ITEM_HEIGHT));
           interacting.current = false;
         }}
-        removeClippedSubviews
+        onScrollEndDrag={(event) => {
+          // Web and low-velocity native drags may end without momentum.
+          if (interacting.current) selectIndex(Math.round(event.nativeEvent.contentOffset.y / ITEM_HEIGHT));
+        }}
+        removeClippedSubviews={false}
         initialNumToRender={7}
         maxToRenderPerBatch={7}
         windowSize={5}

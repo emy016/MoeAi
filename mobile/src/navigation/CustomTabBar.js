@@ -49,10 +49,10 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, Easing, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomeIcon, TrophyIcon, CpuChipIcon, UserGroupIcon, PlusIcon } from 'react-native-heroicons/outline';
+import { HomeIcon, BookOpenIcon, CpuChipIcon, UserGroupIcon, PlusIcon } from 'react-native-heroicons/outline';
 import {
   HomeIcon as HomeIconSolid,
-  TrophyIcon as TrophyIconSolid,
+  BookOpenIcon as BookOpenIconSolid,
   CpuChipIcon as CpuChipIconSolid,
   UserGroupIcon as UserGroupIconSolid,
 } from 'react-native-heroicons/solid';
@@ -71,7 +71,7 @@ import { usePreferences } from '../context/AppPreferences';
 const SHIFT = [-TabBar.SHIFT_OUTER, -TabBar.SHIFT_INNER, TabBar.SHIFT_INNER, TabBar.SHIFT_OUTER];
 const ICONS = {
   Home: { Outline: HomeIcon, Solid: HomeIconSolid, label: 'Home' },
-  Practice: { Outline: TrophyIcon, Solid: TrophyIconSolid, label: 'Ranked' },
+  Practice: { Outline: BookOpenIcon, Solid: BookOpenIconSolid, label: 'Practice' },
   Simulators: { Outline: CpuChipIcon, Solid: CpuChipIconSolid, label: 'Simulators' },
   Community: { Outline: UserGroupIcon, Solid: UserGroupIconSolid, label: 'Community' },
 };

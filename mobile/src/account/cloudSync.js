@@ -57,7 +57,8 @@ export function portable(key, raw) {
   return null;
 }
 
-export function startCloudSync({ onRemoteApplied, onStatus }) {
+export function startCloudSync({ onRemoteApplied, onStatus, practiceKey }) {
+  const syncedKeys = practiceKey ? [...SYNCED_KEYS, practiceKey] : SYNCED_KEYS;
   let meta = {};
   const lastSynced = {};
   const pending = new Set();
@@ -106,7 +107,7 @@ export function startCloudSync({ onRemoteApplied, onStatus }) {
       remote = (await res.json())?.state || {};
     } catch (_) { status('offline'); return; }
     let applied = false;
-    for (const key of SYNCED_KEYS) {
+    for (const key of syncedKeys) {
       const entry = remote[REMOTE(key)];
       const localAt = meta[key] || 0;
       if (entry && typeof entry.data === 'string' && Number(entry.at) > localAt) {
@@ -126,7 +127,7 @@ export function startCloudSync({ onRemoteApplied, onStatus }) {
   }
 
   const unsubscribe = onStorageWrite((key, value) => {
-    if (!SYNCED_KEYS.includes(key)) return;
+    if (!syncedKeys.includes(key)) return;
     // Stores write back what they just loaded; that is not a change.
     if (lastSynced[key] === value) return;
     meta[key] = Date.now();
