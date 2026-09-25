@@ -872,6 +872,13 @@
     html.embed .rank-card, html.embed .profile-card, html.embed .stat-pill, html.embed .mode-tab, html.embed .lb-row, html.embed .achievement-card { box-shadow: none; border-color: transparent; border-radius: 14px; }
     html.embed body { padding-bottom: 24px; min-height: 100%; overscroll-behavior: contain; }
     html.embed .btn-back { display: none; }
+    /* Inside the app the Arena uses the app's own look: its font, flat cards and pill buttons in the app's colors, no glass or glow. */
+    html.embed { --accent-glow: transparent; --glow: transparent; --glow2: transparent; --glass-border: transparent; --glass-border2: transparent; }
+    html.embed *, html.embed *::before, html.embed *::after { font-family: 'Nunito Sans', -apple-system, sans-serif !important; letter-spacing: normal !important; text-shadow: none !important; }
+    html.embed [class*="card"], html.embed .stat-pill, html.embed .lb-row, html.embed .match-item, html.embed .achievement-item, html.embed .mode-tab, html.embed .lb-filter, html.embed .empty-state, html.embed .tournament-bracket { background: var(--bg2) !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-radius: 16px !important; }
+    html.embed .btn, html.embed .btn-primary, html.embed button.primary { background: var(--accent) !important; background-image: none !important; color: #fff !important; border: none !important; border-radius: 999px !important; box-shadow: none !important; font-weight: 700 !important; }
+    html.embed .mode-tab.active, html.embed .lb-filter.active { background: var(--accent) !important; color: #fff !important; }
+    html.embed .crt-overlay, html.embed .theme-switcher { display: none !important; }
     html.embed .brand { pointer-events: none; }
     html.embed .topbar { padding-top: max(10px, env(safe-area-inset-top)); }
     html.embed .page-head { margin-top: 18px; }

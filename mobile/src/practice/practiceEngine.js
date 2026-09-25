@@ -6,8 +6,20 @@ export const DAILY_LIMITS = { questions: 20, exams: 3, flashcards: 100 };
 
 const names = { mcq: 'multiple choice', essay: 'essay', blank: 'fill in the blank', boolean: 'true or false' };
 
+const LANGUAGES = { en: 'English', ar: 'Arabic (Modern Standard, Arabic script)', es: 'Spanish', fr: 'French', de: 'German', zh: 'Chinese', hi: 'Hindi' };
+
+/**
+ * Practice follows the language the app is set to, and only that language:
+ * no Franco-Arabic and no mixing (Franco belongs to the chat, where the
+ * student chooses it). Technical terms may stay in their standard form.
+ */
+function languageRule(settings) {
+  const name = LANGUAGES[settings.language] || 'English';
+  return `Reply in ${name} only. Write every question, option, answer and explanation in ${name}. Never use Franco-Arabic (Arabic in Latin letters) and never mix languages; formulas, code and standard technical terms may stay as they are.`;
+}
+
 function context(settings) {
-  return `Subject: ${settings.subject?.name || 'General study'}. Lecture: ${settings.lecture?.title || 'all lectures'}. Difficulty: ${settings.difficulty}. Use the student's subject and lecture material when available. Do not invent a source citation.`;
+  return `${languageRule(settings)} Subject: ${settings.subject?.name || 'General study'}. Lecture: ${settings.lecture?.title || 'all lectures'}. Difficulty: ${settings.difficulty}. Use the student's subject and lecture material when available. Do not invent a source citation.`;
 }
 
 function parseReply(text) {
@@ -47,8 +59,8 @@ export async function generateQuestions(settings, count) {
     'Create exactly ' + count + ' original study questions. Return ONLY a JSON object {"questions":[...]}; no Markdown.',
     context(settings),
     `Question types in order: ${types.map((type) => names[type]).join(', ')}. ${settings.types?.length > 1 ? 'Types were selected together; vary them randomly as specified in this list.' : ''}`,
-    'For each question include: type (mcq, essay, blank, boolean), question, answer, explanation (a clear step-by-step worked explanation).',
-    'For mcq, include exactly four plausible options and zero-based correctIndex. For boolean, answer must be "True" or "False". For blank, make the missing portion explicit with ____ and give a short answer. For essay, give a model answer and grading guidance in explanation.',
+    'For each question include: type (mcq, essay, blank, boolean), question, answer, explanation. The explanation is concise: at most 2 short sentences saying why the answer is right (a formula or one key step, no preamble, no repetition of the question).',
+    'For mcq, include exactly four plausible options and zero-based correctIndex. For boolean, answer must be "True" or "False". For blank, make the missing portion explicit with ____ and give a short answer of 1-3 words, so it can be checked exactly. For essay, give a short model answer and one line of grading guidance in explanation.',
     'Never put the answer in the question text. Ensure answers and explanations are factually consistent.',
   ].join('\n');
   const reply = await generateMoeAIReply({ text: prompt, subject: settings.subject, lecture: settings.lecture, lectureFiles: settings.lecture?.files || [] });
@@ -79,16 +91,27 @@ export async function generateFlashcards(settings) {
   return parsed.cards.map((card, index) => ({ id: `${Date.now()}-${index}`, front: String(card.front).trim(), back: String(card.back).trim() }));
 }
 
+/** Checked on the device against the saved answer key: no call to MoeAI, no waiting. */
 export function gradeObjective(question, response) {
   if (question.type === 'mcq') return Number(response) === question.correctIndex;
-  const clean = (value) => String(value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
-  return clean(response) === clean(question.answer);
+  const clean = (value) => String(value ?? '').normalize('NFKC').toLocaleLowerCase()
+    .replace(/[\u064B-\u0652]/g, '') // Arabic diacritics
+    .replace(/[.,;:!?'"`()[\]{}]/g, ' ').replace(/\b(the|a|an)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  const given = clean(response);
+  const expected = clean(question.answer);
+  if (!given) return false;
+  if (question.type === 'boolean') return given.startsWith(expected) || (expected === 'true' && /^(t|صح|صحيح)/.test(given)) || (expected === 'false' && /^(f|خطأ|خطا|غلط)/.test(given));
+  // Fill in the blank: the same words, ignoring case, articles and punctuation; a number must match as a number.
+  if (given === expected) return true;
+  const asNumber = (value) => { const n = Number(value.replace(/\s/g, '')); return Number.isFinite(n) ? n : null; };
+  if (asNumber(given) !== null && asNumber(expected) !== null) return Math.abs(asNumber(given) - asNumber(expected)) < 1e-9;
+  return expected.length > 3 && (given.includes(expected) || (given.length > 3 && expected.includes(given) && given.length >= expected.length * 0.6));
 }
 
 export async function explainObjective(question, response, settings) {
   const selected = question.type === 'mcq' ? question.options[response] : response;
   const reply = await generateMoeAIReply({
-    text: `Explain this solved study question step by step for the student. State the correct answer and why the student's answer is right or wrong. Do not change the answer key.\nQuestion: ${question.prompt}\nCorrect answer: ${question.answer}\nStudent answer: ${selected}\nOriginal worked explanation: ${question.explanation}`,
+    text: `${languageRule(settings)} In at most 3 short sentences, state the correct answer and why the student's answer is right or wrong. No preamble. Do not change the answer key.\nQuestion: ${question.prompt}\nCorrect answer: ${question.answer}\nStudent answer: ${selected}\nOriginal worked explanation: ${question.explanation}`,
     subject: settings.subject, lecture: settings.lecture,
   });
   return reply.text.trim() || question.explanation;
@@ -96,7 +119,7 @@ export async function explainObjective(question, response, settings) {
 
 export async function gradeEssay(question, response, settings) {
   const reply = await generateMoeAIReply({
-    text: `Grade this student's written answer to the question below. Return ONLY JSON {"correct":true/false,"explanation":"step-by-step feedback including the correct answer"}. Give credit for equivalent wording and valid reasoning.\nQuestion: ${question.prompt}\nModel answer: ${question.answer}\nGrading guidance: ${question.explanation}\nStudent answer: ${String(response).slice(0, 4000)}`,
+    text: `${languageRule(settings)} Grade this student's written answer to the question below. Return ONLY JSON {"correct":true/false,"explanation":"concise feedback in at most 3 short sentences, including the correct answer"}. Give credit for equivalent wording and valid reasoning.\nQuestion: ${question.prompt}\nModel answer: ${question.answer}\nGrading guidance: ${question.explanation}\nStudent answer: ${String(response).slice(0, 4000)}`,
     subject: settings.subject, lecture: settings.lecture,
   });
   const parsed = parseReply(reply.text);
