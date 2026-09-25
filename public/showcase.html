@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MoeAI — the tutor that knows your syllabus | EduMoe</title>
-  <meta name="description" content="MoeAI is a curriculum-aware AI tutor for Egyptian university students. It answers from your own lectures, in Egyptian Arabic, Franco-Arabic or English, and remembers what you got wrong." />
+  <meta name="description" content="MoeAI is a generative AI tutor for Egyptian university students. It answers from your own lectures in Egyptian Arabic, Franco-Arabic or English, remembers each student, and builds simulations, graphs, mind maps, flashcards and practice exams on the spot." />
   <link rel="canonical" href="https://moe-ai-sable.vercel.app/showcase" />
 
   <meta property="og:type" content="website" />
@@ -343,9 +343,10 @@
     <span class="eyebrow">MOEAI · BY EDUMOE</span>
     <h1>The tutor that knows<br><em>your</em> syllabus.</h1>
     <p class="lede">
-      Every AI can explain pointers. None of them know that <strong>your</strong> lecture
-      covered them in week 11, that you got the dereference question wrong last Tuesday,
-      or that you'd rather be explained to in Franco.
+      MoeAI is a generative AI tutor for Egyptian university students. It answers from
+      <strong>your</strong> lectures, remembers <strong>you</strong> from one week to the next,
+      and doesn't just write: it builds the simulation, the graph, the mind map, the flashcards
+      and the practice exam for the thing you're stuck on, in Arabic, Franco or English.
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="/moeai">Open MoeAI <span aria-hidden="true">→</span></a>
@@ -356,6 +357,7 @@
       <div><b>191</b><span>lecture pages, cited to the page</span></div>
       <div><b>3</b><span>full FUE courses grounded</span></div>
       <div><b>3</b><span>languages, per message</span></div>
+      <div><b>12</b><span>kinds of things it generates</span></div>
     </div>
   </header>
 
@@ -441,10 +443,42 @@
       </article>
       <article class="card lg lg-card">
         <span class="num">03</span><h3>You</h3>
-        <p>Every quiz question you miss becomes a note. Next week it's brought back up —
-        as continuity, not as “according to my records”. You can read and delete all of it.</p>
-        <span class="status live">Live</span>
+        <p>MoeAI remembers each student: your name, how you like things explained, your exam
+        dates, the mistake you keep making. Some things it keeps in mind always, others only
+        when that topic comes up. Open <em>Memory</em> in the app to read, pin, edit or delete
+        every one of them, switch on skills, or tell it how to work with you.</p>
+        <span class="status live">Live · memory, skills, custom instructions</span>
       </article>
+    </div>
+  </section>
+
+  <!-- ─── GENERATIVE ────────────────────────────────────────── -->
+  <section class="band" id="generative">
+    <span class="eyebrow center">GENERATIVE, NOT JUST CHAT</span>
+    <h2 class="center">It makes the thing that makes it click.</h2>
+    <p class="center sub">
+      Ask about projectile motion and you get a simulation you can drag. Ask how a matrix
+      transforms space and you get the animation. Every one of these is generated for your
+      question, on the spot, inside the chat, and grounded in your lecture.
+    </p>
+    <div class="feat">
+      <div><b>Interactive visualizers</b><span>Sliders, canvases and live math, written for your question</span></div>
+      <div><b>Charts &amp; graphs</b><span>Plot any function or dataset it's explaining</span></div>
+      <div><b>3D scenes</b><span>Rotate the surface, the vector field, the molecule</span></div>
+      <div><b>Step animations</b><span>Math that moves, one step at a time, like a lecture video</span></div>
+      <div><b>Real PhET labs</b><span>University of Colorado simulations, with tasks set by MoeAI</span></div>
+      <div><b>Diagrams &amp; mind maps</b><span>Flowcharts, state machines, trees, course maps</span></div>
+      <div><b>Runnable code</b><span>Python and JavaScript that run in the chat</span></div>
+      <div><b>Quizzes &amp; flashcards</b><span>Tap to answer, flip to check, explained when wrong</span></div>
+    </div>
+    <h3 class="center" style="margin-top:36px">Studio: one tap turns a lecture into…</h3>
+    <div class="feat">
+      <div><b>A study guide</b><span>One page: key ideas, formulas, a worked example, the traps</span></div>
+      <div><b>A mind map</b><span>The whole lecture as a map you can take in at once</span></div>
+      <div><b>Flashcards</b><span>A deck you flip through before the exam</span></div>
+      <div><b>A practice quiz</b><span>Five questions, mixed difficulty, explained</span></div>
+      <div><b>Revision slides</b><span>Short slides, one idea each</span></div>
+      <div><b>An audio overview</b><span>Two minutes, read aloud, for the bus</span></div>
     </div>
   </section>
 
@@ -466,6 +500,10 @@
       <div><b>Edit &amp; resend</b><span>Fix a question without starting over</span></div>
       <div><b>Tell your lecturer</b><span>Thumbs up or down reach the course staff</span></div>
       <div><b>Ranked, in the app</b><span>The Elo arena, one tab away</span></div>
+      <div><b>It remembers you</b><span>Memory you can read and edit, and skills you switch on</span></div>
+      <div><b>It asks back</b><span>Tappable choices when a quick answer from you changes the reply</span></div>
+      <div><b>Exam mode</b><span>A timed practice exam with a countdown, graded by MoeAI</span></div>
+      <div><b>Make it yours</b><span>13 accent colors, 5 background styles, tinted surfaces</span></div>
     </div>
   </section>
 
@@ -476,20 +514,24 @@
         <span class="eyebrow">FOR UNIVERSITIES</span>
         <h2>Upload a course once. Every student gets a tutor that knows it.</h2>
         <p>
-          Staff drop lectures into the Organizer; MoeAI reads them, builds a map of the
-          course, the formulas and the mistakes students make, and flags what is missing.
-          Students sign in through the university and find their courses already there.
+          Professors and TAs manage their course's MoeAI from the <a href="/tutor">Tutor page</a>:
+          upload lectures, sheets and past exams; MoeAI reads them, builds a map of the course,
+          the formulas and the mistakes students make, and flags what is missing. Anything
+          MoeAI writes on its own waits for staff approval, and staff can ask it exactly what a
+          student would to see how it answers. Students sign in through the university and
+          find their courses already there.
         </p>
         <p>
           Organizations get an admin dashboard: members, roles, invitations tied to a
           verified email, suspensions, and the plan. Every permission is enforced by the
           database, not the browser.
         </p>
+        <a class="btn btn-primary" href="/tutor">Open the Tutor page</a>
         <a class="btn" href="/start/organization">Bring MoeAI to your organization</a>
       </div>
       <div class="drop lg lg-card">
         <div class="file"><span>🎓</span><div><b>University sign-in</b><small>SSO through the university; SAML-ready</small></div></div>
-        <div class="file"><span>🗂️</span><div><b>Organizer</b><small>upload · OCR · index · course brain</small></div></div>
+        <div class="file"><span>🗂️</span><div><b>Tutor page</b><small>upload · OCR · index · course brain · review</small></div></div>
         <div class="file"><span>🛡️</span><div><b>Admin dashboard</b><small>members · invitations · roles · plan</small></div></div>
       </div>
     </div>
@@ -528,7 +570,7 @@
       <div><b>Conversations</b><span>Threaded, searchable, exportable</span></div>
       <div><b>Library</b><span>PDFs, notes, subtitles — grounded answers</span></div>
       <div><b>Study plan</b><span>Deadlines, with MoeAI planning around them</span></div>
-      <div><b>Modes</b><span>Tutor, quick, code, math, library, quiz</span></div>
+      <div><b>Practice</b><span>Question sets, flashcards, timed exam mode</span></div>
       <div><b>Workbench</b><span>Calculator, graphs, truth tables, sandbox</span></div>
       <div><b>Notebook</b><span>Save any answer worth keeping</span></div>
       <div><b>Read aloud</b><span>For revising away from the screen</span></div>

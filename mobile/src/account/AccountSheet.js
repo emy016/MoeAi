@@ -98,6 +98,7 @@ export default function AccountSheet() {
           </View>
           {account.org ? <Text style={[{ color: colors.textSecondary }, type(12, 'semiBold', 17)]}>{t('universityLinked')}</Text> : null}
           <Text style={[{ color: colors.textMuted }, type(12, 'regular', 17)]}>{t('syncExplain')}</Text>
+          {account.org?.role === 'teacher' || account.org?.role === 'admin' ? <Button label={t('openTutorPage')} onPress={() => openSite('/organizer')} /> : null}
           {!account.org ? <Button label={t('accountSettings')} ghost onPress={() => openSite('/account')} /> : null}
           <Button label={t('signOut')} ghost busy={busy === 'out'} onPress={() => run('out', async () => { await signOut(); closeAccount(); })} />
         </View>
@@ -122,6 +123,9 @@ export default function AccountSheet() {
               <Text style={[styles.switch, { color: colors.accent }, type(12, 'bold', 16)]}>{t('noAccountYet')}</Text>
             </ElasticPressable>
           </View>
+          <ElasticPressable shape="pill" onPress={() => openSite('/organizer')} accessibilityRole="link">
+            <Text style={[styles.switch, { color: colors.textSecondary }, type(12, 'semiBold', 16)]}>{t('staffLink')}</Text>
+          </ElasticPressable>
         </View>
       )}
     </SwipeableBottomSheet>

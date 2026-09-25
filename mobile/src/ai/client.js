@@ -37,11 +37,17 @@ const sameOrigin = typeof window !== 'undefined' && window.location?.origin
   && /^https?:/.test(window.location.origin) ? window.location.origin : '';
 export const API_BASE_URL = String(fromEnv || sameOrigin || 'https://moe-ai-sable.vercel.app').replace(/\/+$/, '');
 
+import { personalForRequest } from '../personal/snapshot';
+
+/** Hidden blocks MoeAI writes for itself (memory, skills) are not part of the conversation. */
+export const visibleText = (text) => String(text || '').replace(/```(memory|skill)\s*\n[\s\S]*?(```|$)/gi, '').trim();
+
 function cleanHistory(history) {
   return (Array.isArray(history) ? history : [])
     .filter((message) => ['user', 'assistant'].includes(message?.role) && message?.text && message?.status !== 'pending' && message?.status !== 'failed')
     .slice(-(HISTORY_TURNS * 2))
-    .map((message) => ({ role: message.role, content: String(message.text).slice(0, MAX_MESSAGE_CHARS) }));
+    .map((message) => ({ role: message.role, content: visibleText(message.text).slice(0, MAX_MESSAGE_CHARS) }))
+    .filter((message) => message.content);
 }
 
 function blobAsBase64(blob) {
@@ -106,6 +112,8 @@ function createStreamParser(onDelta) {
   let text = '';
   let streamError = '';
   let citations = [];
+  let remembered = [];
+  let skills = [];
   const consume = (chunk) => {
     buffer += chunk;
     const lines = buffer.split('\n');
@@ -118,11 +126,12 @@ function createStreamParser(onDelta) {
       if (Array.isArray(event.citations)) citations = event.citations.slice(0, 8).map((c) => ({ title: String(c?.title || ''), ref: String(c?.ref || ''), excerpt: String(c?.excerpt || '').slice(0, 300) }));
       else if (typeof event.delta === 'string' && event.delta) { text += event.delta; onDelta?.(event.delta, text); }
       else if (event.error) streamError = String(event.error);
+      if (event.done) { remembered = Array.isArray(event.remembered) ? event.remembered.slice(0, 6) : []; skills = Array.isArray(event.skills) ? event.skills.slice(0, 2) : []; }
     }
   };
   return {
     consume,
-    finish() { if (buffer.trim()) consume('\n'); return { text: text.trim(), streamError, citations }; },
+    finish() { if (buffer.trim()) consume('\n'); return { text: text.trim(), streamError, citations, remembered, skills }; },
   };
 }
 
@@ -153,6 +162,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       credentials: 'include',
       body: JSON.stringify({
         surface: 'app',
+        personal: personalForRequest(),
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
         learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}), ...(lecture?.materialId ? { materialId: lecture.materialId } : {}) },
         attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (
@@ -189,7 +199,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     signal?.removeEventListener?.('abort', onStop);
   }
 
-  const { text: answer, streamError, citations } = parser.finish();
+  const { text: answer, streamError, citations, remembered, skills } = parser.finish();
   if (!response.ok && !answer) {
     let message = response.status === 429
       ? 'MoeAI is busy right now. Please try again in a moment.'
@@ -205,5 +215,5 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
     throw failure;
   }
   // A stream that broke midway still delivered real text; keep it.
-  return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError), citations };
+  return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError), citations, remembered, skills };
 }

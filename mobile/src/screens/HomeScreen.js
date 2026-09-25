@@ -18,6 +18,7 @@ import { useSubjectStore } from '../subjects/subjectStore';
 import FullCalendarScreen from './FullCalendarScreen';
 import LectureChatScreen from './LectureChatScreen';
 import { useAccount } from '../account/AccountContext';
+import { usePersonal } from '../personal/PersonalContext';
 import MoeAINudge from '../components/MoeAINudge';
 import ModelBanner from '../components/ModelBanner';
 import { useNudges } from '../nudges/useNudges';
@@ -116,7 +117,8 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const deleteLectureChat = useCallback((threadId) => {
     if (chatTarget) removeChat(chatTarget.subjectId, chatTarget.lectureId, threadId);
   }, [chatTarget, removeChat]);
-  const { openAccount, openSite, account } = useAccount();
+  const { openAccount } = useAccount();
+  const { openPanel } = usePersonal();
   const { nudge, dismiss: dismissNudge } = useNudges(subjects, t);
   // Taking MoeAI up on it: open that lecture's chat with the question already asked.
   const acceptNudge = useCallback((item) => {
@@ -130,11 +132,11 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   }, [dismissNudge, sendMessage, startChat, subjects, t]);
   const selectChatProfileItem = useCallback((id) => {
     if (id === 'profile') { openAccount(); return; }
-    if (id === 'plan') { if (account.status === 'signedIn') openSite('/account#plan'); else openAccount(); return; }
+    if (id === 'memory') { openPanel('memory'); return; }
     if (id !== 'settings') return;
     setChatTarget(null);
     requestAnimationFrame(() => onOpenSettings?.());
-  }, [account.status, onOpenSettings, openAccount, openSite]);
+  }, [onOpenSettings, openAccount, openPanel]);
   const confirmContentDelete = useCallback(() => {
     if (deleteTarget?.type === 'subject') {
       removeSubjectChats(deleteTarget.subject.id);

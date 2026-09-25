@@ -28,10 +28,12 @@ import useHoldToDictate from '../chat/useHoldToDictate';
 import VoiceMode from '../chat/VoiceMode';
 import LectureReader from '../chat/LectureReader';
 import { speak as speakAloud, stop as stopSpeaking } from '../chat/speech';
-import { API_BASE_URL } from '../ai/client';
+import { API_BASE_URL, visibleText } from '../ai/client';
+import { usePersonal } from '../personal/PersonalContext';
 import { modelLabel, useAccount } from '../account/AccountContext';
 import KaTeXMessage from '../chat/KaTeXMessage';
 import RichMessage from '../chat/RichMessage';
+import Studio from '../chat/Studio';
 import CalendarAlertModal from '../components/CalendarAlertModal';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
 import ElasticPressable from '../components/ElasticPressable';
@@ -224,7 +226,7 @@ function IconAction({ onPress, label, children }) {
 const SUGGESTIONS = ['suggestSummary', 'suggestExplain', 'suggestExample', 'suggestQuiz'];
 
 /** A new chat: what this MoeAI is, and good first questions about this lecture. */
-function ChatEmptyState({ lecture, subject, model, onPick, onRead }) {
+function ChatEmptyState({ lecture, subject, model, onPick, onStudio, onRead }) {
   const { colors, type, t, isRTL } = usePreferences();
   const grounded = Boolean(subject?.orgCourseId);
   return (
@@ -238,6 +240,7 @@ function ChatEmptyState({ lecture, subject, model, onPick, onRead }) {
         </View>
       ) : null}
       <Text style={[styles.emptyText, { color: colors.textMuted }, type(13, 'regular', 19)]}>{grounded ? t('groundedNote') : t('emptyChat')}</Text>
+      <Studio onPick={onStudio} />
       <View style={[styles.suggestions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {SUGGESTIONS.map((key) => (
           <ElasticPressable key={key} shape="pill" onPress={() => onPick(t(key))} accessibilityRole="button">
@@ -254,6 +257,19 @@ function ChatEmptyState({ lecture, subject, model, onPick, onRead }) {
         </ElasticPressable>
       ) : null}
     </View>
+  );
+}
+
+/** MoeAI kept something from this reply; tapping shows exactly what, and lets the student change it. */
+function MemoryChip({ items }) {
+  const { colors, type, t, isRTL } = usePreferences();
+  const { openPanel } = usePersonal();
+  const summary = items.slice(0, 2).map((m) => String(m.key || '').replace(/_/g, ' ')).join(', ');
+  return (
+    <Pressable onPress={() => openPanel(items.some((m) => m.skill) ? 'skills' : 'memory')} accessibilityRole="button" accessibilityLabel={t('memoryUpdated')} style={[styles.memoryChip, { backgroundColor: colors.cardButton, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <SparklesIcon size={12} color={colors.accent} />
+      <Text numberOfLines={1} style={[{ color: colors.textSecondary, flexShrink: 1 }, type(11, 'semiBold', 15)]}>{t('memoryUpdated')}{summary ? ` · ${summary}` : ''}</Text>
+    </Pressable>
   );
 }
 
@@ -331,6 +347,7 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, 
           </Pressable>
         ) : null}
         {!user && !pending && !!message.citations?.length ? <Sources items={message.citations} /> : null}
+        {!user && !pending && !streaming && !!message.remembered?.length ? <MemoryChip items={message.remembered} /> : null}
         {!user && !pending && !streaming && !!message.text && (
           <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
@@ -609,6 +626,14 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     onSend(targetId, { text: clean, files: [] });
   }, [onSend, onStartChat, replying, threadId]);
 
+  // Studio's audio overview is read aloud as soon as MoeAI finishes writing it.
+  const speakNext = useRef(false); // false, or the message count when the audio overview was asked for
+  const sendStudio = useCallback((text, { speak } = {}) => {
+    setAttachmentOpen(false);
+    speakNext.current = speak ? messages.length : false;
+    sendText(text);
+  }, [messages.length, sendText]);
+
   const sendFromComposer = useCallback(() => {
     if (replying) return;
     send();
@@ -649,13 +674,20 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   const removePending = useCallback((id) => setPendingAttachments((current) => current.filter((item) => item.id !== id)), []);
   const openPreview = useCallback((attachments, index) => setPreview({ attachments, index }), []);
-  const copyMessage = useCallback((text) => Clipboard.setStringAsync(text).catch(() => {}), []);
+  const copyMessage = useCallback((text) => Clipboard.setStringAsync(visibleText(text)).catch(() => {}), []);
   const speakMessage = useCallback((message) => {
     if (speakingId === message.id) { stopSpeaking(); setSpeakingId(null); return; }
     setSpeakingId(message.id);
     speakAloud(message.text, { language, onDone: () => setSpeakingId((id) => (id === message.id ? null : id)) });
   }, [language, speakingId]);
   useEffect(() => () => stopSpeaking(), []);
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (speakNext.current === false || messages.length <= speakNext.current || !last || last.role !== 'assistant' || last.status !== 'complete' || !last.text) return;
+    speakNext.current = false;
+    setSpeakingId(last.id);
+    speakAloud(last.text, { language, onDone: () => setSpeakingId((id) => (id === last.id ? null : id)) });
+  }, [language, messages]);
   const rateMessage = useCallback((message, rating) => {
     if (!threadId) return;
     onFeedback?.(threadId, message.id, rating);
@@ -789,7 +821,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
             keyExtractor={(item) => item.id}
             renderItem={renderMessage}
             contentContainerStyle={[styles.messages, !messages.length && styles.emptyMessages]}
-            ListEmptyComponent={<ChatEmptyState lecture={lecture} subject={subject} model={model} onPick={sendText} onRead={() => setReaderOpen(true)} />}
+            ListEmptyComponent={<ChatEmptyState lecture={lecture} subject={subject} model={model} onPick={sendText} onStudio={sendStudio} onRead={() => setReaderOpen(true)} />}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="always"
             keyboardDismissMode="interactive"
@@ -831,6 +863,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
               {showCamera && <ElasticPressable shape="pill" onPress={takePhoto}><View style={styles.attachmentOption}><CameraIcon size={19} color={colors.accent} /><Text style={[{ color: colors.textPrimary }, type(12, 'semiBold', 16)]}>{t('camera')}</Text></View></ElasticPressable>}
               <ElasticPressable shape="pill" onPress={attachImages}><View style={styles.attachmentOption}><PhotoIcon size={19} color={colors.accent} /><Text style={[{ color: colors.textPrimary }, type(12, 'semiBold', 16)]}>{t('images')}</Text></View></ElasticPressable>
               <ElasticPressable shape="pill" onPress={attachFiles}><View style={styles.attachmentOption}><PaperClipIcon size={19} color={colors.accent} /><Text style={[{ color: colors.textPrimary }, type(12, 'semiBold', 16)]}>{t('files')}</Text></View></ElasticPressable>
+              {!replying ? <View style={[styles.studioInMenu, { borderTopColor: colors.border }]}><Studio compact onPick={sendStudio} /></View> : null}
             </Animated.View>}
             {editing ? (
               <View style={[styles.editingBar, { backgroundColor: colors.card }]}>
@@ -945,6 +978,8 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 }
 
 const styles = StyleSheet.create({
+  studioInMenu: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8, paddingHorizontal: 6, marginTop: 4, width: 300 },
+  memoryChip: { alignSelf: 'flex-start', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, marginTop: 6, maxWidth: '100%' },
   replyActions: { alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   iconAction: { padding: 3, marginTop: 4 },
   editButton: { alignSelf: 'flex-end', alignItems: 'center', gap: 4, marginTop: 4, marginHorizontal: 4, padding: 2 },

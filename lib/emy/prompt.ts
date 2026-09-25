@@ -143,7 +143,8 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
   const excess = fixedCost + specCost + ASSEMBLY_OVERHEAD_TOKENS - opts.budgetTokens;
   if (excess > 0) trace.overBudget = shed(chosen, excess, boosted, trace) > 0;
 
-  // The bot defines RESPONSE_STYLE_ACTIVATION but never sends it; neither does this.
+  // The bot defined RESPONSE_STYLE_ACTIVATION and never sent it, which is why
+  // long answers read like a textbook. It goes right after the personality.
   const parts = [contract, ...reference, directives.PERSONALITY_ACTIVATION];
   let tutoringActivated = false;
   for (const name of SECTION_ORDER) {
@@ -153,6 +154,7 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
     parts.push(`${HEADINGS[name]}\n\n${units.map((u) => u.text).join("\n\n")}`);
   }
   if (!tutoringActivated) parts.push(directives.TUTORING_ACTIVATION);
+  parts.push(directives.RESPONSE_STYLE_ACTIVATION);
   parts.push(...appContext);
   parts.push(languageBlock);
 

@@ -1,6 +1,7 @@
 /** Persistent lecture conversations backed by the MoeAI provider fallback chain. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateMoeAIReply } from '../ai/client';
+import { usePersonal } from '../personal/PersonalContext';
 import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
 
 const STORAGE_KEY = storageKey('lecture-chats-v1');
@@ -20,6 +21,7 @@ function normalizeMessage(message) {
     citations: Array.isArray(message?.citations) ? message.citations.slice(0, 8) : [],
     feedback: message?.feedback === 1 || message?.feedback === -1 ? message.feedback : 0,
     editedAt: message?.editedAt || null,
+    remembered: Array.isArray(message?.remembered) ? message.remembered.slice(0, 6) : [],
   };
 }
 
@@ -60,6 +62,7 @@ function mergeChats(stored, current) {
 }
 
 export function useLectureChatStore() {
+  const { applyRemembered } = usePersonal();
   const [chats, setChats] = useState({});
   const [ready, setReady] = useState(false);
   const chatsRef = useRef(chats);
@@ -132,7 +135,9 @@ export function useLectureChatStore() {
         provider: result.provider,
         model: result.model,
         citations: result.citations || [],
+        remembered: [...(result.remembered || []), ...(result.skills || []).map((k) => ({ key: k.name, value: 'New skill', skill: true }))],
       });
+      applyRemembered(result.remembered || [], result.skills || []);
       return result;
     } catch (error) {
       if (flushTimer) clearTimeout(flushTimer);
@@ -144,7 +149,7 @@ export function useLectureChatStore() {
     } finally {
       inFlight.current.delete(assistantId);
     }
-  }, [patchMessage]);
+  }, [applyRemembered, patchMessage]);
 
   const sendMessage = useCallback(async (subjectId, lectureId, threadId, {
     text = '', files = [], subject = null, lecture = null,

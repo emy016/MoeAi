@@ -222,3 +222,84 @@ Object.assign(ar, {
   simulatorsEmpty: 'لسه مفيش محاكاة لموادك. ضيف موادك في الصفحة الرئيسية زي Logic Design أو Discrete Math أو Python أو Calculus أو Physics عشان تفتح بتاعتها. ودي شوية تبدأ بيهم.',
   simulatorsStarter: 'عشان تبدأ',
 });
+
+Object.assign(en, {
+  openTutorPage: 'Open the Tutor page (manage your course)', staffLink: 'Professor or TA? Manage your course on the Tutor page',
+  memoryMenu: 'Memory', personalTitle: 'What MoeAI knows about you', personal_memory: 'Memory', personal_skills: 'Skills', personal_instructions: 'Instructions',
+  save: 'Save', saved: 'Saved', edit: 'Edit',
+  memoryExplain: 'MoeAI remembers what matters about you between chats: your name, how you like to learn, exam dates, what you keep getting stuck on. You can change or delete anything here.',
+  memoryGuest: 'You are not signed in, so this stays on this device. Sign in to keep it on every device.',
+  memoryEmpty: 'Nothing yet. Chat with MoeAI and tell it about yourself, or add something here.',
+  memoryAlwaysTitle: 'Always in mind', memoryCalledTitle: 'When the topic comes up',
+  memoryAlways: 'Always', memoryCalled: 'When relevant',
+  memoryAlwaysHint: 'MoeAI keeps this in mind in every reply.', memoryCalledHint: 'MoeAI recalls this when the conversation is about this topic.',
+  memoryTopic: 'Topic, e.g. exam date', memoryValue: 'What MoeAI should remember',
+  memoryByMoeAI: 'Remembered by MoeAI', memoryAdd: 'Add a memory', memoryClear: 'Forget everything', memoryClearConfirm: 'Yes, forget all',
+  memoryUpdated: 'Memory updated',
+  skillsExplain: 'Skills are standing rules you switch on, like "always end with a practice question". MoeAI follows every skill that is on.',
+  skillName: 'Skill name', skillRules: 'Rules, one per line', skillBuilder: 'Skill builder', skillBuilderHint: 'Describe what MoeAI should do, e.g. "quiz me after every explanation"',
+  skillDraft: 'Draft with MoeAI', skillWrite: 'Write my own', skillTemplates: 'Ready-made skills',
+  instructionsExplain: 'Tell MoeAI how to work with you. It reads this before every reply.',
+  instructionsHint: 'e.g. I am a second-year CS student. Keep answers short, use Franco-Arabic, and show code in C++.',
+  askSubmit: 'Send answers', askWriting: 'MoeAI is writing questions…', askBroken: 'These questions did not come through. Ask MoeAI again.', askOther: 'Other…', askAnswered: 'Answered',
+});
+Object.assign(ar, {
+  openTutorPage: 'افتح صفحة المدرّس (إدارة المادة)', staffLink: 'دكتور أو معيد؟ أدِر مادتك من صفحة المدرّس',
+  memoryMenu: 'الذاكرة', personalTitle: 'اللي MoeAI فاكره عنك', personal_memory: 'الذاكرة', personal_skills: 'المهارات', personal_instructions: 'التعليمات',
+  save: 'حفظ', saved: 'اتحفظ', edit: 'تعديل',
+  memoryExplain: 'MoeAI بيفتكر الحاجات المهمة عنك بين المحادثات: اسمك، بتحب تذاكر إزاي، مواعيد امتحاناتك، والحاجات اللي بتقف عندها. تقدر تعدل أو تمسح أي حاجة هنا.',
+  memoryGuest: 'إنت مش مسجل دخول، فده محفوظ على الجهاز ده بس. سجل دخول عشان يبقى معاك على كل أجهزتك.',
+  memoryEmpty: 'لسه مفيش حاجة. اتكلم مع MoeAI وعرفه بنفسك، أو ضيف حاجة من هنا.',
+  memoryAlwaysTitle: 'فاكرها دايمًا', memoryCalledTitle: 'لما الموضوع ييجي',
+  memoryAlways: 'دايمًا', memoryCalled: 'لما تلزم',
+  memoryAlwaysHint: 'MoeAI هيفتكر ده في كل رد.', memoryCalledHint: 'MoeAI هيفتكر ده لما الكلام يبقى عن الموضوع ده.',
+  memoryTopic: 'الموضوع، مثلًا ميعاد الامتحان', memoryValue: 'MoeAI يفتكر إيه',
+  memoryByMoeAI: 'MoeAI افتكرها', memoryAdd: 'ضيف ذكرى', memoryClear: 'انسى كل حاجة', memoryClearConfirm: 'أيوه، انسى الكل',
+  memoryUpdated: 'الذاكرة اتحدثت',
+  skillsExplain: 'المهارات قواعد ثابتة بتشغلها، زي "اختم دايمًا بسؤال تدريب". MoeAI بيمشي على كل مهارة شغالة.',
+  skillName: 'اسم المهارة', skillRules: 'القواعد، كل واحدة في سطر', skillBuilder: 'صانع المهارات', skillBuilderHint: 'اوصف MoeAI يعمل إيه، مثلًا "امتحني بعد كل شرح"',
+  skillDraft: 'اكتبها مع MoeAI', skillWrite: 'اكتبها بنفسي', skillTemplates: 'مهارات جاهزة',
+  instructionsExplain: 'قول لـ MoeAI يشتغل معاك إزاي. هيقرا ده قبل كل رد.',
+  instructionsHint: 'مثلًا: أنا طالب CS سنة تانية. خلي الردود قصيرة، اكتب فرانكو، والكود بـ C++.',
+  askSubmit: 'ابعت الإجابات', askWriting: 'MoeAI بيكتب الأسئلة…', askBroken: 'الأسئلة موصلتش. اسأل MoeAI تاني.', askOther: 'حاجة تانية…', askAnswered: 'اتجاوب',
+});
+
+Object.assign(en, {
+  studioTitle: 'STUDIO · MAKE SOMETHING FROM THIS LECTURE',
+  studioGuide: 'Study guide', studioMindmap: 'Mind map', studioFlashcards: 'Flashcards', studioQuiz: 'Practice quiz', studioSlides: 'Slides', studioAudio: 'Audio overview',
+  studioGuidePrompt: 'Make me a one-page study guide for this lecture',
+  studioMindmapPrompt: 'Draw a mind map of this lecture',
+  studioFlashcardsPrompt: 'Make flashcards for this lecture',
+  studioQuizPrompt: 'Give me a 5-question practice quiz on this lecture',
+  studioSlidesPrompt: 'Turn this lecture into short revision slides',
+  studioAudioPrompt: 'Give me a 2-minute audio overview of this lecture to listen to',
+  flashcardsTitle: 'Flashcards', flashcardsFront: 'QUESTION', flashcardsBack: 'ANSWER', flashcardsTap: 'Tap to flip',
+  flashcardsShowBack: 'Show answer', flashcardsShowFront: 'Show question', flashcardsWriting: 'MoeAI is making your flashcards…', flashcardsBroken: 'These flashcards did not come through. Ask MoeAI again.',
+  previous: 'Previous', next: 'Next',
+});
+Object.assign(ar, {
+  studioTitle: 'الاستوديو · اعمل حاجة من المحاضرة دي',
+  studioGuide: 'ملخص مذاكرة', studioMindmap: 'خريطة ذهنية', studioFlashcards: 'بطاقات', studioQuiz: 'اختبار تدريبي', studioSlides: 'سلايدز', studioAudio: 'ملخص صوتي',
+  studioGuidePrompt: 'اعملّي ملخص مذاكرة في صفحة واحدة للمحاضرة دي',
+  studioMindmapPrompt: 'ارسملي خريطة ذهنية للمحاضرة دي',
+  studioFlashcardsPrompt: 'اعملّي flashcards للمحاضرة دي',
+  studioQuizPrompt: 'اديني اختبار تدريبي من ٥ أسئلة على المحاضرة دي',
+  studioSlidesPrompt: 'حوّل المحاضرة دي لسلايدز مراجعة قصيرة',
+  studioAudioPrompt: 'اديني ملخص صوتي للمحاضرة دي في دقيقتين أسمعه',
+  flashcardsTitle: 'بطاقات', flashcardsFront: 'السؤال', flashcardsBack: 'الإجابة', flashcardsTap: 'دوس عشان تقلب',
+  flashcardsShowBack: 'اعرض الإجابة', flashcardsShowFront: 'اعرض السؤال', flashcardsWriting: 'MoeAI بيعمل البطاقات…', flashcardsBroken: 'البطاقات موصلتش. اسأل MoeAI تاني.',
+  previous: 'السابق', next: 'التالي',
+});
+
+Object.assign(en, {
+  surfaceTitle: 'Background style', surfaceDesc: 'Pick the surfaces the whole app is painted on.',
+  surfaceDefault: 'Classic', surfaceMidnight: 'Midnight', surfaceAmoled: 'Pure black', surfaceWarm: 'Warm', surfaceForest: 'Forest',
+  tintTitle: 'Tint with accent', tintDesc: 'Wash your accent color lightly into every surface.',
+  pink: 'Pink', teal: 'Teal', amber: 'Amber', indigo: 'Indigo', lime: 'Lime', sky: 'Sky', coral: 'Coral', crimson: 'Crimson',
+});
+Object.assign(ar, {
+  surfaceTitle: 'شكل الخلفية', surfaceDesc: 'اختار الألوان اللي التطبيق كله مرسوم عليها.',
+  surfaceDefault: 'كلاسيك', surfaceMidnight: 'منتصف الليل', surfaceAmoled: 'أسود صافي', surfaceWarm: 'دافي', surfaceForest: 'غابة',
+  tintTitle: 'لوّن بلون التمييز', tintDesc: 'خلي لون التمييز يبان خفيف على كل الأسطح.',
+  pink: 'بمبي', teal: 'تركواز', amber: 'كهرماني', indigo: 'نيلي', lime: 'ليموني', sky: 'سماوي', coral: 'مرجاني', crimson: 'قرمزي',
+});

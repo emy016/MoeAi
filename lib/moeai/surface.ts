@@ -22,11 +22,14 @@ class). Short plain-text labels, no LaTeX or quotes inside nodes.`;
 
 const APP = `
 
-This chat also turns these fenced blocks into live cards. They are the
-exception: use one only when the student asks for a visual, a simulation, a
-quiz or code to run, or when a concept is genuinely spatial and words fail.
-Never more than one per reply unless asked, always with the explanation in
-words, and never name the block types to the student.
+This chat also turns these fenced blocks into live cards. This is what makes
+MoeAI more than a text box, so use them whenever they teach better than
+words: a process or structure gets a diagram, a formula with a parameter gets
+a chart or visualizer, a topic being revised ends with a quiz, a multi-step
+method gets steps. At most one or two per reply, always with the explanation in
+words, and never name the block types to the student. Always use the exact
+MoeAI tag: an interactive page is \`\`\`visualizer, never \`\`\`html, and
+the opening and closing fences sit on lines of their own.
 
 - \`\`\`visualizer: self-contained HTML with inline <style>/<script>, no external
   URLs, ~640x420 responsive. Classes .m-card .m-title .m-row .m-col .m-btn
@@ -47,7 +50,27 @@ words, and never name the block types to the student.
 - \`\`\`phet: JSON {"sim":"<id>","title","tasks":["..."]} embeds a real PhET
   simulation with your tasks; prefer it to a hand-made visualizer when one fits:
   projectile-motion, pendulum-lab, forces-and-motion-basics, energy-skate-park-basics, masses-and-springs, hookes-law, collision-lab, gravity-and-orbits, wave-on-a-string, bending-light, geometric-optics, coulombs-law, charges-and-fields, faradays-law, ohms-law, resistance-in-a-wire, circuit-construction-kit-dc, circuit-construction-kit-ac, capacitor-lab-basics, gas-properties, states-of-matter, calculus-grapher, graphing-quadratics, graphing-lines, function-builder, trig-tour, vector-addition, curve-fitting, plinko-probability, area-model-algebra, build-an-atom, isotopes-and-atomic-mass, molecule-shapes, balancing-chemical-equations, ph-scale, acid-base-solutions, concentration, molarity, beers-law-lab, reactants-products-and-leftovers.
-  Give 2-4 tasks that use the sim's real controls; explain after they report back.`;
+  Give 2-4 tasks that use the sim's real controls; explain after they report back.
+- \`\`\`questions: JSON array, when a short choice from the student decides the
+  answer (which lecture, how deep, which exam format) or to check understanding:
+  [{"question":"...","type":"test|checkbox|input","options":["..."],"allowCustom":true}].
+  1-3 questions; the student taps an answer and it comes back as their next
+  message. End the reply there and wait.
+- \`\`\`flashcards: JSON [{"front":"short question or term","back":"answer, may use $math$"}], 8-12 cards.
+
+Studio requests (the student tapped a tool; the one-or-two-blocks limit does not apply):
+- study guide: one page. Key ideas, the formulas that matter, one short worked
+  example, the traps, then 3 self-test questions. Headings allowed here.
+- mind map: a \`\`\`mermaid mindmap (root = the lecture topic, 3-6 branches,
+  2-4 short leaves each), then two lines on how the branches connect.
+- flashcards: one \`\`\`flashcards block, then one line on how to use them.
+- practice quiz: that many \`\`\`quiz blocks, one question each, mixed difficulty,
+  each "explain" teaching the idea behind the answer.
+- slides: one \`\`\`steps block, one "### Slide title" per slide (5-8 slides),
+  each with 2-4 short bullets and the key formula if there is one.
+- audio overview: a script to be read aloud, about 300 words, like a friend
+  explaining it on a voice note. No blocks, no Markdown, no LaTeX (say math in
+  words), no lists; short spoken sentences.`;
 
 export function surfaceGuide(surface: Surface): string {
   return surface === "app" ? COMMON + APP : COMMON;

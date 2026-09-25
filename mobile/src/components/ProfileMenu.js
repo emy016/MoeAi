@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Cog6ToothIcon, CreditCardIcon, UserIcon } from 'react-native-heroicons/outline';
+import { Cog6ToothIcon, LightBulbIcon, UserIcon } from 'react-native-heroicons/outline';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProfileMenu as M, ProfilePill as P, Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 
-const OPTIONS=[{id:'profile',key:'profile',Icon:UserIcon},{id:'plan',key:'planUsage',Icon:CreditCardIcon},{id:'settings',key:'settings',Icon:Cog6ToothIcon}];
+const OPTIONS=[{id:'profile',key:'profile',Icon:UserIcon},{id:'memory',key:'memoryMenu',Icon:LightBulbIcon},{id:'settings',key:'settings',Icon:Cog6ToothIcon}];
 const PILL_HEIGHT=P.AVATAR_SIZE+P.PILL_PADDING_VERTICAL*2;
 
 function MenuItem({ Icon, label, onPress }) {

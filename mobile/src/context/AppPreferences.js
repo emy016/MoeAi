@@ -8,7 +8,7 @@ import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedS
 
 const STORAGE_KEY = storageKey('preferences-v2');
 const FONT_SCALES = { small: 0.88, default: 1, large: 1.15, extraLarge: 1.3 };
-const defaults = { theme: 'dark', accent: 'purple', language: null, fontSize: 'default', textWeight: 'regular', motion: true, studyReminders: true, quizReminders: true, sessionReminders: true };
+const defaults = { theme: 'dark', accent: 'purple', surface: 'default', tint: false, language: null, fontSize: 'default', textWeight: 'regular', motion: true, studyReminders: true, quizReminders: true, sessionReminders: true };
 const PreferencesContext = createContext(null);
 
 export function AppPreferencesProvider({ children }) {
@@ -46,7 +46,7 @@ export function AppPreferencesProvider({ children }) {
 
   const effectiveTheme = prefs.theme === 'system' ? (systemScheme === 'light' ? 'light' : 'dark') : prefs.theme;
   const language = prefs.language || 'en';
-  const colors = useMemo(() => makeColors(effectiveTheme, prefs.accent), [effectiveTheme, prefs.accent]);
+  const colors = useMemo(() => makeColors(effectiveTheme, prefs.accent, prefs.surface, prefs.tint), [effectiveTheme, prefs.accent, prefs.surface, prefs.tint]);
   const t = useCallback((key, values) => {
     const template = translations[language]?.[key] ?? translations.en[key] ?? key;
     if (!values || typeof template !== 'string') return template;
