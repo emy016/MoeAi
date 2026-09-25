@@ -22,6 +22,7 @@ export const LIBS = {
   pyodide: 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/',
   katexCss: `${CDN}/katex@0.16.47/dist/katex.min.css`,
   katexJs: `${CDN}/katex@0.16.47/dist/katex.min.js`,
+  katexAuto: `${CDN}/katex@0.16.47/dist/contrib/auto-render.min.js`,
   hljs: `${CDN}/@highlightjs/cdn-assets@11.12.0/highlight.min.js`,
   hljsDark: `${CDN}/@highlightjs/cdn-assets@11.12.0/styles/github-dark.min.css`,
   hljsLight: `${CDN}/@highlightjs/cdn-assets@11.12.0/styles/github.min.css`,
@@ -117,8 +118,43 @@ function page(id, theme, { head = '', body = '', css = '' }) {
 
 // ── Kinds ───────────────────────────────────────────────────────────────────
 
+/**
+ * Models often label sliders and results in LaTeX ("$A^T$", "$\\rightarrow$").
+ * A visualizer is plain HTML, so that showed as raw source. When the page
+ * contains math delimiters, KaTeX's auto-render typesets it, including text
+ * the page's own script writes later (re-run on changes, throttled).
+ */
 function visualizer(code) {
-  return { body: code };
+  if (!/\$[^$\n]+\$|\\\(|\\\[/.test(code)) return { body: code };
+  return {
+    body: `${code}
+<link rel="stylesheet" href="${LIBS.katexCss}">
+<script src="${LIBS.katexJs}"></script>
+<script src="${LIBS.katexAuto}"></script>
+<script>
+(function () {
+  var busy = false;
+  function typeset() {
+    if (busy || !window.renderMathInElement) return;
+    busy = true;
+    try {
+      window.renderMathInElement(document.body, { delimiters: [
+        { left: '$$', right: '$$', display: true }, { left: '\\\\[', right: '\\\\]', display: true },
+        { left: '$', right: '$', display: false }, { left: '\\\\(', right: '\\\\)', display: false },
+      ], ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'input'], throwOnError: false });
+    } catch (e) {}
+    setTimeout(function () { busy = false; }, 150);
+  }
+  var timer = null;
+  function soon() { clearTimeout(timer); timer = setTimeout(typeset, 60); }
+  window.addEventListener('load', typeset);
+  setTimeout(typeset, 400);
+  try { new MutationObserver(function (list) {
+    for (var i = 0; i < list.length; i++) { var t = list[i].target; if (t && t.closest && t.closest('.katex')) return; }
+    soon();
+  }).observe(document.body, { childList: true, subtree: true, characterData: true }); } catch (e) {}
+})();
+</script>` };
 }
 
 function mermaid(code, theme) {

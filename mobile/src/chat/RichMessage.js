@@ -12,7 +12,11 @@ import QuestionCard from './blocks/QuestionCard';
 import FlashcardsCard from './blocks/FlashcardsCard';
 import { hasBlocks, splitSegments } from './blocks/segments';
 
-export default React.memo(function RichMessage({ text, color, textAlign, fontStyle, maxWidth, style, onFix }) {
+/** Math wrapped in a code span (`$A^T$`) is still math: models do this, and it rendered as raw source. */
+const unwrapMath = (value) => String(value || '').replace(/`(\${1,2}[^`\n]+?\${1,2})`/g, '$1');
+
+export default React.memo(function RichMessage({ text: rawText, color, textAlign, fontStyle, maxWidth, style, onFix }) {
+  const text = useMemo(() => unwrapMath(rawText), [rawText]);
   const segments = useMemo(() => (hasBlocks(text) ? splitSegments(text) : null), [text]);
   if (!segments) {
     return <KaTeXMessage text={text} color={color} textAlign={textAlign} fontStyle={fontStyle} maxWidth={maxWidth} style={style} />;
