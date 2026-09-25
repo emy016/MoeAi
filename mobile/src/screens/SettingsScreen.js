@@ -4,7 +4,7 @@ import { CheckIcon, ChevronRightIcon } from 'react-native-heroicons/outline';
 import { Cog8ToothIcon, MoonIcon, SunIcon } from 'react-native-heroicons/solid';
 import Card from '../components/Card';
 import ElasticPressable from '../components/ElasticPressable';
-import { AccentPresets } from '../constants/colors';
+import { AccentPresets, MORE_ACCENTS, Surfaces, makeColors } from '../constants/colors';
 import { FontFamily } from '../constants/fonts';
 import { Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
@@ -106,7 +106,7 @@ function AccentSelector({ value, onChange }) {
     ]).start();
   },[selectedIndex,motion,position,stretch]);
   return <View style={s.swatches}>
-    <Animated.View pointerEvents="none" style={[s.swatchSelectionPosition,{transform:[{translateX:position.interpolate({inputRange:[0,ACCENTS.length-1],outputRange:[0,SWATCH_STEP*(ACCENTS.length-1)]})}]}]}><Animated.View style={[s.swatchSelectionCircle,{backgroundColor:colors.white,transform:[{scaleX:stretch}]}]}/></Animated.View>
+    <Animated.View pointerEvents="none" style={[s.swatchSelectionPosition,{transform:[{translateX:position.interpolate({inputRange:[0,ACCENTS.length-1],outputRange:[0,SWATCH_STEP*(ACCENTS.length-1)]})}]}]}><Animated.View style={[s.swatchSelectionCircle,{backgroundColor:colors.white,opacity:ACCENTS.includes(value)?1:0,transform:[{scaleX:stretch}]}]}/></Animated.View>
     {ACCENTS.map(name=>{const selected=value===name;return <ElasticPressable key={name} style={s.swatchSlot} shape="circle" onPress={()=>onChange(name)} accessibilityLabel={t(name)} accessibilityState={{selected}}><View style={[s.swatch,{backgroundColor:AccentPresets[name][effectiveTheme]}]}><AccentCheck selected={selected}/></View></ElasticPressable>;})}
   </View>;
 }
@@ -139,6 +139,18 @@ function LanguageSheet({ visible, onClose }) {
   return <Sheet visible={visible} title={t('chooseLanguage')} onClose={onClose}><ScrollView style={s.languageList}>{SUPPORTED_LANGUAGES.map(code=>{const selected=code===language;const meta=LANGUAGE_META[code];return <ElasticPressable key={code} style={s.languageButton} pressableStyle={[s.languageRow,{backgroundColor:colors.cardButton,flexDirection:isRTL?'row-reverse':'row'}]} onPress={()=>{setPreference('language',code);onClose();}} accessibilityRole="button" accessibilityState={{selected}}><Image source={FLAG_IMAGES[meta.flag]} style={s.languageFlag} resizeMode="contain"/><View style={s.copy}><Text style={[{color:selected?colors.accent:colors.textPrimary,textAlign:isRTL?'right':'left'},type(15,'semiBold')]}>{meta.nativeName}</Text><Text style={[{color:selected?colors.accent:colors.textMuted,textAlign:isRTL?'right':'left'},type(12)]}>{meta.names[language]}</Text></View>{selected?<CheckIcon size={20} color={colors.accent}/>:null}</ElasticPressable>;})}</ScrollView></Sheet>;
 }
 
+/** The rest of the palette, below Youssef's animated row. */
+function MoreAccents({ value, onChange }) {
+  const { effectiveTheme, colors, t } = usePreferences();
+  return <View style={s.moreAccents}>{MORE_ACCENTS.map(name=>{const selected=value===name;return <ElasticPressable key={name} shape="circle" onPress={()=>onChange(name)} accessibilityLabel={t(name)} accessibilityState={{selected}}><View style={[s.swatch,{backgroundColor:AccentPresets[name][effectiveTheme],borderWidth:selected?3:0,borderColor:colors.white}]}>{selected?<CheckIcon size={14} color={colors.white}/>:null}</View></ElasticPressable>;})}</View>;
+}
+
+/** Background styles, each previewed with the current accent. */
+function SurfacePicker({ value, onChange }) {
+  const { effectiveTheme, colors, type, t, accent: accentName } = usePreferences();
+  return <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.surfaceRow}>{Object.keys(Surfaces).map(name=>{const selected=(value||'default')===name;const preview=makeColors(effectiveTheme,accentName,name);return <ElasticPressable key={name} shape="pill" onPress={()=>onChange(name)} accessibilityRole="button" accessibilityLabel={t(Surfaces[name].label)} accessibilityState={{selected}}><View style={[s.surfaceTile,{backgroundColor:preview.background,borderColor:selected?colors.accent:preview.border}]}><View style={[s.surfaceCard,{backgroundColor:preview.card}]}><View style={[s.surfaceLine,{backgroundColor:preview.accent,width:'60%'}]}/><View style={[s.surfaceLine,{backgroundColor:preview.track,width:'85%'}]}/></View><Text numberOfLines={1} style={[{color:preview.textPrimary},type(11,'semiBold',14)]}>{t(Surfaces[name].label)}</Text></View></ElasticPressable>;})}</ScrollView>;
+}
+
 export default function SettingsScreen(){
   const p=usePreferences(); const {colors,t,type,setPreference,isRTL}=p;
   // Account actions live on the site (export, deletion, re-authentication); guests sign in first.
@@ -147,7 +159,9 @@ export default function SettingsScreen(){
   return <View style={[s.root,{backgroundColor:colors.background}]}><ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
     <Section title={t('appearance')}>
       <Inner title={t('theme')} description={t('themeDesc')}><Segmented value={p.theme} options={THEME_OPTIONS} onChange={v=>setPreference('theme',v)}/></Inner>
-      <Inner title={t('accentColor')} description={t('accentDesc')} stack><View style={s.accentBlock}><AccentSelector value={p.accent} onChange={value=>setPreference('accent',value)}/></View></Inner>
+      <Inner title={t('accentColor')} description={t('accentDesc')} stack><View style={s.accentBlock}><AccentSelector value={p.accent} onChange={value=>setPreference('accent',value)}/></View><MoreAccents value={p.accent} onChange={value=>setPreference('accent',value)}/></Inner>
+      <Inner title={t('surfaceTitle')} description={t('surfaceDesc')} stack><SurfacePicker value={p.surface} onChange={value=>setPreference('surface',value)}/></Inner>
+      <Inner title={t('tintTitle')} description={t('tintDesc')}><Toggle value={!!p.tint} onChange={v=>setPreference('tint',v)} label={t('tintTitle')}/></Inner>
       <Inner title={t('appLanguage')} description={t('languageDesc')} onPress={()=>setLanguageOpen(true)}><View style={s.valueWrap}><Text numberOfLines={1} style={[{color:colors.accent,textAlign:isRTL?'left':'right'},type(13,'semiBold')]}>{lang.nativeName}</Text><Text numberOfLines={1} style={[{color:colors.textMuted,textAlign:isRTL?'left':'right'},type(10)]}>{lang.names[p.language]}</Text></View></Inner>
     </Section>
     <Section title={t('accessibility')}>
@@ -163,6 +177,11 @@ export default function SettingsScreen(){
 
 const s=StyleSheet.create({
  root:{flex:1},
+ moreAccents:{flexDirection:'row',flexWrap:'wrap',gap:SWATCH_GAP,marginTop:10},
+ surfaceRow:{gap:8,paddingVertical:2},
+ surfaceTile:{width:92,borderRadius:14,padding:8,gap:6,borderWidth:2},
+ surfaceCard:{borderRadius:8,padding:6,gap:4},
+ surfaceLine:{height:4,borderRadius:2},
  scroll:{padding:Spacing.md,paddingBottom:Spacing.xl},
  section:{padding:Spacing.md,marginBottom:Spacing.md},sectionTitle:{marginBottom:Spacing.md},sectionBody:{gap:Spacing.sm},
  full:{width:'100%'},inner:{minHeight:68,borderRadius:Radius.md,padding:Spacing.md,alignItems:'center',gap:Spacing.sm},innerStack:{alignItems:'stretch'},copy:{flex:1,minWidth:0},stackCopy:{width:'100%',minWidth:0,flexGrow:0,flexShrink:0},
