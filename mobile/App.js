@@ -87,9 +87,50 @@ function useMobileWebShell() {
   }, []);
 }
 
+/**
+ * Everyone runs the newest MoeAI. On the web the app is one long-lived page,
+ * so a tab opened yesterday (or a phone that cached it) would keep running
+ * yesterday's build forever. Each build publishes /app-version.json; when
+ * the app opens or its tab comes back into view and that names a different
+ * bundle from the one running, it reloads onto the new build. Saved chats,
+ * memory and settings live in storage and the account, so nothing is lost.
+ */
+function useLatestBuild() {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined' || !/^https?:/.test(window.location.origin)) return undefined;
+    const running = [...document.scripts].map((el) => el.src).join(' ').match(/AppEntry-[a-f0-9]+\.js/)?.[0];
+    if (!running) return undefined;
+    let busy = false;
+    const check = async () => {
+      if (busy || document.visibilityState === 'hidden') return;
+      busy = true;
+      try {
+        const res = await fetch(`/app-version.json?t=${Date.now()}`, { cache: 'no-store' });
+        const latest = res.ok ? (await res.json())?.bundle : null;
+        const tried = window.sessionStorage?.getItem('moeai-build');
+        if (latest && latest !== running && tried !== latest) {
+          window.sessionStorage?.setItem('moeai-build', latest);
+          const url = new URL(window.location.href);
+          url.searchParams.set('v', latest.slice(9, 17));
+          window.location.replace(url.toString());
+        }
+      } catch (_) {
+        // Offline or no version file: keep running what we have.
+      } finally {
+        busy = false;
+      }
+    };
+    check();
+    const onVisible = () => { if (document.visibilityState === 'visible') check(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+}
+
 export default function App() {
   const [fontsLoaded, fontError] = useAppFonts();
   useMobileWebShell();
+  useLatestBuild();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

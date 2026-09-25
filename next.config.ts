@@ -39,6 +39,13 @@ const nextConfig: NextConfig = {
     "/api/health": ["./prompts/**"],
   },
 
+  // The app shell and its version file must never be served from a cache:
+  // a stale copy is how a student ends up on last week's MoeAI.
+  async headers() {
+    const fresh = [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }];
+    return ["/moeai", "/moeai-app.html", "/app-version.json"].map((source) => ({ source, headers: fresh }));
+  },
+
   async rewrites() {
     return [
       { source: "/", destination: "/index.html" },

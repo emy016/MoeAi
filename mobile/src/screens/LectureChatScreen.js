@@ -892,6 +892,12 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                 style={[styles.input, Platform.OS === 'web' && { height: webInputHeight }, { color: colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}
                 onFocus={() => setAttachmentOpen(false)}
                 onSubmitEditing={sendFromComposer}
+                // A multiline field on the web turns Enter into a new line; like
+                // every chat app, Enter sends and Shift+Enter breaks the line.
+                onKeyPress={Platform.OS === 'web' ? (event) => {
+                  const e = event?.nativeEvent || {};
+                  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { event.preventDefault?.(); sendFromComposer(); }
+                } : undefined}
               />
               <Pressable onPressIn={() => { setMicHeld(true); startDictation(); }} onPressOut={() => { setMicHeld(false); stopDictation(); }} onTouchCancel={() => { setMicHeld(false); stopDictation(); }} hitSlop={7} style={styles.micButton} accessibilityRole="button" accessibilityLabel={t('holdToDictate')}>
                 <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.accent, opacity: micProgress, transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] }]} />

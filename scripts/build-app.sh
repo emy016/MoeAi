@@ -19,4 +19,8 @@ cp "$OUT/index.html" public/moeai-app.html
 # The app's icon (app.json web.favicon); also the site-wide /favicon.ico.
 [ -f "$OUT/favicon.ico" ] && cp "$OUT/favicon.ico" public/favicon.ico
 rm -rf "$OUT"
-echo "Installed $(grep -o 'AppEntry-[a-f0-9]*\.js' public/moeai-app.html) into public/"
+BUNDLE=$(grep -o 'AppEntry-[a-f0-9]*\.js' public/moeai-app.html)
+# Open tabs and phones compare this with the bundle they are running and
+# reload themselves onto the new build (mobile/App.js, useLatestBuild).
+printf '{"bundle":"%s","builtAt":"%s"}\n' "$BUNDLE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > public/app-version.json
+echo "Installed $BUNDLE into public/"
