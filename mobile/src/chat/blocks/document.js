@@ -11,6 +11,7 @@
  * card can offer "fix it"), code-run state, and copy requests.
  */
 import { renderMarkdownMarkup } from '../katexMessageUtils';
+import { cleanMermaid } from './cleanMermaid';
 
 const CDN = 'https://cdn.jsdelivr.net/npm';
 export const LIBS = {
@@ -121,6 +122,7 @@ function visualizer(code) {
 }
 
 function mermaid(code, theme) {
+  code = cleanMermaid(code);
   return {
     css: `#m { padding: 14px; display: flex; justify-content: center; } #m svg { height: auto; }`,
     body: `<div id="m"><div class="m-loading">Drawing the diagram…</div></div>

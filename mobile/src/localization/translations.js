@@ -263,3 +263,30 @@ Object.assign(ar, {
   instructionsHint: 'مثلًا: أنا طالب CS سنة تانية. خلي الردود قصيرة، اكتب فرانكو، والكود بـ C++.',
   askSubmit: 'ابعت الإجابات', askWriting: 'MoeAI بيكتب الأسئلة…', askBroken: 'الأسئلة موصلتش. اسأل MoeAI تاني.', askOther: 'حاجة تانية…', askAnswered: 'اتجاوب',
 });
+
+Object.assign(en, {
+  studioTitle: 'STUDIO · MAKE SOMETHING FROM THIS LECTURE',
+  studioGuide: 'Study guide', studioMindmap: 'Mind map', studioFlashcards: 'Flashcards', studioQuiz: 'Practice quiz', studioSlides: 'Slides', studioAudio: 'Audio overview',
+  studioGuidePrompt: 'Make me a one-page study guide for this lecture',
+  studioMindmapPrompt: 'Draw a mind map of this lecture',
+  studioFlashcardsPrompt: 'Make flashcards for this lecture',
+  studioQuizPrompt: 'Give me a 5-question practice quiz on this lecture',
+  studioSlidesPrompt: 'Turn this lecture into short revision slides',
+  studioAudioPrompt: 'Give me a 2-minute audio overview of this lecture to listen to',
+  flashcardsTitle: 'Flashcards', flashcardsFront: 'QUESTION', flashcardsBack: 'ANSWER', flashcardsTap: 'Tap to flip',
+  flashcardsShowBack: 'Show answer', flashcardsShowFront: 'Show question', flashcardsWriting: 'MoeAI is making your flashcards…', flashcardsBroken: 'These flashcards did not come through. Ask MoeAI again.',
+  previous: 'Previous', next: 'Next',
+});
+Object.assign(ar, {
+  studioTitle: 'الاستوديو · اعمل حاجة من المحاضرة دي',
+  studioGuide: 'ملخص مذاكرة', studioMindmap: 'خريطة ذهنية', studioFlashcards: 'بطاقات', studioQuiz: 'اختبار تدريبي', studioSlides: 'سلايدز', studioAudio: 'ملخص صوتي',
+  studioGuidePrompt: 'اعملّي ملخص مذاكرة في صفحة واحدة للمحاضرة دي',
+  studioMindmapPrompt: 'ارسملي خريطة ذهنية للمحاضرة دي',
+  studioFlashcardsPrompt: 'اعملّي flashcards للمحاضرة دي',
+  studioQuizPrompt: 'اديني اختبار تدريبي من ٥ أسئلة على المحاضرة دي',
+  studioSlidesPrompt: 'حوّل المحاضرة دي لسلايدز مراجعة قصيرة',
+  studioAudioPrompt: 'اديني ملخص صوتي للمحاضرة دي في دقيقتين أسمعه',
+  flashcardsTitle: 'بطاقات', flashcardsFront: 'السؤال', flashcardsBack: 'الإجابة', flashcardsTap: 'دوس عشان تقلب',
+  flashcardsShowBack: 'اعرض الإجابة', flashcardsShowFront: 'اعرض السؤال', flashcardsWriting: 'MoeAI بيعمل البطاقات…', flashcardsBroken: 'البطاقات موصلتش. اسأل MoeAI تاني.',
+  previous: 'السابق', next: 'التالي',
+});

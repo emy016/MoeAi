@@ -55,7 +55,22 @@ the opening and closing fences sit on lines of their own.
   answer (which lecture, how deep, which exam format) or to check understanding:
   [{"question":"...","type":"test|checkbox|input","options":["..."],"allowCustom":true}].
   1-3 questions; the student taps an answer and it comes back as their next
-  message. End the reply there and wait.`;
+  message. End the reply there and wait.
+- \`\`\`flashcards: JSON [{"front":"short question or term","back":"answer, may use $math$"}], 8-12 cards.
+
+Studio requests (the student tapped a tool; the one-or-two-blocks limit does not apply):
+- study guide: one page. Key ideas, the formulas that matter, one short worked
+  example, the traps, then 3 self-test questions. Headings allowed here.
+- mind map: a \`\`\`mermaid mindmap (root = the lecture topic, 3-6 branches,
+  2-4 short leaves each), then two lines on how the branches connect.
+- flashcards: one \`\`\`flashcards block, then one line on how to use them.
+- practice quiz: that many \`\`\`quiz blocks, one question each, mixed difficulty,
+  each "explain" teaching the idea behind the answer.
+- slides: one \`\`\`steps block, one "### Slide title" per slide (5-8 slides),
+  each with 2-4 short bullets and the key formula if there is one.
+- audio overview: a script to be read aloud, about 300 words, like a friend
+  explaining it on a voice note. No blocks, no Markdown, no LaTeX (say math in
+  words), no lists; short spoken sentences.`;
 
 export function surfaceGuide(surface: Surface): string {
   return surface === "app" ? COMMON + APP : COMMON;

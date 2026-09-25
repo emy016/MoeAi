@@ -9,6 +9,7 @@ import KaTeXMessage from './KaTeXMessage';
 import BlockCard from './blocks/BlockCard';
 import PhetCard from './blocks/PhetCard';
 import QuestionCard from './blocks/QuestionCard';
+import FlashcardsCard from './blocks/FlashcardsCard';
 import { hasBlocks, splitSegments } from './blocks/segments';
 
 export default React.memo(function RichMessage({ text, color, textAlign, fontStyle, maxWidth, style, onFix }) {
@@ -27,6 +28,8 @@ export default React.memo(function RichMessage({ text, color, textAlign, fontSty
           ? <PhetCard key={`b${index}-phet`} block={segment} onAsk={onFix} />
           : segment.kind === 'ask'
             ? <QuestionCard key={`b${index}-ask`} block={segment} onSend={onFix} />
+            : segment.kind === 'flashcards'
+            ? <FlashcardsCard key={`b${index}-cards`} block={segment} maxWidth={maxWidth} />
             : <BlockCard key={`b${index}-${segment.kind}`} block={segment} onFix={onFix} />
       ))}
     </View>

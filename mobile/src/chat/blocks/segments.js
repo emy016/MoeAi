@@ -17,9 +17,10 @@ const ALIASES = {
   chart: 'chart', plot: 'chart', steps: 'steps', checklist: 'steps', todo: 'steps', quiz: 'quiz',
   scene3d: 'scene3d', '3d': 'scene3d', three: 'scene3d', animation: 'animation', manim: 'animation', phet: 'phet', simulation: 'phet',
   question: 'ask', questions: 'ask', ask: 'ask', clarify: 'ask',
+  flashcards: 'flashcards', flashcard: 'flashcards', cards: 'flashcards',
 };
 
-export const LIVE_KINDS = new Set(['mermaid', 'visualizer', 'chart', 'steps', 'quiz', 'scene3d', 'animation', 'phet', 'ask']);
+export const LIVE_KINDS = new Set(['mermaid', 'visualizer', 'chart', 'steps', 'quiz', 'scene3d', 'animation', 'phet', 'ask', 'flashcards']);
 export const HIDDEN = new Set(['memory', 'skill']);
 export const RUNNABLE = new Set(['python', 'javascript']);
 
@@ -37,6 +38,7 @@ function inferKind(lang, code) {
     try {
       const value = JSON.parse(trimmed);
       if (Array.isArray(value) && value.length && value.every((q) => q && typeof q.question === 'string' && q.type)) return 'ask';
+      if (Array.isArray(value) && value.length && value.every((c) => c && typeof c.front === 'string' && typeof c.back === 'string')) return 'flashcards';
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         if (Array.isArray(value.datasets) || (value.type && Array.isArray(value.labels))) return 'chart';
         if (typeof value.question === 'string' && Array.isArray(value.options) && value.answer !== undefined) return 'quiz';
