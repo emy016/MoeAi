@@ -224,6 +224,7 @@ Object.assign(ar, {
 });
 
 Object.assign(en, {
+  openTutorPage: 'Open the Tutor page (manage your course)', staffLink: 'Professor or TA? Manage your course on the Tutor page',
   memoryMenu: 'Memory', personalTitle: 'What MoeAI knows about you', personal_memory: 'Memory', personal_skills: 'Skills', personal_instructions: 'Instructions',
   save: 'Save', saved: 'Saved', edit: 'Edit',
   memoryExplain: 'MoeAI remembers what matters about you between chats: your name, how you like to learn, exam dates, what you keep getting stuck on. You can change or delete anything here.',
@@ -243,6 +244,7 @@ Object.assign(en, {
   askSubmit: 'Send answers', askWriting: 'MoeAI is writing questions…', askBroken: 'These questions did not come through. Ask MoeAI again.', askOther: 'Other…', askAnswered: 'Answered',
 });
 Object.assign(ar, {
+  openTutorPage: 'افتح صفحة المدرّس (إدارة المادة)', staffLink: 'دكتور أو معيد؟ أدِر مادتك من صفحة المدرّس',
   memoryMenu: 'الذاكرة', personalTitle: 'اللي MoeAI فاكره عنك', personal_memory: 'الذاكرة', personal_skills: 'المهارات', personal_instructions: 'التعليمات',
   save: 'حفظ', saved: 'اتحفظ', edit: 'تعديل',
   memoryExplain: 'MoeAI بيفتكر الحاجات المهمة عنك بين المحادثات: اسمك، بتحب تذاكر إزاي، مواعيد امتحاناتك، والحاجات اللي بتقف عندها. تقدر تعدل أو تمسح أي حاجة هنا.',

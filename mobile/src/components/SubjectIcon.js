@@ -24,6 +24,7 @@ import {
   WrenchScrewdriverIcon,
 } from 'react-native-heroicons/solid';
 import { resolveSubjectIcon, subjectIconSourceSupportsPlatform } from '../subjects/subjectIconSource';
+import { courseGlyphFor } from './CourseGlyphs';
 
 function fallbackFor(name) {
   const value = String(name || '').toLowerCase();
@@ -74,6 +75,8 @@ export default React.memo(function SubjectIcon({ name, query, color, size = 30, 
   const [failed, setFailed] = useState(false);
   const search = query || name;
   const Fallback = useMemo(() => fallbackFor(search), [search]);
+  // Courses with an exact hand-drawn icon never go to the search.
+  const Glyph = useMemo(() => courseGlyphFor(search), [search]);
 
   useEffect(() => {
     let alive = true;
@@ -83,13 +86,20 @@ export default React.memo(function SubjectIcon({ name, query, color, size = 30, 
     // Native fetch can do that, while browsers correctly block it with CORS.
     // Web therefore uses the deterministic local icon immediately unless the
     // app configures an explicitly web-compatible proxy/custom resolver.
-    if (!subjectIconSourceSupportsPlatform(Platform.OS)) return undefined;
+    if (Glyph || !subjectIconSourceSupportsPlatform(Platform.OS)) return undefined;
     const cancelIdle = scheduleIdle(() => {
       resolveSubjectIcon(search).then((result) => { if (alive) setRemote(result); });
     });
     return () => { alive = false; cancelIdle(); };
-  }, [search]);
+  }, [Glyph, search]);
 
+  if (Glyph) {
+    return (
+      <View style={[styles.box, { width: size, height: size }, style]} accessibilityLabel={`${name} subject icon`}>
+        <Glyph size={size} color={color} />
+      </View>
+    );
+  }
   return (
     <View style={[styles.box, { width: size, height: size }, style]} accessibilityLabel={remote?.credit || `${name} subject icon`}>
       {remote?.uri && !failed

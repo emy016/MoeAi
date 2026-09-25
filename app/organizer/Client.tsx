@@ -227,15 +227,21 @@ export default function Client() {
             <div className="org-head">
               <Logo size={40} />
               <div>
-                <h1>MoeAI Organizer</h1>
-                <p>Tutor mode for TAs and professors. Upload your course once; MoeAI organizes it for every student in it.</p>
+                <h1>Tutor page</h1>
+                <p>For professors and TAs: manage the MoeAI model for your course. Upload your course once; MoeAI organizes it for every student in it.</p>
               </div>
             </div>
+            <ul className="org-muted" style={{ marginTop: 14, lineHeight: 1.7, paddingLeft: 18 }}>
+              <li><strong>Materials:</strong> upload lecture slides, sheets and past exams (PDF, PPTX, DOCX). MoeAI reads them and answers students with citations to your files.</li>
+              <li><strong>Brain:</strong> the course map, glossary, formulas, common mistakes and practice MoeAI builds from them, which you can regenerate.</li>
+              <li><strong>Review:</strong> anything MoeAI wrote on its own waits for your approval before a student sees it.</li>
+              <li><strong>Try:</strong> ask MoeAI what a student would ask and see exactly how it answers from your course.</li>
+            </ul>
             <p className="org-muted" style={{ marginTop: 14 }}>
               {me.signedIn ? "This account does not teach any course yet. Ask your faculty admin to add you as course staff." : "Sign in with your university staff account to continue."}
             </p>
             <div className="org-row" style={{ marginTop: 14 }}>
-              <Link className="org-btn" href="/sso/fue?next=/organizer">Staff sign-in</Link>
+              <Link className="org-btn" href="/sso/fue?next=/organizer">Sign in as FUE staff</Link>
               <Link className="org-btn ghost" href="/moeai">Student app</Link>
             </div>
           </section>
@@ -251,7 +257,7 @@ export default function Client() {
           <div className="org-head" style={{ flexWrap: "wrap" }}>
             <Logo size={40} />
             <div style={{ flex: 1, minWidth: 200 }}>
-              <h1>MoeAI Organizer</h1>
+              <h1>Tutor page</h1>
               <p>{me.name}{me.org ? ` · ${me.org.orgName}` : ""} · Tutor mode</p>
             </div>
             <Link className="org-btn ghost small" href="/moeai">Student view</Link>

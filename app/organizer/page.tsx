@@ -5,7 +5,7 @@ import "@/components/brand/logo.css";
 import "../org.css";
 
 export const metadata: Metadata = {
-  title: "MoeAI Organizer",
+  title: "MoeAI Tutor page",
   description: "Tutor mode for course staff: upload a course once and MoeAI organizes it into the knowledge its students learn from.",
   robots: { index: false },
 };

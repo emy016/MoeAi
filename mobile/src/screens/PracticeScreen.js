@@ -27,6 +27,51 @@ const HOURS = Array.from({ length: 24 }, (_, value) => ({ value, label: String(v
 const MINUTES = Array.from({ length: 60 }, (_, value) => ({ value, label: String(value).padStart(2, '0') }));
 const cap = (x, low, high) => Math.max(low, Math.min(high, x));
 
+const clock = (value) => {
+  const h = Math.floor(value / 3600);
+  const m = Math.floor((value % 3600) / 60);
+  const sec = String(value % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+};
+
+/** The exam clock: time left, a bar that drains, and a color that warns in the last minutes. */
+function ExamTimer({ seconds, total, index, count }) {
+  const { colors, type } = usePreferences();
+  const share = total ? cap(seconds / total, 0, 1) : 0;
+  const urgent = seconds <= 60 || share <= 0.1;
+  const warn = !urgent && (seconds <= 300 || share <= 0.25);
+  const tone = urgent ? colors.danger : warn ? DifficultyColors.medium : colors.accent;
+  const pulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!urgent) { pulse.setValue(1); return undefined; }
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 0.55, duration: 450, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1, duration: 450, useNativeDriver: true }),
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [pulse, urgent]);
+  return (
+    <View style={[s.timer, { backgroundColor: colors.cardButton }]} accessibilityRole="timer" accessibilityLabel={`Time left ${clock(seconds)}`}>
+      <View style={s.timerRow}>
+        <View>
+          <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>EXAM MODE · TIME LEFT</Text>
+          <Animated.Text style={[{ color: tone, opacity: pulse, fontVariant: ['tabular-nums'] }, type(30, 'bold', 36)]}>{clock(seconds)}</Animated.Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>QUESTION</Text>
+          <Text style={[{ color: colors.textPrimary }, type(20, 'bold', 26)]}>{index + 1}<Text style={[{ color: colors.textMuted }, type(14, 'semiBold', 26)]}> / {count}</Text></Text>
+        </View>
+      </View>
+      <View style={[s.timerTrack, { backgroundColor: colors.track }]}>
+        <View style={[s.timerFill, { width: `${share * 100}%`, backgroundColor: tone }]} />
+      </View>
+      {urgent ? <Text style={[{ color: colors.danger }, type(12, 'bold', 16)]}>Last minute. Your answers are submitted automatically when time runs out.</Text>
+        : warn ? <Text style={[{ color: colors.textSecondary }, type(12, 'semiBold', 16)]}>Less than {Math.ceil(seconds / 60)} minutes left. Wrap up long answers.</Text> : null}
+    </View>
+  );
+}
+
 function Label({ children, muted, style }) {
   const { colors, type } = usePreferences();
   return <Text style={[{ color: muted ? colors.textMuted : colors.textPrimary }, type(13, 'bold', 18), style]}>{children}</Text>;
@@ -214,13 +259,17 @@ export default function PracticeScreen({ active = false, onInnerTabChange, onAre
   return <View style={[s.root, { backgroundColor: colors.background }]}>
     {view === 'home' ? <><View style={[s.tabs, { backgroundColor: colors.cardButton }]}><Animated.View pointerEvents="none" style={[s.indicator, { backgroundColor: colors.accent, transform: [{ translateX: tabProgress.interpolate({ inputRange: [0, 1], outputRange: [0, 144] }) }] }]}/>{['Studying', 'Arena'].map((name) => <ElasticPressable key={name} shape="pill" onPress={() => switchInner(name)} style={s.tab} pressableStyle={s.tabButton} accessibilityRole="tab" accessibilityState={{ selected: inner === name }}><Text style={[{ color: inner === name ? colors.white : colors.textMuted }, type(13, 'bold', 18)]}>{name}</Text></ElasticPressable>)}</View>{inner === 'Arena' ? <Arena active={active} onStats={onArenaStats}/> : <ScreenContainer><View style={s.cards}><ElasticPressable onPress={() => { setError(''); setMode('questions'); }} style={s.square} pressableStyle={[s.tile, { backgroundColor: colors.card }]} accessibilityRole="button" accessibilityLabel="Questions"><AcademicCapIcon size={42} color={colors.accent}/><Label style={s.tileTitle}>Questions</Label></ElasticPressable><ElasticPressable onPress={() => { setError(''); setMode('exam'); }} style={s.square} pressableStyle={[s.tile, { backgroundColor: colors.card }]} accessibilityRole="button" accessibilityLabel="Exam"><DocumentTextIcon size={42} color={colors.accent}/><Label style={s.tileTitle}>Exam</Label></ElasticPressable><ElasticPressable onPress={() => { setError(''); setMode('flashcards'); }} style={s.wide} pressableStyle={[s.tile, { backgroundColor: colors.card }]} accessibilityRole="button" accessibilityLabel="Flashcards"><RectangleStackIcon size={42} color={colors.accent}/><Label style={s.tileTitle}>Flashcards</Label></ElasticPressable></View></ScreenContainer>}</> : null}
     {view === 'archive' ? <Archive entries={store.archive} subjects={subjects} close={() => setView('home')}/> : null}
-    {view === 'session' && session ? <ScreenContainer><View style={s.heading}><Label>{session.mode === 'exam' ? `Exam · ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : session.mode === 'flashcards' ? 'Flashcards' : 'Questions'}</Label><Label muted>{index + 1} / {session.items.length}</Label></View>{session.mode === 'flashcards' ? <><Flashcard card={question} flipped={flipped} progress={flipProgress} onFlip={() => { setFlipped((old) => !old); if (motion) Animated.spring(flipProgress, { toValue: flipped ? 0 : 1, stiffness: 220, damping: 22, mass: 0.75, useNativeDriver: true }).start(); else flipProgress.setValue(flipped ? 0 : 1); }}/><View style={s.footer}><Button secondary icon={XCircleIcon} onPress={() => tally(false)} style={s.flex}>Wrong</Button><Button icon={CheckCircleIcon} onPress={() => tally(true)} style={s.flex}>Right</Button></View><Button secondary onPress={finish}>Quit</Button></> : <><Card><Question question={question} response={responses[index]} setResponse={(value) => setResponses((old) => ({ ...old, [index]: value }))} feedback={feedback[index]} exam={session.mode === 'exam'}/></Card>{error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}{session.mode === 'exam' ? <><View style={s.footer}><Button secondary onPress={() => setIndex(Math.max(0, index - 1))} disabled={index === 0} style={s.flex}>← Previous</Button><Button secondary onPress={() => setIndex(Math.min(session.items.length - 1, index + 1))} disabled={index === session.items.length - 1} style={s.flex}>Next →</Button></View><Button onPress={finish} disabled={busy}>{busy ? 'Grading…' : 'Submit exam'}</Button></> : <>{!feedback[index] ? <Button onPress={answer} disabled={busy || response === undefined || String(response).trim() === ''}>{busy ? 'Checking…' : 'Check answer'}</Button> : null}<View style={s.footer}><Button secondary onPress={finish} style={s.flex}>Quit</Button><Button onPress={next} disabled={!feedback[index] || busy} style={s.flex}>{busy ? 'Loading…' : 'Next'}</Button></View></>}</>}</ScreenContainer> : null}
+    {view === 'session' && session ? <ScreenContainer>{session.mode === 'exam' ? <ExamTimer seconds={seconds} total={session.settings.minutes * 60} index={index} count={session.items.length} /> : <View style={s.heading}><Label>{session.mode === 'flashcards' ? 'Flashcards' : 'Questions'}</Label><Label muted>{index + 1} / {session.items.length}</Label></View>}{session.mode === 'flashcards' ? <><Flashcard card={question} flipped={flipped} progress={flipProgress} onFlip={() => { setFlipped((old) => !old); if (motion) Animated.spring(flipProgress, { toValue: flipped ? 0 : 1, stiffness: 220, damping: 22, mass: 0.75, useNativeDriver: true }).start(); else flipProgress.setValue(flipped ? 0 : 1); }}/><View style={s.footer}><Button secondary icon={XCircleIcon} onPress={() => tally(false)} style={s.flex}>Wrong</Button><Button icon={CheckCircleIcon} onPress={() => tally(true)} style={s.flex}>Right</Button></View><Button secondary onPress={finish}>Quit</Button></> : <><Card><Question question={question} response={responses[index]} setResponse={(value) => setResponses((old) => ({ ...old, [index]: value }))} feedback={feedback[index]} exam={session.mode === 'exam'}/></Card>{error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}{session.mode === 'exam' ? <><View style={s.footer}><Button secondary onPress={() => setIndex(Math.max(0, index - 1))} disabled={index === 0} style={s.flex}>← Previous</Button><Button secondary onPress={() => setIndex(Math.min(session.items.length - 1, index + 1))} disabled={index === session.items.length - 1} style={s.flex}>Next →</Button></View><Button onPress={finish} disabled={busy}>{busy ? 'Grading…' : 'Submit exam'}</Button></> : <>{!feedback[index] ? <Button onPress={answer} disabled={busy || response === undefined || String(response).trim() === ''}>{busy ? 'Checking…' : 'Check answer'}</Button> : null}<View style={s.footer}><Button secondary onPress={finish} style={s.flex}>Quit</Button><Button onPress={next} disabled={!feedback[index] || busy} style={s.flex}>{busy ? 'Loading…' : 'Next'}</Button></View></>}</>}</ScreenContainer> : null}
     {view === 'result' && result ? <Modal visible animationType={motion ? 'fade' : 'none'} presentationStyle="fullScreen" onRequestClose={closeResult}><ScreenContainer><View style={s.result}><Text style={[{ color: colors.textPrimary }, type(24, 'bold', 30)]}>{session?.mode === 'exam' ? 'Exam result' : 'Session result'}</Text><View style={s.ring}><ProgressRing completed={result.correct} total={result.total} active size={210}/><Text style={[s.score, { color: colors.textPrimary }, type(31, 'bold', 38)]}>{result.correct}/{result.total}</Text></View><Label muted>answered correctly</Label>{result.answers ? result.answers.map((item, i) => <Card key={item.question.id} style={{ width: '100%' }}><Label>{i + 1}. {item.question.prompt}</Label><Text style={{ color: item.correct ? colors.accent : colors.danger }}>{item.correct ? '✓ Correct' : '✕ Incorrect'}</Text><Text style={[{ color: colors.textSecondary }, type(12, 'regular', 18)]}>Your answer: {item.response || 'Unanswered'}{'\n'}Answer: {item.question.answer}{'\n'}{item.explanation}</Text></Card>) : null}<Button onPress={closeResult} style={{ width: '100%' }}>Done</Button></View></ScreenContainer></Modal> : null}
     <Setup key={mode || 'closed'} mode={mode} close={() => setMode(null)} archive={() => { setMode(null); setView('archive'); }} start={start} subjects={subjects} store={store} busy={busy} error={error}/>
   </View>;
 }
 
 const s = StyleSheet.create({
+  timer: { borderRadius: Radius.lg || 18, padding: 14, gap: 10, marginBottom: Spacing.sm },
+  timerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  timerTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  timerFill: { height: 6, borderRadius: 3 },
   root: { flex: 1 }, center: { alignItems: 'center', justifyContent: 'center' }, row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }, heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }, subjectHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.sm },
   tabs: { width: 292, height: 45, alignSelf: 'center', borderRadius: Radius.pill, padding: 4, flexDirection: 'row', marginBottom: Spacing.md, overflow: 'hidden' }, indicator: { position: 'absolute', top: 4, left: 4, bottom: 4, width: 140, borderRadius: Radius.pill }, tab: { width: 144, zIndex: 1 }, tabButton: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   cards: { width: '100%', maxWidth: 460, alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: Spacing.md }, square: { width: '47%', aspectRatio: 1 }, wide: { width: '100%', height: 138 }, tile: { flex: 1, borderRadius: Radius.lg, padding: Spacing.md, justifyContent: 'space-between' }, tileTitle: { fontSize: 18 },

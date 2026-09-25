@@ -57,6 +57,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/index.html", destination: "/", permanent: true },
+      // The Organizer is the professor's page; people look for it by these names.
+      ...["/tutor", "/professor", "/staff", "/teach"].map((source) => ({ source, destination: "/organizer", permanent: false })),
       ...pages
         .filter((page) => page !== "index")
         .map((page) => ({ source: `/${page}.html`, destination: `/${page}`, permanent: true })),
