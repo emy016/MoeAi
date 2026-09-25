@@ -117,7 +117,8 @@ export function useAccount() {
 /** "Mariam Adel" and "@mariam.adel" for the profile pill; guests see a sign-in prompt. */
 export function accountLabels(account, t) {
   if (account.status !== 'signedIn') return { displayName: t('guest'), handle: t('signInShort') };
-  const handle = account.handle || String(account.email || '').split('@')[0];
+  // A university account's "email" is "<ID> · <University>"; the pill shows the ID only.
+  const handle = account.handle || (account.org ? String(account.org.externalId || '') : String(account.email || '').split('@')[0].split(' · ')[0]);
   return { displayName: account.name || handle || t('student'), handle: handle ? `@${handle}` : '' };
 }
 

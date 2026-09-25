@@ -111,23 +111,35 @@ export function useLectureChatStore() {
   const streamReply = useCallback(async (key, threadId, assistantId, { text, files, history, subject, lecture }) => {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     if (controller) inFlight.current.set(assistantId, controller);
-    // Re-rendering on every token would make long answers stutter on phones.
-    let pendingText = null;
-    let flushTimer = null;
-    const flush = () => {
-      flushTimer = null;
-      if (pendingText === null) return;
-      const next = pendingText;
-      pendingText = null;
-      patchMessage(key, threadId, assistantId, { text: next, status: 'streaming' });
+    // Models send text in bursts (sometimes a paragraph at a time). The reply
+    // is revealed at a steady pace instead, so it reads as it is written, and
+    // the screen re-renders a few dozen times a second rather than per token.
+    let target = '';
+    let shown = 0;
+    let ticker = null;
+    let drained = null;
+    const tick = () => {
+      if (shown < target.length) {
+        const behind = target.length - shown;
+        shown = Math.min(target.length, shown + Math.max(3, Math.ceil(behind / 8)));
+        patchMessage(key, threadId, assistantId, { text: target.slice(0, shown), status: 'streaming' });
+      } else if (drained) { drained(); drained = null; }
     };
+    const startTicker = () => { if (!ticker) ticker = setInterval(tick, 33); };
+    const stopTicker = () => { if (ticker) clearInterval(ticker); ticker = null; };
     try {
       const result = await generateMoeAIReply({
         text, files, lectureFiles: lecture?.files || [], history, subject, lecture,
         signal: controller?.signal,
-        onDelta: (_chunk, full) => { pendingText = full; if (!flushTimer) flushTimer = setTimeout(flush, 60); },
+        onDelta: (_chunk, full) => { target = full; startTicker(); },
       });
-      if (flushTimer) clearTimeout(flushTimer);
+      // Let the reveal finish (never more than about a second and a half) before the final text lands.
+      if (!result.stopped && result.text && shown < result.text.length) {
+        target = result.text;
+        startTicker();
+        await Promise.race([new Promise((resolve) => { drained = resolve; }), new Promise((resolve) => setTimeout(resolve, 1500))]);
+      }
+      stopTicker();
       patchMessage(key, threadId, assistantId, {
         text: result.text || '',
         status: result.stopped ? (result.text ? 'stopped' : 'failed') : 'complete',
@@ -140,7 +152,7 @@ export function useLectureChatStore() {
       applyRemembered(result.remembered || [], result.skills || []);
       return result;
     } catch (error) {
-      if (flushTimer) clearTimeout(flushTimer);
+      stopTicker();
       patchMessage(key, threadId, assistantId, {
         text: error?.message || 'MoeAI could not reach an AI model. Please try again.',
         status: 'failed',

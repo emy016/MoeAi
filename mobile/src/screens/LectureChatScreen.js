@@ -899,10 +899,6 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { event.preventDefault?.(); sendFromComposer(); }
                 } : undefined}
               />
-              <Pressable onPressIn={() => { setMicHeld(true); startDictation(); }} onPressOut={() => { setMicHeld(false); stopDictation(); }} onTouchCancel={() => { setMicHeld(false); stopDictation(); }} hitSlop={7} style={styles.micButton} accessibilityRole="button" accessibilityLabel={t('holdToDictate')}>
-                <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.accent, opacity: micProgress, transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }] }]} />
-                <MicrophoneIcon size={20} color={listening || micHeld ? colors.background : colors.textSecondary} />
-              </Pressable>
               {replying ? (
                 <ElasticPressable shape="circle" onPress={stopReplying} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
                   <View style={[styles.sendButton, { backgroundColor: colors.accent }]}><StopIcon size={18} color={colors.background} /></View>

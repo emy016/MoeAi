@@ -6,7 +6,7 @@ import { usePreferences } from '../context/AppPreferences';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export default React.memo(function ProgressRing({ completed, total, active, size = 164, strokeWidth = 10 }) {
+export default React.memo(function ProgressRing({ completed, total, active, size = 164, strokeWidth = 10, title, caption }) {
   const { colors, type, t, motion } = usePreferences();
   const progressValue = total ? Math.max(0, Math.min(1, completed / total)) : 0;
   const animated = useRef(new Animated.Value(0)).current;
@@ -66,8 +66,9 @@ export default React.memo(function ProgressRing({ completed, total, active, size
         )}
       </Svg>
       <View style={styles.copy}>
-        <Text style={[{ color: colors.textPrimary }, type(28, 'bold', 33)]}>{Math.round(progressValue * 100)}%</Text>
-        <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.count, { color: colors.textMuted }, type(12, 'semiBold', 16)]}>{t('lecturesOutOf', { completed, total })}</Text>
+        {/* Home shows lecture progress; other screens (practice results) pass their own title and caption. */}
+        <Text style={[{ color: colors.textPrimary }, type(size > 190 ? 34 : 28, 'bold', size > 190 ? 40 : 33)]}>{title ?? `${Math.round(progressValue * 100)}%`}</Text>
+        <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.count, { color: colors.textMuted }, type(12, 'semiBold', 16)]}>{caption ?? t('lecturesOutOf', { completed, total })}</Text>
       </View>
     </View>
   );
