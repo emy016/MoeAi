@@ -879,6 +879,13 @@
     html.embed .btn, html.embed .btn-primary, html.embed button.primary { background: var(--accent) !important; background-image: none !important; color: #fff !important; border: none !important; border-radius: 999px !important; box-shadow: none !important; font-weight: 700 !important; }
     html.embed .mode-tab.active, html.embed .lb-filter.active { background: var(--accent) !important; color: #fff !important; }
     html.embed .crt-overlay, html.embed .theme-switcher { display: none !important; }
+    /* Same shapes as the app: no outlines anywhere, pill badges, 6px rounded bars, unlocked items tinted rather than outlined. */
+    html.embed [class*="badge"], html.embed .avatar, html.embed [class*="avatar"] { border: none !important; }
+    html.embed .rank-progress, html.embed .ach-progress { height: 6px !important; border-radius: 3px !important; background: var(--bg3) !important; }
+    html.embed .rank-progress-fill, html.embed .ach-progress-fill { border-radius: 3px !important; box-shadow: none !important; }
+    html.embed .lb-row { border-bottom: none !important; margin-bottom: 8px; }
+    html.embed .achievement-item.unlocked { background: var(--okbg) !important; }
+    html.embed input, html.embed select, html.embed textarea { border: none !important; border-radius: 14px !important; background: var(--bg3) !important; outline: none; }
     html.embed .brand { pointer-events: none; }
     html.embed .topbar { padding-top: max(10px, env(safe-area-inset-top)); }
     html.embed .page-head { margin-top: 18px; }

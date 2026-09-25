@@ -141,7 +141,7 @@ function createStreamParser(onDelta) {
  * cannot, the whole reply arrives at once and `onDelta` is called with it.
  * `signal` stops it: whatever had arrived is returned, marked `stopped`.
  */
-export async function generateMoeAIReply({ text, files = [], lectureFiles = [], history = [], subject, lecture, onDelta, signal } = {}) {
+export async function generateMoeAIReply({ text, files = [], lectureFiles = [], history = [], subject, lecture, replyLanguage, onDelta, signal } = {}) {
   const attachments = await prepareAttachments([...lectureFiles, ...files]);
   const notes = attachments.filter((item) => item.note).map((item) => `[Attached file: ${item.name} (${item.mimeType}) — ${item.note}]`);
   const question = [String(text || '').trim() || 'Please help me with the attached material.', ...notes].join('\n\n');
@@ -163,6 +163,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       body: JSON.stringify({
         surface: 'app',
         personal: personalForRequest(),
+        ...(replyLanguage ? { replyLanguage } : {}),
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
         learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}), ...(lecture?.materialId ? { materialId: lecture.materialId } : {}) },
         attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (

@@ -49,7 +49,7 @@ export default function LectureReader({ visible, materialId, title, onClose, onA
 
   const textWidth = Math.min(760, width - Spacing.md * 2) - 28;
   const renderPage = useCallback(({ item }) => (
-    <View style={[styles.page, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <View style={[styles.page, { backgroundColor: colors.card }]}>
       <View style={[styles.pageHead, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>{t('pageN').replace('{n}', String(item.page))}</Text>
         <ElasticPressable shape="pill" onPress={() => onAsk(item)} accessibilityRole="button" accessibilityLabel={t('askAboutPage')}>
@@ -102,7 +102,7 @@ export default function LectureReader({ visible, materialId, title, onClose, onA
             keyExtractor={(p) => String(p.page)}
             renderItem={renderPage}
             contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + Spacing.lg }]}
-            ListHeaderComponent={state.summary ? <Text style={[styles.summary, { color: colors.textSecondary, borderColor: colors.border }, type(13, 'regular', 19)]}>{state.summary}</Text> : null}
+            ListHeaderComponent={state.summary ? <Text style={[styles.summary, { color: colors.textSecondary, backgroundColor: colors.cardButton }, type(13, 'regular', 19)]}>{state.summary}</Text> : null}
             onViewableItemsChanged={onViewable}
             viewabilityConfig={{ itemVisiblePercentThreshold: 30 }}
             onScrollToIndexFailed={(info) => setTimeout(() => listRef.current?.scrollToIndex({ index: info.index, animated: true }), 150)}
@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
   dots: { gap: 6, paddingHorizontal: Spacing.md, paddingVertical: 10 },
   dot: { minWidth: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
   list: { padding: Spacing.md, gap: 12 },
-  page: { alignSelf: 'center', width: '100%', maxWidth: 760, borderRadius: Radius.lg, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 8 },
+  page: { alignSelf: 'center', width: '100%', maxWidth: 760, borderRadius: Radius.lg, padding: 14, gap: 8 },
   pageHead: { alignItems: 'center', justifyContent: 'space-between' },
   ask: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.pill },
-  summary: { alignSelf: 'center', width: '100%', maxWidth: 760, padding: 12, borderRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, marginBottom: 4 },
+  summary: { alignSelf: 'center', width: '100%', maxWidth: 760, padding: 12, borderRadius: Radius.md, overflow: 'hidden', marginBottom: 4 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.lg, gap: 12 },
   retry: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: Radius.pill },
 });

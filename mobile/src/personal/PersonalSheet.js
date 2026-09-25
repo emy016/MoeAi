@@ -111,7 +111,7 @@ function MemoryTab({ run }) {
       <Text style={[{ color: colors.textSecondary }, type(13, 'regular', 18)]}>{t('memoryExplain')}</Text>
       {!signedIn ? <Text style={[{ color: colors.textMuted }, type(12, 'regular', 16)]}>{t('memoryGuest')}</Text> : null}
       {!memories.length ? (
-        <View style={[styles.empty, { borderColor: colors.border }]}>
+        <View style={[styles.empty, { backgroundColor: colors.cardButton }]}>
           <Text style={[{ color: colors.textMuted, textAlign: 'center' }, type(13, 'regular', 18)]}>{t('memoryEmpty')}</Text>
         </View>
       ) : null}
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   iconButton: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: Radius.pill },
   card: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: Radius.md },
-  empty: { borderWidth: 1, borderStyle: 'dashed', borderRadius: Radius.md, padding: 16 },
+  empty: { borderRadius: Radius.md, padding: 16 },
   row: { flexDirection: 'row', gap: Spacing.sm, alignItems: 'center' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   flex: { flex: 1, minWidth: 0 },

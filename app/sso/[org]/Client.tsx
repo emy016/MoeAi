@@ -8,7 +8,6 @@
  * rest of the product does not change when the real SSO is connected.
  */
 import { useState } from "react";
-import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 
 type Org = { slug: string; name: string; short: string; idLabel: string; programs: { name: string; live: boolean }[] };
@@ -67,9 +66,6 @@ export default function Client({ org, next }: { org: Org; next: string }) {
           <strong>MoeAI demo sign-in.</strong> This page is run by MoeAI, not by {org.short}, and only accepts the demo
           accounts MoeAI issued for this pilot. Do not enter your real university password here. When {org.short} connects
           its own single sign-on, this step moves to the university&apos;s login page.
-        </p>
-        <p className="org-muted" style={{ textAlign: "center" }}>
-          <Link href="/sso" style={{ textDecoration: "underline" }}>Choose another university</Link>
         </p>
       </div>
     </main>

@@ -108,7 +108,7 @@ export function useLectureChatStore() {
   }, []);
 
   /** Streams the reply to `userMessage` into `assistantMessage`, which must already be in the thread. */
-  const streamReply = useCallback(async (key, threadId, assistantId, { text, files, history, subject, lecture }) => {
+  const streamReply = useCallback(async (key, threadId, assistantId, { text, files, history, subject, lecture, replyLanguage }) => {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     if (controller) inFlight.current.set(assistantId, controller);
     // Models send text in bursts (sometimes a paragraph at a time). The reply
@@ -129,7 +129,7 @@ export function useLectureChatStore() {
     const stopTicker = () => { if (ticker) clearInterval(ticker); ticker = null; };
     try {
       const result = await generateMoeAIReply({
-        text, files, lectureFiles: lecture?.files || [], history, subject, lecture,
+        text, files, lectureFiles: lecture?.files || [], history, subject, lecture, replyLanguage,
         signal: controller?.signal,
         onDelta: (_chunk, full) => { target = full; startTicker(); },
       });
@@ -164,7 +164,7 @@ export function useLectureChatStore() {
   }, [applyRemembered, patchMessage]);
 
   const sendMessage = useCallback(async (subjectId, lectureId, threadId, {
-    text = '', files = [], subject = null, lecture = null,
+    text = '', files = [], subject = null, lecture = null, replyLanguage,
   }) => {
     const clean = String(text || '').trim();
     if (!clean && !files.length) return;
@@ -188,7 +188,7 @@ export function useLectureChatStore() {
       };
       return { ...current, [key]: [updated, ...threads.filter((thread) => thread.id !== threadId)] };
     });
-    return streamReply(key, threadId, assistantMessage.id, { text: clean, files, history, subject, lecture });
+    return streamReply(key, threadId, assistantMessage.id, { text: clean, files, history, subject, lecture, replyLanguage });
   }, [streamReply]);
 
   /** Stops whatever reply is arriving in this thread; the part already written stays. */

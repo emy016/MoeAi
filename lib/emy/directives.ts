@@ -137,6 +137,11 @@ const TARGET_RULES: Record<Target, string> = {
   [FRANCO]: "Write the whole reply in Egyptian Franco-Arabic in Latin letters, following the student's own spelling. No Arabic script anywhere. Do not switch to plain English; technical terms keep their normal form.",
   [AR_EN]: "The student is mixing Arabic and English on purpose - keep the mixture. Arabic parts in Egyptian Arabic in Arabic script, English parts in English. Do not collapse the reply into one language.",
   [FRANCO_EN]: "The student is mixing Franco-Arabic and English on purpose - keep the mixture. Franco stays in Latin letters, never Arabic script; English stays English. Do not collapse the reply into one language.",
+  es: "Write the whole reply in Spanish. No Arabic, no Franco-Arabic, no English sentences; technical terms keep their normal form.",
+  fr: "Write the whole reply in French. No Arabic, no Franco-Arabic, no English sentences; technical terms keep their normal form.",
+  de: "Write the whole reply in German. No Arabic, no Franco-Arabic, no English sentences; technical terms keep their normal form.",
+  zh: "Write the whole reply in Simplified Chinese. No Arabic, no Franco-Arabic, no English sentences; technical terms keep their normal form.",
+  hi: "Write the whole reply in Hindi in Devanagari script. No Arabic, no Franco-Arabic, no Hinglish; technical terms keep their normal form.",
 };
 
 export function languageDirective(decision: LanguageDecision): string {

@@ -13,6 +13,8 @@
  *   franco     Egyptian Arabic in Latin script (Franco / Arabizi)
  *   ar+en      natural Arabic/English mixture
  *   franco+en  natural Franco/English mixture
+ *   es fr de zh hi  only when asked for explicitly (the app language picker
+ *                   sends "Reply in Spanish only" and so on for practice)
  */
 
 export const EN = "en";
@@ -20,9 +22,15 @@ export const AR = "ar";
 export const FRANCO = "franco";
 export const AR_EN = "ar+en";
 export const FRANCO_EN = "franco+en";
-export type Target = typeof EN | typeof AR | typeof FRANCO | typeof AR_EN | typeof FRANCO_EN;
+export const ES = "es";
+export const FR = "fr";
+export const DE = "de";
+export const ZH = "zh";
+export const HI = "hi";
+export type Target = typeof EN | typeof AR | typeof FRANCO | typeof AR_EN | typeof FRANCO_EN
+  | typeof ES | typeof FR | typeof DE | typeof ZH | typeof HI;
 
-export const TARGETS: readonly Target[] = [EN, AR, FRANCO, AR_EN, FRANCO_EN];
+export const TARGETS: readonly Target[] = [EN, AR, FRANCO, AR_EN, FRANCO_EN, ES, FR, DE, ZH, HI];
 export const ARABIC_SCRIPT_TARGETS = new Set<Target>([AR, AR_EN]);
 export const FRANCO_TARGETS = new Set<Target>([FRANCO, FRANCO_EN]);
 export const MIXED_TARGETS = new Set<Target>([AR_EN, FRANCO_EN]);
@@ -192,6 +200,11 @@ const EXPLICIT_RULES: [Target, RegExp][] = [
   [AR, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?(?:arabic|3arabi|arabi|masri|egyptian arabic)\\b`, "i")],
   [AR, /\b(?:arabic|3arabi)\s+(?:please|pls|plz)\b/i],
   [AR, /(?:بالعرب[يى]|بالمصر[يى]|اتكلم عرب[يى]|كلمن[يى] بالعرب[يى])/],
+  [ES, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?(?:spanish|espa[nñ]ol)\\b`, "i")],
+  [FR, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?(?:french|fran[cç]ais)\\b`, "i")],
+  [DE, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?(?:german|deutsch)\\b`, "i")],
+  [ZH, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?(?:chinese|mandarin)\\b`, "i")],
+  [HI, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?hindi\\b`, "i")],
   [EN, new RegExp(`${VERB}\\b[^.?!\\n]{0,40}\\b(?:in\\s+)?english\\b`, "i")],
   [EN, /\benglish\s+(?:please|pls|plz|only)\b/i],
   [EN, /(?:بالانجليز[يى]|بالإنجليز[يى]|بالانجلش)/],
@@ -311,5 +324,10 @@ export function describe(target: Target): string {
     [FRANCO]: "Egyptian Franco-Arabic (Latin script)",
     [AR_EN]: "a natural Egyptian Arabic / English mixture",
     [FRANCO_EN]: "a natural Franco-Arabic / English mixture",
+    [ES]: "Spanish",
+    [FR]: "French",
+    [DE]: "German",
+    [ZH]: "Simplified Chinese",
+    [HI]: "Hindi (Devanagari script)",
   } as Record<Target, string>)[target] ?? target;
 }

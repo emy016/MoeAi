@@ -37,7 +37,7 @@ const clock = (value) => {
 };
 
 /** The exam clock: time left, a bar that drains, and a color that warns in the last minutes. */
-function ExamTimer({ seconds, total, index, count }) {
+function ExamTimer({ seconds, total, index, count, answered = 0 }) {
   const { colors, type } = usePreferences();
   const share = total ? cap(seconds / total, 0, 1) : 0;
   const urgent = seconds <= 60 || share <= 0.1;
@@ -63,6 +63,7 @@ function ExamTimer({ seconds, total, index, count }) {
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>QUESTION</Text>
           <Text style={[{ color: colors.textPrimary }, type(20, 'bold', 26)]}>{index + 1}<Text style={[{ color: colors.textMuted }, type(14, 'semiBold', 26)]}> / {count}</Text></Text>
+          <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>{answered} ANSWERED</Text>
         </View>
       </View>
       <View style={[s.timerTrack, { backgroundColor: colors.track }]}>
@@ -70,6 +71,35 @@ function ExamTimer({ seconds, total, index, count }) {
       </View>
       {urgent ? <Text style={[{ color: colors.danger }, type(12, 'bold', 16)]}>Last minute. Your answers are submitted automatically when time runs out.</Text>
         : warn ? <Text style={[{ color: colors.textSecondary }, type(12, 'semiBold', 16)]}>Less than {Math.ceil(seconds / 60)} minutes left. Wrap up long answers.</Text> : null}
+    </View>
+  );
+}
+
+/** Questions and flashcards: where you are, and a bar that fills as cards are done. */
+function SessionProgress({ label, index, count, done, right }) {
+  const { colors, type, motion } = usePreferences();
+  const share = count ? cap(done / count, 0, 1) : 0;
+  const fill = useRef(new Animated.Value(share)).current;
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    if (motion) Animated.spring(fill, { toValue: share, stiffness: 260, damping: 30, mass: 0.7, useNativeDriver: false, isInteraction: false }).start();
+    else fill.setValue(share);
+  }, [fill, motion, share]);
+  return (
+    <View style={[s.timer, { backgroundColor: colors.cardButton }]} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: count, now: done }} accessibilityLabel={`${label}: ${done} of ${count} done`}>
+      <View style={s.timerRow}>
+        <View>
+          <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>{label.toUpperCase()}</Text>
+          <Text style={[{ color: colors.textPrimary }, type(20, 'bold', 26)]}>{index + 1}<Text style={[{ color: colors.textMuted }, type(14, 'semiBold', 26)]}> / {count}</Text></Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>{done} DONE</Text>
+          {right ? <Text style={[{ color: colors.accent }, type(14, 'bold', 20)]}>{right}</Text> : null}
+        </View>
+      </View>
+      <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={[s.timerTrack, { backgroundColor: colors.track }]}>
+        <Animated.View style={[s.timerFill, { width: fill.interpolate({ inputRange: [0, 1], outputRange: [0, width] }), backgroundColor: colors.accent }]} />
+      </View>
     </View>
   );
 }
@@ -309,7 +339,7 @@ export default function PracticeScreen({ active = false, onInnerTabChange, onAre
   return <View style={[s.root, { backgroundColor: colors.background }]}>
     {view === 'home' ? <><View style={[s.tabs, { backgroundColor: colors.cardButton }]}><Animated.View pointerEvents="none" style={[s.indicator, { backgroundColor: colors.accent, transform: [{ translateX: tabProgress.interpolate({ inputRange: [0, 1], outputRange: [0, 144] }) }] }]}/>{['Studying', 'Arena'].map((name) => <ElasticPressable key={name} shape="pill" onPress={() => switchInner(name)} style={s.tab} pressableStyle={s.tabButton} accessibilityRole="tab" accessibilityState={{ selected: inner === name }}><Text style={[{ color: inner === name ? colors.white : colors.textMuted }, type(13, 'bold', 18)]}>{name}</Text></ElasticPressable>)}</View>{inner === 'Arena' ? <Arena active={active} onStats={onArenaStats}/> : <ScreenContainer>{resumable ? <ResumeCard session={resumable} onResume={resume} onDiscard={discardSaved}/> : null}<View style={s.cards}>{[['questions', 'Questions', AcademicCapIcon, s.square], ['flashcards', 'Flashcards', RectangleStackIcon, s.square], ['exam', 'Exam', DocumentTextIcon, s.wide]].map(([id, label, Icon, cell]) => <ElasticPressable key={id} onPress={() => openMode(id)} style={cell} pressableStyle={[s.tile, { backgroundColor: colors.card }]} accessibilityRole="button" accessibilityLabel={label}><Icon size={44} color={colors.accent}/><Label style={s.tileTitle}>{label}</Label></ElasticPressable>)}</View></ScreenContainer>}</> : null}
     {view === 'archive' ? <Archive entries={store.archive} subjects={subjects} close={() => setView('home')}/> : null}
-    {view === 'session' && session ? <ScreenContainer>{session.mode === 'exam' ? <ExamTimer seconds={seconds} total={session.settings.minutes * 60} index={index} count={session.items.length} /> : <View style={s.heading}><Label>{session.mode === 'flashcards' ? 'Flashcards' : 'Questions'}</Label><Label muted>{index + 1} / {session.items.length}</Label></View>}{session.mode === 'flashcards' ? <><Flashcard card={question} flipped={flipped} progress={flipProgress} onFlip={() => { setFlipped((old) => !old); if (motion) Animated.spring(flipProgress, { toValue: flipped ? 0 : 1, stiffness: 220, damping: 22, mass: 0.75, useNativeDriver: true }).start(); else flipProgress.setValue(flipped ? 0 : 1); }}/><View style={s.footer}><Button secondary icon={XCircleIcon} onPress={() => tally(false)} style={s.flex}>Wrong</Button><Button icon={CheckCircleIcon} onPress={() => tally(true)} style={s.flex}>Right</Button></View><Button secondary onPress={finish}>Quit</Button></> : <><Card><Question question={question} response={responses[index]} setResponse={(value) => setResponses((old) => ({ ...old, [index]: value }))} feedback={feedback[index]} exam={session.mode === 'exam'}/></Card>{error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}{session.mode === 'exam' ? <><View style={s.footer}><Button secondary onPress={() => setIndex(Math.max(0, index - 1))} disabled={index === 0} style={s.flex}>← Previous</Button><Button secondary onPress={() => setIndex(Math.min(session.items.length - 1, index + 1))} disabled={index === session.items.length - 1} style={s.flex}>Next →</Button></View><Button onPress={finish} disabled={busy}>{busy ? 'Grading…' : 'Submit exam'}</Button></> : <>{!feedback[index] ? <Button onPress={answer} disabled={busy || response === undefined || String(response).trim() === ''}>{busy ? 'Checking…' : 'Check answer'}</Button> : null}<View style={s.footer}><Button secondary onPress={leave} style={s.flex}>{session.items.some((_, i) => !feedback[i]) ? 'Save & exit' : 'Finish'}</Button><Button onPress={next} disabled={!feedback[index] || busy} style={s.flex}>{busy ? 'Loading…' : 'Next'}</Button></View></>}</>}</ScreenContainer> : null}
+    {view === 'session' && session ? <ScreenContainer>{session.mode === 'exam' ? <ExamTimer seconds={seconds} total={session.settings.minutes * 60} index={index} count={session.items.length} answered={Object.values(responses).filter((value) => value !== undefined && String(value).trim() !== '').length} /> : <SessionProgress label={session.mode === 'flashcards' ? 'Flashcards' : 'Questions'} index={index} count={session.items.length} done={Object.keys(feedback).length} right={Object.keys(feedback).length ? `${Object.values(feedback).filter((item) => item.correct).length} correct` : ''} />}{session.mode === 'flashcards' ? <><Flashcard card={question} flipped={flipped} progress={flipProgress} onFlip={() => { setFlipped((old) => !old); if (motion) Animated.spring(flipProgress, { toValue: flipped ? 0 : 1, stiffness: 220, damping: 22, mass: 0.75, useNativeDriver: true }).start(); else flipProgress.setValue(flipped ? 0 : 1); }}/><View style={s.footer}><Button secondary icon={XCircleIcon} onPress={() => tally(false)} style={s.flex}>Wrong</Button><Button icon={CheckCircleIcon} onPress={() => tally(true)} style={s.flex}>Right</Button></View><Button secondary onPress={finish}>Quit</Button></> : <><Card><Question question={question} response={responses[index]} setResponse={(value) => setResponses((old) => ({ ...old, [index]: value }))} feedback={feedback[index]} exam={session.mode === 'exam'}/></Card>{error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}{session.mode === 'exam' ? <><View style={s.footer}><Button secondary onPress={() => setIndex(Math.max(0, index - 1))} disabled={index === 0} style={s.flex}>← Previous</Button><Button secondary onPress={() => setIndex(Math.min(session.items.length - 1, index + 1))} disabled={index === session.items.length - 1} style={s.flex}>Next →</Button></View><Button onPress={finish} disabled={busy}>{busy ? 'Grading…' : 'Submit exam'}</Button></> : <>{!feedback[index] ? <Button onPress={answer} disabled={busy || response === undefined || String(response).trim() === ''}>{busy ? 'Checking…' : 'Check answer'}</Button> : null}<View style={s.footer}><Button secondary onPress={leave} style={s.flex}>{session.items.some((_, i) => !feedback[i]) ? 'Save & exit' : 'Finish'}</Button><Button onPress={next} disabled={!feedback[index] || busy} style={s.flex}>{busy ? 'Loading…' : 'Next'}</Button></View></>}</>}</ScreenContainer> : null}
     {view === 'result' && result ? <Modal visible animationType={motion ? 'fade' : 'none'} presentationStyle="fullScreen" onRequestClose={closeResult}><ScreenContainer><View style={s.result}><Text style={[{ color: colors.textPrimary }, type(24, 'bold', 30)]}>{session?.mode === 'exam' ? 'Exam result' : 'Session result'}</Text><View style={s.ring}><ProgressRing completed={result.correct} total={result.total} active size={210} title={`${result.correct}/${result.total}`} caption={session?.mode === 'flashcards' ? 'cards you knew' : 'questions correct'}/></View>{result.answers ? result.answers.map((item, i) => <Card key={item.question.id} style={{ width: '100%', gap: Spacing.sm }}><Label>{i + 1}. {item.question.prompt}</Label><Verdict correct={item.correct}/><Text style={[{ color: colors.textSecondary }, type(12, 'regular', 18)]}>Your answer: {item.response || 'Unanswered'}{'\n'}Answer: {item.question.answer}{'\n'}{item.explanation}</Text></Card>) : null}<Button onPress={closeResult} style={{ width: '100%' }}>Done</Button></View></ScreenContainer></Modal> : null}
     <Setup key={mode || 'closed'} mode={mode} close={() => setMode(null)} archive={() => { setMode(null); setView('archive'); }} start={start} subjects={subjects} store={store} busy={busy} error={error}/>
   </View>;

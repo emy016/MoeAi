@@ -3,15 +3,19 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ORGS } from "@/lib/orgs";
 import { safeNext } from "@/lib/auth/next";
+import { redirect } from "next/navigation";
 import "@/components/brand/logo.css";
 import "../org.css";
 
 export const metadata: Metadata = { title: "Sign in with your university", robots: { index: false } };
 
-/** Step one: which university or school. The rollout shows as "coming soon". */
+/** Step one: which university. Only live universities are listed; with one live, it opens directly. */
 export default async function Page({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
   const q = next ? `?next=${encodeURIComponent(safeNext(next))}` : "";
+  // No university picker with "coming soon" rows: while one university is live, go straight to its sign-in.
+  const live = ORGS.filter((org) => org.live);
+  if (live.length === 1) redirect(`/sso/${live[0].slug}${q}`);
   return (
     <main className="org-page">
       <div className="org-wrap">
@@ -24,21 +28,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
             </div>
           </div>
           <div className="org-list">
-            {ORGS.map((org) =>
-              org.live ? (
-                <Link key={org.slug} className="org-item" href={`/sso/${org.slug}${q}`}>
-                  <strong>{org.short}</strong>
-                  <span className="org-muted" style={{ margin: 0 }}>{org.name}</span>
-                  <span className="org-badge live">Live</span>
-                </Link>
-              ) : (
-                <div key={org.slug} className="org-item" aria-disabled="true">
-                  <strong>{org.short}</strong>
-                  <span className="org-muted" style={{ margin: 0 }}>{org.name}</span>
-                  <span className="org-badge">Coming soon</span>
-                </div>
-              ),
-            )}
+            {live.map((org) => (
+              <Link key={org.slug} className="org-item" href={`/sso/${org.slug}${q}`}>
+                <strong>{org.short}</strong>
+                <span className="org-muted" style={{ margin: 0 }}>{org.name}</span>
+                <span className="org-badge live">Live</span>
+              </Link>
+            ))}
           </div>
         </section>
         <p className="org-muted" style={{ textAlign: "center" }}>

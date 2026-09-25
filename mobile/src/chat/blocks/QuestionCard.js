@@ -75,7 +75,7 @@ export default function QuestionCard({ block, onSend }) {
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.cardButton, borderColor: colors.accent }]}>
+    <View style={[styles.card, { backgroundColor: colors.cardButton }]}>
       {questions.map((q) => (
         <View key={q.id} style={styles.question}>
           <View style={styles.titleRow}>
@@ -119,7 +119,7 @@ export default function QuestionCard({ block, onSend }) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: Radius.md, padding: 14, gap: 14, borderWidth: 1, borderColor: 'transparent', marginVertical: 4 },
+  card: { borderRadius: Radius.md, padding: 14, gap: 14, marginVertical: 4 },
   question: { gap: 8 },
   titleRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
   option: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: Radius.md },

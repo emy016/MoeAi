@@ -2,7 +2,7 @@ import "server-only";
 import { parseContext, sessionBlock, type BrainContext } from "./context";
 import { providerKeys } from "../keys";
 import { streamGemini, ProvidersUnavailable, type GeminiContent, type GeminiPart } from "../ai/gemini";
-import { conversationLanguage, detectLanguage, type LanguageDecision } from "../emy/language";
+import { conversationLanguage, detectLanguage, gatherEvidence, FRANCO_TARGETS, MIXED_TARGETS, TARGETS, type LanguageDecision, type Target } from "../emy/language";
 import { detectSignals } from "../emy/signals";
 import { loadRegistry, validateRegistry, MODULE_ORDER } from "../emy/specs";
 import { buildSystemPrompt } from "../emy/prompt";
@@ -62,6 +62,17 @@ export function resolveLanguage(messages: ChatMessage[], hint?: string): Languag
   const current = users[users.length - 1] ?? "";
   const previous = conversationLanguage(users.slice(0, -1)) ?? (hint?.toLowerCase().includes("arabic") ? "ar" : null);
   return detectLanguage(current, previous);
+}
+
+/**
+ * A reply language the app sets outright (Talk Back uses the app's language).
+ * Only single, spoken languages: never Franco and never a mixture.
+ */
+export function voiceLanguage(requested: unknown, messages: ChatMessage[]): LanguageDecision | null {
+  const target = String(requested ?? "").toLowerCase() as Target;
+  if (!TARGETS.includes(target) || FRANCO_TARGETS.has(target) || MIXED_TARGETS.has(target)) return null;
+  const current = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  return { target, source: "explicit", decisive: true, evidence: gatherEvidence(current), note: "the app asked for its own language (voice)" };
 }
 
 function systemFor(turn: Turn, decision: LanguageDecision, budgetTokens: number, referenceCounts = false) {

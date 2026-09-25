@@ -60,6 +60,8 @@ for (const [message, previous, expected] of DETECTION) {
 
 const EXPLICIT: [string, Target | null][] = [
   ["Answer in English.", EN], ["رد بالعربي", AR], ["جاوب بالفرانكو", FRANCO], ["can you explain in franco", FRANCO], ["What is a pointer?", null],
+  ["Reply in Spanish only. Never use Franco-Arabic (Arabic in Latin letters).", "es"], ["Reply in French only.", "fr"], ["Reply in German only.", "de"],
+  ["Reply in Chinese only.", "zh"], ["Reply in Hindi only.", "hi"], ["Reply in Arabic (Modern Standard, Arabic script) only. Never use Franco-Arabic.", AR],
 ];
 for (const [message, expected] of EXPLICIT) check(`explicit ${JSON.stringify(message)}`, explicitLanguageRequest(message) === expected);
 

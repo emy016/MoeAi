@@ -19,7 +19,7 @@
  * Failures before the stream starts are a normal JSON body with a 4xx/5xx.
  */
 import { NextRequest, after } from "next/server";
-import { resolveLanguage, streamReply } from "@/lib/moeai/brain";
+import { resolveLanguage, streamReply, voiceLanguage } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { surfaceGuide } from "@/lib/moeai/surface";
@@ -246,7 +246,8 @@ export async function POST(req: NextRequest) {
   // ── Reply in the language they actually wrote in ───────────────────────
   // Decided here, from the student's own messages, exactly as the Telegram
   // bot decides it; the directive goes last in the prompt (lib/emy).
-  const language = resolveLanguage(messages, context.profile.language);
+  // Talk Back asks for the app's language outright (a voice cannot read Franco).
+  const language = voiceLanguage((raw as { replyLanguage?: unknown })?.replyLanguage, messages) ?? resolveLanguage(messages, context.profile.language);
 
   // ── Stream ────────────────────────────────────────────────────────────
   const controller = new AbortController();

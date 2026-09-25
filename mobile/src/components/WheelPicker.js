@@ -10,8 +10,14 @@
  * enlarged numbers in the center band follow the scroll position on every
  * frame (the native driver is not available on the web, so it is only used on
  * phones).
+ *
+ * Both layers are windowed around the row passing the center: the muted list
+ * keeps a stretch of rows either side (spacers hold the rest of the height)
+ * and the bright band keeps that row and four neighbors on each side, so a
+ * long year list never mounts hundreds of text nodes while every number that
+ * slides through the band is still drawn, cropped by its edges.
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { usePreferences } from '../context/AppPreferences';
 
@@ -21,6 +27,8 @@ const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CENTER_TOP = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 const WEB = Platform.OS === 'web';
 const SETTLE_MS = 110;
+const BAND_WINDOW = 4;
+const LIST_WINDOW = 14;
 
 function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
   const { colors, type } = usePreferences();
@@ -32,6 +40,12 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
   const touching = useRef(false);
   const settleTimer = useRef(null);
   const programmatic = useRef(false);
+  const [center, setCenter] = useState(() => indexOf(value));
+  const centerRef = useRef(center);
+  const follow = useCallback((y) => {
+    const index = Math.max(0, Math.min(items.length - 1, Math.round(y / ITEM_HEIGHT)));
+    if (index !== centerRef.current) { centerRef.current = index; setCenter(index); }
+  }, [items.length]);
 
   const scrollTo = useCallback((index, animated) => {
     programmatic.current = true;
@@ -58,8 +72,9 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
     if (touching.current) return;
     offset.current = index * ITEM_HEIGHT;
     scrollY.setValue(offset.current);
+    follow(offset.current);
     requestAnimationFrame(() => scrollTo(index, false));
-  }, [indexOf, scrollTo, scrollY, value]);
+  }, [follow, indexOf, scrollTo, scrollY, value]);
 
   useEffect(() => () => clearTimeout(settleTimer.current), []);
 
@@ -67,11 +82,18 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
     useNativeDriver: !WEB,
     listener: (event) => {
       offset.current = event.nativeEvent.contentOffset.y;
+      follow(offset.current);
       if (!WEB || programmatic.current) return;
       clearTimeout(settleTimer.current);
       settleTimer.current = setTimeout(settle, SETTLE_MS);
     },
   });
+
+  const clampIndex = (i) => Math.max(0, Math.min(items.length - 1, i));
+  const listFrom = clampIndex(center - LIST_WINDOW);
+  const listTo = clampIndex(center + LIST_WINDOW);
+  const bandFrom = clampIndex(center - BAND_WINDOW);
+  const bandTo = clampIndex(center + BAND_WINDOW);
 
   return (
     <View style={[styles.picker, { flex }]} accessibilityRole="adjustable" accessibilityLabel={accessibilityLabel} accessibilityValue={{ text: String(items[committed.current]?.label ?? '') }}>
@@ -91,7 +113,8 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
         onLayout={() => scrollTo(indexOf(value), false)}
         nestedScrollEnabled
       >
-        {items.map((item, index) => (
+        <View style={{ height: listFrom * ITEM_HEIGHT }} />
+        {items.slice(listFrom, listTo + 1).map((item, i) => { const index = listFrom + i; return (
           <Pressable
             key={String(item.value)}
             onPress={() => { offset.current = index * ITEM_HEIGHT; scrollTo(index, true); settle(); }}
@@ -101,13 +124,14 @@ function WheelPicker({ items, value, onChange, accessibilityLabel, flex = 1 }) {
           >
             <Text numberOfLines={1} style={[styles.baseText, { color: colors.textMuted }, type(14, 'bold', 18)]}>{item.label}</Text>
           </Pressable>
-        ))}
+        ); })}
+        <View style={{ height: (items.length - 1 - listTo) * ITEM_HEIGHT }} />
       </Animated.ScrollView>
       {/* Every label is drawn in the band too and slides with the scroll, so a number enlarges as it enters the center. */}
       <View pointerEvents="none" style={[styles.centerMask, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Animated.View style={{ transform: [{ translateY: Animated.multiply(scrollY, -1) }] }}>
-          {items.map((item) => (
-            <Text key={String(item.value)} numberOfLines={1} style={[{ color: colors.textPrimary }, type(19, 'bold', 23), styles.selectedText]}>{item.label}</Text>
+          {items.slice(bandFrom, bandTo + 1).map((item, i) => (
+            <Text key={String(item.value)} numberOfLines={1} style={[{ color: colors.textPrimary }, type(19, 'bold', 23), styles.selectedText, { top: (bandFrom + i) * ITEM_HEIGHT }]}>{item.label}</Text>
           ))}
         </Animated.View>
       </View>
@@ -125,5 +149,5 @@ const styles = StyleSheet.create({
   item: { height: ITEM_HEIGHT, alignItems: 'center', justifyContent: 'center' },
   baseText: { opacity: 0.58, transform: [{ scale: 0.8 }], textAlign: 'center' },
   centerMask: { position: 'absolute', left: 0, right: 0, top: CENTER_TOP, height: ITEM_HEIGHT, overflow: 'hidden', borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth },
-  selectedText: { height: ITEM_HEIGHT, lineHeight: ITEM_HEIGHT, textAlign: 'center', textAlignVertical: 'center', includeFontPadding: false },
+  selectedText: { position: 'absolute', left: 0, right: 0, height: ITEM_HEIGHT, lineHeight: ITEM_HEIGHT, textAlign: 'center', textAlignVertical: 'center', includeFontPadding: false },
 });

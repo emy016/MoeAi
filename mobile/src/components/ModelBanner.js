@@ -23,7 +23,7 @@ export default function ModelBanner({ subjects, onOpenSubject }) {
   if (!label || !orgCourses.length) return null;
   const align = { textAlign: isRTL ? 'right' : 'left' };
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colorWithAlpha(colors.accent, 0.35) }]} accessibilityRole="summary">
+    <View style={[styles.card, { backgroundColor: colors.card }]} accessibilityRole="summary">
       <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <View style={[styles.mark, { backgroundColor: colorWithAlpha(colors.accent, 0.16) }]}><CheckBadgeIcon size={22} color={colors.accent} /></View>
         <View style={styles.text}>
@@ -51,7 +51,7 @@ export default function ModelBanner({ subjects, onOpenSubject }) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, borderWidth: 1 },
+  card: { borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md },
   row: { alignItems: 'center', gap: 10 },
   mark: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, minWidth: 0 },

@@ -202,7 +202,7 @@ function Sources({ items }) {
         ))}
       </View>
       {open >= 0 && items[open]?.excerpt ? (
-        <Text style={[styles.sourceExcerpt, { color: colors.textSecondary, borderColor: colors.border, textAlign: isRTL ? 'right' : 'left' }, type(12, 'regular', 17)]}>{items[open].excerpt}…</Text>
+        <Text style={[styles.sourceExcerpt, { color: colors.textSecondary, backgroundColor: colors.cardButton, textAlign: isRTL ? 'right' : 'left' }, type(12, 'regular', 17)]}>{items[open].excerpt}…</Text>
       ) : null}
     </View>
   );
@@ -618,13 +618,15 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const stopReplying = useCallback(() => { if (threadId) onStop?.(threadId); }, [onStop, threadId]);
   const regenerate = useCallback(() => { if (threadId && !replying) onRegenerate?.(threadId); }, [onRegenerate, replying, threadId]);
   // Follow-ups and "fix it" requests send on their own, leaving the draft alone.
-  const sendText = useCallback((text) => {
+  const sendText = useCallback((text, { replyLanguage } = {}) => {
     const clean = String(text || '').trim();
     if (replying || !clean) return;
     const targetId = threadId || onStartChat();
     if (!threadId) setThreadId(targetId);
-    onSend(targetId, { text: clean, files: [] });
+    onSend(targetId, { text: clean, files: [], ...(replyLanguage ? { replyLanguage } : {}) });
   }, [onSend, onStartChat, replying, threadId]);
+  // Talk Back answers in the app's language, never Franco: a voice cannot read Arabic in Latin letters.
+  const sendVoice = useCallback((text) => sendText(text, { replyLanguage: language }), [language, sendText]);
 
   // Studio's audio overview is read aloud as soon as MoeAI finishes writing it.
   const speakNext = useRef(false); // false, or the message count when the audio overview was asked for
@@ -970,7 +972,7 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
           </Animated.View>
         </KeyboardAvoidingView>
       </Animated.View>
-      <VoiceMode visible={voiceOpen} messages={messages} onSend={sendText} onClose={() => setVoiceOpen(false)} title={lecture?.title} />
+      <VoiceMode visible={voiceOpen} messages={messages} onSend={sendVoice} onClose={() => setVoiceOpen(false)} title={lecture?.title} />
       {lecture?.materialId ? <LectureReader visible={readerOpen} materialId={lecture.materialId} title={lecture.title} onClose={() => setReaderOpen(false)} onAsk={askAboutPage} /> : null}
       <ChatAttachmentPreview visible={!!preview} attachments={preview?.attachments || []} initialIndex={preview?.index || 0} onClose={() => setPreview(null)} />
       <SubjectEditorModal visible={!!renameTarget} title={t('renameChat')} initialValue={renameTarget?.title || ''} placeholder={t('chatName')} onCancel={() => setRenameTarget(null)} onConfirm={saveRename} />
@@ -1001,7 +1003,7 @@ const styles = StyleSheet.create({
   followUps: { flexWrap: 'wrap', gap: 6, marginTop: 8 },
   followUp: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
   sources: { marginTop: 6, marginBottom: 2, marginHorizontal: 4 },
-  sourceExcerpt: { marginTop: 6, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
+  sourceExcerpt: { marginTop: 6, padding: 10, borderRadius: Radius.md, overflow: 'hidden' },
   root: { flex: 1 },
   header: { minHeight: 72, paddingHorizontal: Spacing.md, paddingBottom: 9, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   headerButton: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },

@@ -26,7 +26,7 @@ export default React.memo(function PhetCard({ block, onAsk }) {
 
   if (!block.closed || !spec || !url) {
     return (
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, padding: 14 }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, padding: 14 }]}>
         <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>{block.closed ? t('phetUnknown') : t('blockBuilding', { what: t('blockPhet').toLowerCase() })}</Text>
       </View>
     );
@@ -39,7 +39,7 @@ export default React.memo(function PhetCard({ block, onAsk }) {
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <View style={[styles.card, { backgroundColor: colors.card }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View style={styles.titleRow}>
           <BeakerIcon size={16} color={colors.accent} />
@@ -94,7 +94,7 @@ export default React.memo(function PhetCard({ block, onAsk }) {
 });
 
 const styles = StyleSheet.create({
-  card: { width: '100%', borderRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden', marginVertical: 6 },
+  card: { width: '100%', borderRadius: Radius.md, overflow: 'hidden', marginVertical: 6 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingHorizontal: 10, paddingVertical: 6, borderBottomWidth: StyleSheet.hairlineWidth },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
