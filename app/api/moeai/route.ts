@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
   // ── Reply in the language they actually wrote in ───────────────────────
   // Decided here, from the student's own messages, exactly as the Telegram
   // bot decides it; the directive goes last in the prompt (lib/emy).
-  // Talk Back asks for the app's language outright (a voice cannot read Franco).
+  // The app may ask for its own language outright (never Franco or a mixture).
   const language = voiceLanguage((raw as { replyLanguage?: unknown })?.replyLanguage, messages) ?? resolveLanguage(messages, context.profile.language);
 
   // ── Stream ────────────────────────────────────────────────────────────

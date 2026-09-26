@@ -85,7 +85,7 @@ export default function Legal() {
           OpenRouter) to generate a reply. Their handling is governed by their own terms.
         </p>
         <p>
-          <strong>Voice.</strong> Voice mode and read-aloud use the speech features
+          <strong>Dictation.</strong> Speech to text uses the speech recognition
           built into your browser or phone. MoeAI receives only the text. Some browsers
           (for example Chrome) send audio to their own speech service to transcribe it;
           that is governed by the browser&rsquo;s terms.

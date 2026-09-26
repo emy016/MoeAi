@@ -267,7 +267,7 @@ void main() { gl_FragColor = vec4(uColor.rgb * uColor.a, uColor.a); }`;
 
       // ─── CS "cards": drawn on <canvas>, used as GL textures ───
       // No photos on hand yet, so the gallery nodes carry equations /
-      // snippets from the actual FUE curriculum instead of images.
+      // snippets from the actual course curriculum instead of images.
       function drawCard(w, h, accent, title, lines, mono) {
         const c = document.createElement('canvas');
         c.width = w; c.height = h;

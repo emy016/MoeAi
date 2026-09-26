@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | EduMoe",
   },
   description:
-    "A focused learning home for FUE Computer Science students, powered by curriculum-aware AI.",
+    "A focused learning home for Computer Science students, powered by curriculum-aware AI.",
 };
 
 export const viewport: Viewport = {

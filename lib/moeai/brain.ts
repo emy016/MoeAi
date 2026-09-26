@@ -65,7 +65,7 @@ export function resolveLanguage(messages: ChatMessage[], hint?: string): Languag
 }
 
 /**
- * A reply language the app sets outright (Talk Back uses the app's language).
+ * A reply language the app sets outright (e.g. the app's own language).
  * Only single, spoken languages: never Franco and never a mixture.
  */
 export function voiceLanguage(requested: unknown, messages: ChatMessage[]): LanguageDecision | null {

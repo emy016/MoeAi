@@ -21,13 +21,11 @@ import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Bars3Icon, CameraIcon, ClipboardDocumentIcon as SolidClipboardDocumentIcon, DocumentIcon, MicrophoneIcon, PaperAirplaneIcon, PaperClipIcon, PencilIcon, PencilSquareIcon, PhotoIcon, PlusIcon, StopIcon, TrashIcon, XMarkIcon } from 'react-native-heroicons/solid';
-import { ArrowPathIcon, BookOpenIcon, ClipboardDocumentIcon as OutlineClipboardDocumentIcon, HandThumbDownIcon, HandThumbUpIcon, PencilIcon as OutlinePencilIcon, SpeakerWaveIcon, StopCircleIcon } from 'react-native-heroicons/outline';
+import { ArrowPathIcon, BookOpenIcon, ClipboardDocumentIcon as OutlineClipboardDocumentIcon, HandThumbDownIcon, HandThumbUpIcon, PencilIcon as OutlinePencilIcon } from 'react-native-heroicons/outline';
 import { HandThumbDownIcon as SolidThumbDown, HandThumbUpIcon as SolidThumbUp, SparklesIcon } from 'react-native-heroicons/solid';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useHoldToDictate from '../chat/useHoldToDictate';
-import VoiceMode from '../chat/VoiceMode';
 import LectureReader from '../chat/LectureReader';
-import { speak as speakAloud, stop as stopSpeaking } from '../chat/speech';
 import { API_BASE_URL, visibleText } from '../ai/client';
 import { usePersonal } from '../personal/PersonalContext';
 import { modelLabel, useAccount } from '../account/AccountContext';
@@ -208,15 +206,6 @@ function Sources({ items }) {
   );
 }
 
-/** Four bars: the voice-mode button, as in the chat bars students already know. */
-function Waveform({ color }) {
-  return (
-    <View style={styles.wave} pointerEvents="none">
-      {[9, 16, 12, 7].map((h, i) => <View key={i} style={[styles.waveBar, { height: h, backgroundColor: color }]} />)}
-    </View>
-  );
-}
-
 function IconAction({ onPress, label, children }) {
   return (
     <Pressable hitSlop={8} onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.iconAction}>{children}</Pressable>
@@ -273,7 +262,7 @@ function MemoryChip({ items }) {
   );
 }
 
-const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, isLastUser, canEdit, onRegenerate, onFix, onFollowUp, speaking, onSpeak, onFeedback, onEdit }) {
+const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, isLast, isLastUser, canEdit, onRegenerate, onFix, onFollowUp, onFeedback, onEdit }) {
   const { colors, type, isRTL, motion, t } = usePreferences();
   const { width } = useWindowDimensions();
   const user = message.role === 'user';
@@ -352,11 +341,6 @@ const ChatBubble = React.memo(function ChatBubble({ message, onPreview, onCopy, 
           <View style={[styles.replyActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {message.status !== 'failed' ? <CopyFeedback text={message.text} onCopy={onCopy} /> : null}
             {message.status !== 'failed' ? (
-              <IconAction onPress={() => onSpeak(message)} label={speaking ? t('stopReading') : t('readAloud')}>
-                {speaking ? <StopCircleIcon size={COPY_ICON_SIZE + 1} color={colors.accent} /> : <SpeakerWaveIcon size={COPY_ICON_SIZE} color={colors.textMuted} />}
-              </IconAction>
-            ) : null}
-            {message.status !== 'failed' ? (
               <IconAction onPress={() => onFeedback(message, message.feedback === 1 ? 0 : 1)} label={t('goodAnswer')}>
                 {message.feedback === 1 ? <SolidThumbUp size={COPY_ICON_SIZE} color={colors.accent} /> : <HandThumbUpIcon size={COPY_ICON_SIZE} color={colors.textMuted} />}
               </IconAction>
@@ -420,13 +404,10 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const [pendingAttachments, setPendingAttachments] = useState([]);
   const [attachmentOpen, setAttachmentOpen] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [micHeld, setMicHeld] = useState(false);
   const [navigatorUnlocked, setNavigatorUnlocked] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [webInputHeight, setWebInputHeight] = useState(40);
-  const [speakingId, setSpeakingId] = useState(null);
   const [editing, setEditing] = useState(null);
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
   const { account } = useAccount();
   const model = modelLabel(account);
@@ -491,8 +472,8 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
 
   useEffect(() => {
     micProgress.stopAnimation();
-    Animated.spring(micProgress, { toValue: listening || micHeld ? 1 : 0, stiffness: 380, damping: 24, mass: 0.52, useNativeDriver: true, isInteraction: false }).start();
-  }, [listening, micHeld, micProgress]);
+    Animated.spring(micProgress, { toValue: listening ? 1 : 0, stiffness: 380, damping: 24, mass: 0.52, useNativeDriver: true, isInteraction: false }).start();
+  }, [listening, micProgress]);
 
   useEffect(() => {
     navigatorProgress.stopAnimation();
@@ -578,8 +559,6 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const dismiss = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
-    stopSpeaking();
-    setSpeakingId(null);
     setHistoryOpen(false);
     Animated.parallel([
       Animated.timing(drawerProgress, { toValue: 0, duration: motion ? 100 : 0, useNativeDriver: true, isInteraction: false }),
@@ -625,16 +604,10 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
     if (!threadId) setThreadId(targetId);
     onSend(targetId, { text: clean, files: [], ...(replyLanguage ? { replyLanguage } : {}) });
   }, [onSend, onStartChat, replying, threadId]);
-  // Talk Back answers in the app's language, never Franco: a voice cannot read Arabic in Latin letters.
-  const sendVoice = useCallback((text) => sendText(text, { replyLanguage: language }), [language, sendText]);
-
-  // Studio's audio overview is read aloud as soon as MoeAI finishes writing it.
-  const speakNext = useRef(false); // false, or the message count when the audio overview was asked for
-  const sendStudio = useCallback((text, { speak } = {}) => {
+  const sendStudio = useCallback((text) => {
     setAttachmentOpen(false);
-    speakNext.current = speak ? messages.length : false;
     sendText(text);
-  }, [messages.length, sendText]);
+  }, [sendText]);
 
   const sendFromComposer = useCallback(() => {
     if (replying) return;
@@ -677,19 +650,6 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
   const removePending = useCallback((id) => setPendingAttachments((current) => current.filter((item) => item.id !== id)), []);
   const openPreview = useCallback((attachments, index) => setPreview({ attachments, index }), []);
   const copyMessage = useCallback((text) => Clipboard.setStringAsync(visibleText(text)).catch(() => {}), []);
-  const speakMessage = useCallback((message) => {
-    if (speakingId === message.id) { stopSpeaking(); setSpeakingId(null); return; }
-    setSpeakingId(message.id);
-    speakAloud(message.text, { language, onDone: () => setSpeakingId((id) => (id === message.id ? null : id)) });
-  }, [language, speakingId]);
-  useEffect(() => () => stopSpeaking(), []);
-  useEffect(() => {
-    const last = messages[messages.length - 1];
-    if (speakNext.current === false || messages.length <= speakNext.current || !last || last.role !== 'assistant' || last.status !== 'complete' || !last.text) return;
-    speakNext.current = false;
-    setSpeakingId(last.id);
-    speakAloud(last.text, { language, onDone: () => setSpeakingId((id) => (id === last.id ? null : id)) });
-  }, [language, messages]);
   const rateMessage = useCallback((message, rating) => {
     if (!threadId) return;
     onFeedback?.(threadId, message.id, rating);
@@ -777,12 +737,10 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
       onRegenerate={regenerate}
       onFix={sendText}
       onFollowUp={sendText}
-      speaking={speakingId === item.id}
-      onSpeak={speakMessage}
       onFeedback={rateMessage}
       onEdit={startEdit}
     />
-  ), [copyMessage, lastId, lastUserId, onEditResend, openPreview, rateMessage, regenerate, replying, sendText, speakMessage, speakingId, startEdit]);
+  ), [copyMessage, lastId, lastUserId, onEditResend, openPreview, rateMessage, regenerate, replying, sendText, startEdit]);
   const renderNavigatorMessage = useCallback(({ item }) => (
     <ElasticPressable shape="pill" onPress={() => jumpToMessage(item)}>
       <View style={[styles.navigatorMessage, { backgroundColor: colors.cardButton }]}><Text numberOfLines={2} style={[{ color: colors.textSecondary, textAlign: isRTL ? 'right' : 'left' }, type(10, 'semiBold', 14)]}>{item.text || item.files?.map((file) => file.name).join(', ') || t('attachment')}</Text></View>
@@ -905,9 +863,13 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
                 <ElasticPressable shape="circle" onPress={stopReplying} accessibilityRole="button" accessibilityLabel={t('stopReply')}>
                   <View style={[styles.sendButton, { backgroundColor: colors.accent }]}><StopIcon size={18} color={colors.background} /></View>
                 </ElasticPressable>
-              ) : !draft.trim() && !pendingAttachments.length && !editing ? (
-                <ElasticPressable shape="circle" onPress={() => { stopSpeaking(); setSpeakingId(null); setVoiceOpen(true); }} accessibilityRole="button" accessibilityLabel={t('voiceMode')}>
-                  <View style={[styles.sendButton, { backgroundColor: colors.accent }]}><Waveform color={colors.background} /></View>
+              ) : listening || (!draft.trim() && !pendingAttachments.length && !editing) ? (
+                // Speech to text only: tap to dictate into the box, tap again to stop. Nothing is read aloud.
+                <ElasticPressable shape="circle" onPress={() => { if (listening) stopDictation(); else startDictation(); }} accessibilityRole="button" accessibilityState={{ selected: listening }} accessibilityLabel={listening ? t('stopDictation') : t('dictate')}>
+                  <View style={[styles.sendButton, { backgroundColor: colors.accent }]}>
+                    <Animated.View pointerEvents="none" style={[styles.micFill, { backgroundColor: colors.background, opacity: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0, 0.28] }), transform: [{ scale: micProgress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] }]} />
+                    {listening ? <StopIcon size={18} color={colors.background} /> : <MicrophoneIcon size={19} color={colors.background} />}
+                  </View>
                 </ElasticPressable>
               ) : (
                 <ElasticPressable
@@ -972,7 +934,6 @@ export default function LectureChatScreen({ visible, subject, lecture, threads, 
           </Animated.View>
         </KeyboardAvoidingView>
       </Animated.View>
-      <VoiceMode visible={voiceOpen} messages={messages} onSend={sendVoice} onClose={() => setVoiceOpen(false)} title={lecture?.title} />
       {lecture?.materialId ? <LectureReader visible={readerOpen} materialId={lecture.materialId} title={lecture.title} onClose={() => setReaderOpen(false)} onAsk={askAboutPage} /> : null}
       <ChatAttachmentPreview visible={!!preview} attachments={preview?.attachments || []} initialIndex={preview?.index || 0} onClose={() => setPreview(null)} />
       <SubjectEditorModal visible={!!renameTarget} title={t('renameChat')} initialValue={renameTarget?.title || ''} placeholder={t('chatName')} onCancel={() => setRenameTarget(null)} onConfirm={saveRename} />
@@ -988,8 +949,6 @@ const styles = StyleSheet.create({
   iconAction: { padding: 3, marginTop: 4 },
   editButton: { alignSelf: 'flex-end', alignItems: 'center', gap: 4, marginTop: 4, marginHorizontal: 4, padding: 2 },
   editingBar: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: Radius.md, paddingHorizontal: 12, paddingVertical: 8, marginBottom: 6 },
-  wave: { flexDirection: 'row', alignItems: 'center', gap: 2.5, height: 18 },
-  waveBar: { width: 3, borderRadius: 2 },
   empty: { alignItems: 'center', paddingHorizontal: Spacing.md, maxWidth: 560, gap: 10 },
   emptyMark: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   emptyTitle: { textAlign: 'center' },

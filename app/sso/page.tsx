@@ -15,7 +15,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
   const q = next ? `?next=${encodeURIComponent(safeNext(next))}` : "";
   // No university picker with "coming soon" rows: while one university is live, go straight to its sign-in.
   const live = ORGS.filter((org) => org.live);
-  if (live.length === 1) redirect(`/sso/${live[0].slug}${q}`);
+  if (live.length === 1) redirect(`/sso/${live[0].path}${q}`);
   return (
     <main className="org-page">
       <div className="org-wrap">
@@ -29,7 +29,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
           </div>
           <div className="org-list">
             {live.map((org) => (
-              <Link key={org.slug} className="org-item" href={`/sso/${org.slug}${q}`}>
+              <Link key={org.slug} className="org-item" href={`/sso/${org.path}${q}`}>
                 <strong>{org.short}</strong>
                 <span className="org-muted" style={{ margin: 0 }}>{org.name}</span>
                 <span className="org-badge live">Live</span>

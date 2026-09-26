@@ -8,7 +8,7 @@ switched on outside the code.
 ```
 /start ─ Student ─ Sign up / Sign in (email or phone + password, Google, Apple)
        │            └─ verify email → profile (handle, consent) → part of an organization?
-       │                 ├─ yes → /start/find → SSO (demo for FUE, SAML, or invitation) → /start/access
+       │                 ├─ yes → /start/find → SSO (demo university, SAML, or invitation) → /start/access
        │                 └─ no  → /start/plans (Free / Monthly / Yearly)
        └─ Organization ─ Start one → plans → information → setup → /org/admin
                          └─ Part of one → /start/find → SSO → access

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { orgBySlug } from "@/lib/orgs";
 import Client from "./Client";
 import { safeNext } from "@/lib/auth/next";
@@ -12,5 +12,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const [{ org: slug }, { next }] = await Promise.all([params, searchParams]);
   const org = orgBySlug(slug);
   if (!org || !org.live) notFound();
-  return <Client org={{ slug: org.slug, name: org.name, short: org.short, idLabel: org.idLabel, programs: org.programs }} next={safeNext(next)} />;
+  // Old links used the internal key; the public address names no university.
+  if (slug.toLowerCase() !== org.path) redirect(`/sso/${org.path}${next ? `?next=${encodeURIComponent(safeNext(next))}` : ""}`);
+  return <Client org={{ path: org.path, idLabel: org.idLabel }} next={safeNext(next)} />;
 }

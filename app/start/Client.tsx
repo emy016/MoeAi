@@ -687,13 +687,13 @@ function FindOrg({ me, next, withNext, router }: ScreenProps) {
     else router.push(`/start/signin?next=${encodeURIComponent(accessPath(org))}`);
   };
   return (
-    <Card title="Find your organization" subtitle="Search by name or by its email domain (for example fue.edu.eg)." back={() => router.push(withNext(me?.signedIn ? "/start/affiliation" : "/start"))}>
+    <Card title="Find your organization" subtitle="Search by name or by its email domain (for example uni.edu.eg)." back={() => router.push(withNext(me?.signedIn ? "/start/affiliation" : "/start"))}>
       <div className="org-form">
         <label className="st-field" htmlFor="fo-q">
           <span className="sr-only">Organization</span>
           <div style={{ position: "relative" }}>
             <Search size={16} aria-hidden="true" style={{ position: "absolute", insetInlineStart: 12, top: "50%", transform: "translateY(-50%)", color: "var(--muted)" }} />
-            <input id="fo-q" className="org-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Future University, fue.edu.eg…" autoFocus style={{ paddingInlineStart: 36 }} />
+            <input id="fo-q" className="org-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="University name or uni.edu.eg…" autoFocus style={{ paddingInlineStart: 36 }} />
           </div>
         </label>
         <div aria-live="polite">

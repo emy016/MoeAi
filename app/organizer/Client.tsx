@@ -241,7 +241,7 @@ export default function Client() {
               {me.signedIn ? "This account does not teach any course yet. Ask your faculty admin to add you as course staff." : "Sign in with your university staff account to continue."}
             </p>
             <div className="org-row" style={{ marginTop: 14 }}>
-              <Link className="org-btn" href="/sso/fue?next=/organizer">Sign in as FUE staff</Link>
+              <Link className="org-btn" href="/sso/university?next=/organizer">Sign in as university staff</Link>
               <Link className="org-btn ghost" href="/moeai">Student app</Link>
             </div>
           </section>

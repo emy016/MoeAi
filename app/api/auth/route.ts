@@ -33,7 +33,7 @@ export async function GET() {
   return Response.json({
     signedIn: true,
     // A university account's address is internal; show the university ID instead.
-    email: org ? `${org.externalId} · ${org.orgName}` : user.email,
+    email: org ? String(org.externalId) : user.email,
     name: profile?.display_name || org?.displayName || user.email?.split("@")[0] || "Student",
     handle: profile?.handle ?? null,
     onboarded: Boolean(org || profile?.onboarding_completed_at),

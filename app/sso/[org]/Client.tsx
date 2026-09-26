@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 
-type Org = { slug: string; name: string; short: string; idLabel: string; programs: { name: string; live: boolean }[] };
+type Org = { path: string; idLabel: string };
 
 export default function Client({ org, next }: { org: Org; next: string }) {
   const [id, setId] = useState("");
@@ -26,7 +26,7 @@ export default function Client({ org, next }: { org: Org; next: string }) {
       const res = await fetch("/api/sso", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ org: org.slug, id, password }),
+        body: JSON.stringify({ org: org.path, id, password }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "Sign-in failed. Try again.");
@@ -45,14 +45,14 @@ export default function Client({ org, next }: { org: Org; next: string }) {
           <div className="org-head">
             <Logo size={40} />
             <div>
-              <h1>{org.short} sign-in</h1>
-              <p>{org.name} · {org.programs.filter((p) => p.live).map((p) => p.name).join(", ")}</p>
+              <h1>University sign-in</h1>
+              <p>MoeAI demo accounts only.</p>
             </div>
           </div>
           <form className="org-form" onSubmit={submit}>
             <label>
               {org.idLabel}
-              <input className="org-input" inputMode="text" autoComplete="username" required value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. 20251938" />
+              <input className="org-input" inputMode="text" autoComplete="username" required value={id} onChange={(e) => setId(e.target.value)} placeholder="Your demo ID" />
             </label>
             <label>
               Password
@@ -63,9 +63,7 @@ export default function Client({ org, next }: { org: Org; next: string }) {
           </form>
         </section>
         <p className="org-demo">
-          <strong>MoeAI demo sign-in.</strong> This page is run by MoeAI, not by {org.short}, and only accepts the demo
-          accounts MoeAI issued for this pilot. Do not enter your real university password here. When {org.short} connects
-          its own single sign-on, this step moves to the university&apos;s login page.
+          <strong>Demo sign-in.</strong> Do not enter your real university ID or password here.
         </p>
       </div>
     </main>

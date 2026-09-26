@@ -12,7 +12,7 @@ MoeAI is a curriculum-aware AI tutor for Egyptian university students. It teache
 in Egyptian Arabic, Franco-Arabic or English, from the student's actual syllabus.
 
 ### 2 — Problem
-Mariam, first year CS at FUE, opens a general AI to revise physics. It explains
+Mariam, first-year CS student, opens a general AI to revise physics. It explains
 Newtonian motion, in formal English, with American examples. Her course covers
 electrodynamics. She loses an hour, closes the tab, and crams the night before.
 
@@ -20,7 +20,7 @@ electrodynamics. She loses an hour, closes the tab, and crams the night before.
 do not have is her syllabus.
 
 ### 3 — User
-- **User:** Mariam, 18, first-year CS at FUE
+- **User:** Mariam, 18, first-year CS student
 - **Beneficiary:** her cohort — roughly 120 students
 - **Buyer:** free for students; the university, via pilot
 - **Approver:** one professor sponsoring that pilot
@@ -56,7 +56,7 @@ the market does this for Egyptian students.
 - **Target:** 230 → 400 students by end of semester
 
 ### 9 — Adoption
-Beachhead: FUE first-year CS, already reached. Path: student → classmate →
+Beachhead: our first-year CS community, already reached. Path: student → classmate →
 professor champion → department. Model: free for students, institution pays per
 active cohort. Library Mode lets any faculty upload its own material.
 

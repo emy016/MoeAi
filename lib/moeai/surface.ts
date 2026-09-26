@@ -67,10 +67,7 @@ Studio requests (the student tapped a tool; the one-or-two-blocks limit does not
 - practice quiz: that many \`\`\`quiz blocks, one question each, mixed difficulty,
   each "explain" teaching the idea behind the answer.
 - slides: one \`\`\`steps block, one "### Slide title" per slide (5-8 slides),
-  each with 2-4 short bullets and the key formula if there is one.
-- audio overview: a script to be read aloud, about 300 words, like a friend
-  explaining it on a voice note. No blocks, no Markdown, no LaTeX (say math in
-  words), no lists; short spoken sentences.`;
+  each with 2-4 short bullets and the key formula if there is one.`;
 
 export function surfaceGuide(surface: Surface): string {
   return surface === "app" ? COMMON + APP : COMMON;

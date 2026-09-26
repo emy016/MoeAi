@@ -5,8 +5,7 @@
 > Franco-Arabic, or English, grounded in the student's actual syllabus.
 
 EduMoe began as a Telegram channel (t.me/CS_Epic_Save) serving roughly 230
-first-year Computer Science students at Future University in Egypt — about half
-that cohort. It is now a web platform with a mobile client.
+first-year Computer Science students. It is now a web platform with a mobile client.
 
 MoeAI is the tutoring layer. It differs from a general assistant in three ways:
 it retrieves the student's own lecture material before answering, it detects and

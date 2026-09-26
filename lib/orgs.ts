@@ -1,12 +1,14 @@
 /**
- * The universities and schools MoeAI signs students in through.
+ * The university sign-in MoeAI runs for its pilot.
  *
- * Public on purpose: the sign-in picker is shown before anyone is signed in,
- * when RLS hides the organizations table. `live` ones have courses loaded;
- * the rest are the rollout, shown so a student sees theirs is coming.
+ * Public on purpose: the sign-in page is shown before anyone is signed in,
+ * when RLS hides the organizations table. No university is named anywhere a
+ * student sees: `path` is the public address (/sso/university) and `slug` is
+ * the internal key the demo accounts were issued under.
  */
 export type OrgEntry = {
   slug: string;
+  path: string;
   name: string;
   short: string;
   kind: "university" | "school";
@@ -17,17 +19,13 @@ export type OrgEntry = {
 
 export const ORGS: OrgEntry[] = [
   {
-    slug: "fue", name: "Future University in Egypt", short: "FUE", kind: "university", live: true, idLabel: "University ID",
-    programs: [
-      { name: "Computer Science", live: true },
-      { name: "Dentistry", live: false },
-      { name: "Engineering", live: false },
-      { name: "Pharmacy", live: false },
-    ],
+    slug: "fue", path: "university", name: "University", short: "University", kind: "university", live: true, idLabel: "University ID",
+    programs: [{ name: "Computer Science", live: true }],
   },
-  { slug: "guc", name: "German University in Cairo", short: "GUC", kind: "university", live: false, idLabel: "Student ID", programs: [{ name: "Engineering", live: false }, { name: "Media Engineering", live: false }] },
-  { slug: "bue", name: "The British University in Egypt", short: "BUE", kind: "university", live: false, idLabel: "Student ID", programs: [{ name: "Informatics", live: false }] },
-  { slug: "schools", name: "Partner schools (IGCSE · Thanaweya)", short: "Schools", kind: "school", live: false, idLabel: "Student code", programs: [{ name: "Grades 10–12", live: false }] },
 ];
 
-export const orgBySlug = (slug: string) => ORGS.find((o) => o.slug === slug.toLowerCase());
+/** By public path; the old internal slug still resolves so existing links keep working. */
+export const orgBySlug = (value: string) => {
+  const key = value.toLowerCase();
+  return ORGS.find((o) => o.path === key) ?? ORGS.find((o) => o.slug === key);
+};

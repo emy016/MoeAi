@@ -1,6 +1,6 @@
 /**
  * The first thing a university student sees on Home: which MoeAI they are
- * on. "MoeAI · FUE Computer Science" is the tutor their faculty set up,
+ * on. "MoeAI · Computer Science" is the tutor their faculty set up,
  * answering from these courses' own lectures and citing the page; each
  * course opens straight to its lectures.
  */

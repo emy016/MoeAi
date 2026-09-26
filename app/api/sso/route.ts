@@ -10,6 +10,7 @@
 import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { orgEmail, orgIdentity } from "@/lib/org";
+import { orgBySlug } from "@/lib/orgs";
 
 export const runtime = "nodejs";
 
@@ -40,7 +41,9 @@ export async function POST(req: NextRequest) {
   } catch {
     return Response.json({ error: "Malformed request." }, { status: 400 });
   }
-  const org = String(body.org ?? "").toLowerCase();
+  // The page sends the public path; accounts live under the internal key.
+  const requested = String(body.org ?? "").toLowerCase();
+  const org = orgBySlug(requested)?.slug ?? requested;
   const id = String(body.id ?? "").trim();
   const password = String(body.password ?? "");
   if (!/^[a-z0-9-]{2,20}$/.test(org) || !id || !password) {

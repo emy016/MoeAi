@@ -86,7 +86,7 @@ export function Onboarding({
         <div className="mx-onboarding-next">
           <p>
             A verified institution gets one thing its staff and students cannot get alone: anyone signing in with an address at its
-            domain is recognised automatically — no codes, no invitations. Future University in Egypt is the first.
+            domain is recognised automatically — no codes, no invitations.
           </p>
           <div className="mx-inline">
             <a className="mx-primary" href="mailto:islamsharawy7@gmail.com?subject=EduMoe%20—%20verifying%20our%20institution">

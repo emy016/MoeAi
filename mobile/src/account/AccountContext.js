@@ -124,11 +124,11 @@ export function accountLabels(account, t) {
 
 /**
  * The name of the MoeAI a university account is on: its faculty's model,
- * e.g. "MoeAI · FUE Computer Science". Null for everyone else.
+ * e.g. "MoeAI · Computer Science". Null for everyone else. No university
+ * name is shown anywhere.
  */
 export function modelLabel(account) {
   const org = account?.org;
   if (!org) return null;
-  const school = String(org.orgSlug || '').toUpperCase() || org.orgName;
-  return `MoeAI · ${school}${org.program ? ` ${org.program}` : ''}`;
+  return org.program ? `MoeAI · ${org.program}` : 'MoeAI · University';
 }

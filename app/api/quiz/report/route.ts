@@ -1,7 +1,7 @@
 /**
  * /api/quiz/report — record an attempt at one of the page's own quizzes.
  *
- * The quizzes page ships question banks written for the FUE syllabus. Those
+ * The quizzes page ships question banks written for one university syllabus. Those
  * attempts matter as much as the AI-generated ones, and they are the cleanest
  * misconception signal the product ever gets: a student picking the wrong
  * option is a specific, observed gap rather than something inferred from chat.

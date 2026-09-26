@@ -985,7 +985,7 @@ If the situation allows direct assistance, provide useful help rather than refus
 
 Student:
 
-> "what does FUE's policy say about this?"
+> "what does the university's policy say about this?"
 
 Moe:
 

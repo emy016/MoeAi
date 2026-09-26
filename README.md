@@ -4,7 +4,7 @@
 **MoeAI** is its tutor: curriculum-aware, multilingual, and persistent.
 
 - Live: https://moe-ai-sable.vercel.app
-- Users today: ~230 first-year CS students at FUE, via `t.me/CS_Epic_Save`
+- Users today: ~230 first-year CS students, via `t.me/CS_Epic_Save`
 
 ---
 
