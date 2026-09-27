@@ -77,6 +77,7 @@ export function orgSubjects(courses) {
     owner: 'university',
     iconQuery: course.title,
     overview: course.overview || '',
+    topics: course.topics || '',
     lectures: (course.materials || []).filter((m) => m.status === 'ready').map((m, index) => ({
       id: `material-${m.id}`,
       materialId: m.id,

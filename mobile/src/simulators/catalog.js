@@ -4,7 +4,7 @@
  * Each one is a small self-contained page that runs in the same sandbox as
  * the chat's interactive cards (src/chat/blocks), styled by the same MoeAI
  * kit, so it follows the student's theme and accent. A student never sees
- * the whole catalog: `matches` decides which of their courses a simulator
+ * the whole catalog: `topics` (matched against each course's material) decides which courses a simulator
  * belongs to, and the Simulators tab shows only those.
  */
 
@@ -22,7 +22,7 @@ const CHEM = /chem|thermo/;
 
 export const SIMULATORS = [
   {
-    id: 'logic-gates', title: 'Logic gates lab', blurb: 'Toggle inputs and watch every gate, plus a half adder.', matches: LOGIC, kind: 'visualizer',
+    id: 'logic-gates', title: 'Logic gates lab', topics: /logic gate|and gate|\bnand\b|\bnor\b|\bxor\b|boolean/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-row" style="justify-content:space-between"><div class="m-title" style="margin:0">Inputs</div><span class="m-muted" style="font-size:12px">Tap a switch</span></div>
 <div class="m-row" style="margin:12px 0 4px"><button class="sw" data-k="A">A = 0</button><button class="sw" data-k="B">B = 0</button></div></div>
 <div class="m-card" style="margin-top:10px"><table id="t" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
@@ -38,7 +38,7 @@ document.querySelectorAll('.sw').forEach(function(b){b.onclick=function(){v[b.da
 </script>`,
   },
   {
-    id: 'truth-table', title: 'Truth table builder', blurb: 'Type any Boolean expression and get its full table and minterms.', matches: new RegExp(`${LOGIC.source}|${DISCRETE.source}`), kind: 'visualizer',
+    id: 'truth-table', title: 'Truth table builder', topics: /truth table|boolean (algebra|expression|function)|de morgan|logic gate|proposition/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-label">Expression (and · or + not ' xor ^ -> <->)</div>
 <input id="e" type="text" value="(A and B) or not C" style="width:100%;margin-top:6px;font:14px ui-monospace,monospace">
 <div id="info" class="m-muted" style="font-size:12px;margin-top:8px"></div></div>
@@ -65,22 +65,7 @@ document.getElementById('e').oninput=build;build();
 </script>`,
   },
   {
-    id: 'number-bases', title: 'Number bases & bits', blurb: 'Binary, octal, decimal, hex and two’s complement, bit by bit.', matches: new RegExp(`${LOGIC.source}|${PROGRAMMING.source}`), kind: 'visualizer',
-    code: `<div class="m-card"><div class="m-row"><input id="n" type="text" value="42" style="flex:1;min-width:120px;font:15px ui-monospace,monospace"><select id="b"><option value="10">decimal</option><option value="2">binary</option><option value="8">octal</option><option value="16">hex</option></select><select id="w"><option>8</option><option selected>16</option><option>32</option></select></div>
-<div id="bits" style="display:flex;flex-wrap:wrap;gap:4px;margin:12px 0 6px"></div><div id="o" class="m-col" style="gap:6px;font:13px ui-monospace,monospace"></div></div>
-<style>.bit{width:28px;height:34px;border-radius:8px;padding:0;background:var(--m-surface-2);color:var(--m-text);font:700 13px ui-monospace,monospace}.bit.on{background:var(--m-accent);color:#fff}.k{color:var(--m-muted);display:inline-block;width:130px}</style>
-<script>
-var val=42;function width(){return +document.getElementById('w').value}
-function show(){var w=width(),mask=w===32?0xFFFFFFFF:(1<<w)-1,u=(val>>>0)&mask>>>0;if(w===32)u=val>>>0;var s=u>=Math.pow(2,w-1)?u-Math.pow(2,w):u;
-var bits=document.getElementById('bits');bits.innerHTML='';for(var i=w-1;i>=0;i--){var on=Math.floor(u/Math.pow(2,i))%2===1,b=document.createElement('button');b.className='bit'+(on?' on':'');b.textContent=on?1:0;b.title='2^'+i;(function(i){b.onclick=function(){var cur=Math.floor(u/Math.pow(2,i))%2;val=u+(cur?-1:1)*Math.pow(2,i);sync();};})(i);bits.appendChild(b);}
-document.getElementById('o').innerHTML=[['Unsigned',u],['Signed (two’s c.)',s],['Binary',u.toString(2).padStart(w,'0').replace(/(.{4})(?=.)/g,'$1 ')],['Octal',u.toString(8)],['Hex','0x'+u.toString(16).toUpperCase()]].map(function(r){return '<div><span class="k">'+r[0]+'</span>'+r[1]+'</div>'}).join('');}
-function sync(){document.getElementById('n').value=(val>>>0).toString(+document.getElementById('b').value);show();}
-document.getElementById('n').oninput=function(e){var p=parseInt(e.target.value.replace(/^0x/i,'').replace(/\\s/g,''),+document.getElementById('b').value);if(!isNaN(p)){val=p;show();}};
-document.getElementById('b').onchange=sync;document.getElementById('w').onchange=show;show();
-</script>`,
-  },
-  {
-    id: 'python-ide', title: 'Python IDE', blurb: 'Write and run Python right here: numpy included, no setup.', matches: PROGRAMMING, kind: 'ide', language: 'python',
+    id: 'python-ide', title: 'Python IDE', topics: /python|programming|coding|source code|compiler|\bloops?\b|control structure/, status: 'moeai', kind: 'ide', language: 'python',
     code: `# Try it: edit and press Run
 def fib(n):
     a, b = 0, 1
@@ -92,7 +77,7 @@ print([fib(i) for i in range(12)])
 `,
   },
   {
-    id: 'sorting', title: 'Sorting visualizer', blurb: 'Step through bubble, insertion, selection, merge and quick sort.', matches: PROGRAMMING, kind: 'visualizer',
+    id: 'sorting', title: 'Sorting visualizer', topics: /sort(ing)?\b|searching|data structure/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-row"><select id="alg"><option value="bubble">Bubble</option><option value="insertion">Insertion</option><option value="selection">Selection</option><option value="merge">Merge</option><option value="quick">Quick</option></select>
 <button id="play" class="m-btn">Play</button><button id="step" class="m-btn m-btn-ghost">Step</button><button id="shuffle" class="m-btn m-btn-ghost">Shuffle</button></div>
 <svg id="s" viewBox="0 0 400 180" style="width:100%;height:auto;margin-top:12px"></svg>
@@ -116,7 +101,7 @@ document.getElementById('step').onclick=function(){stop();step()};document.getEl
 </script>`,
   },
   {
-    id: 'graph-search', title: 'BFS & DFS on a graph', blurb: 'Pick a start node and watch the frontier grow, step by step.', matches: new RegExp(`${DISCRETE.source}|${PROGRAMMING.source}`), kind: 'visualizer',
+    id: 'graph-search', title: 'BFS & DFS on a graph', topics: /graph (search|traversal|theory)|\bbfs\b|\bdfs\b|breadth.first|depth.first|trees? and graphs/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-row"><select id="mode"><option>BFS</option><option>DFS</option></select><span class="m-label">Start</span><select id="start"></select><button id="go" class="m-btn">Run</button><button id="nx" class="m-btn m-btn-ghost">Step</button></div>
 <svg id="g" viewBox="0 0 420 240" style="width:100%;height:auto;margin-top:8px"></svg><div class="m-row" style="font:12px ui-monospace,monospace"><span class="m-stat" id="order">Order: –</span><span class="m-stat" id="front">Queue: –</span></div></div>
 <script>
@@ -139,7 +124,7 @@ sel.onchange=document.getElementById('mode').onchange=function(){stop();plan()};
 </script>`,
   },
   {
-    id: 'sets', title: 'Sets & Venn diagrams', blurb: 'Union, intersection, difference and symmetric difference, drawn.', matches: new RegExp(`${DISCRETE.source}|${STATS.source}`), kind: 'visualizer',
+    id: 'sets', title: 'Sets & Venn diagrams', topics: /set theory|\bsets\b|venn|union and intersection|power set/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><label class="m-label">A <input id="a" type="text" value="1, 2, 3, 4, 5" style="width:100%"></label><label class="m-label">B <input id="b" type="text" value="4, 5, 6, 7" style="width:100%"></label>
 <div class="m-row" id="ops"></div></div><svg viewBox="0 0 320 170" style="width:100%;height:auto;margin-top:10px"><defs><clipPath id="ca"><circle cx="125" cy="85" r="70"/></clipPath><clipPath id="cb"><circle cx="195" cy="85" r="70"/></clipPath></defs><g id="fill"></g>
 <circle cx="125" cy="85" r="70" fill="none" stroke="var(--m-text)" stroke-width="2"/><circle cx="195" cy="85" r="70" fill="none" stroke="var(--m-text)" stroke-width="2"/><text x="70" y="30" font-weight="800" fill="var(--m-text)">A</text><text x="243" y="30" font-weight="800" fill="var(--m-text)">B</text><g id="labels"></g></svg>
@@ -160,7 +145,7 @@ document.getElementById('a').oninput=document.getElementById('b').oninput=draw;d
 </script>`,
   },
   {
-    id: 'function-plotter', title: 'Function plotter', blurb: 'Plot f(x) with sliders for a and b, the derivative, and a tangent line.', matches: MATH, kind: 'visualizer',
+    id: 'function-plotter', title: 'Function plotter', topics: /graph of (a )?function|\blimits?\b|derivative|differentiat|calculus|tangent line/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-row"><span class="m-label">f(x) =</span><input id="f" type="text" value="a*sin(b*x) + x/3" style="flex:1;min-width:160px;font:14px ui-monospace,monospace"></div>
 <div class="m-row" style="margin-top:8px"><span class="m-label">a</span><input id="a" type="range" min="-3" max="3" step="0.1" value="1.5" style="flex:1"><span class="m-stat" id="av"></span><span class="m-label">b</span><input id="b" type="range" min="0.1" max="4" step="0.1" value="1" style="flex:1"><span class="m-stat" id="bv"></span></div>
 <div class="m-row" style="margin-top:6px"><label class="m-label"><input id="d" type="checkbox"> f′(x)</label><span class="m-label">tangent at x₀</span><input id="x0" type="range" min="-6" max="6" step="0.05" value="1" style="flex:1"><span class="m-stat" id="tv"></span></div>
@@ -181,7 +166,7 @@ document.getElementById('tv').textContent='x₀='+x0.toFixed(2)+'  slope='+(isFi
 </script>`,
   },
   {
-    id: 'projectile', title: 'Projectile motion', blurb: 'Launch speed, angle and gravity; range, peak and flight time live.', matches: PHYSICS, kind: 'visualizer',
+    id: 'projectile', title: 'Projectile motion', topics: /projectile|kinematic|motion in two dimensions|trajectory/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><div class="m-row"><span class="m-label" style="width:70px">v₀ (m/s)</span><input id="v" type="range" min="5" max="40" value="22" style="flex:1"><span class="m-stat" id="vv"></span></div>
 <div class="m-row"><span class="m-label" style="width:70px">angle</span><input id="t" type="range" min="5" max="85" value="45" style="flex:1"><span class="m-stat" id="tv"></span></div>
 <div class="m-row"><span class="m-label" style="width:70px">g</span><select id="g"><option value="9.81">Earth 9.81</option><option value="1.62">Moon 1.62</option><option value="3.71">Mars 3.71</option><option value="24.79">Jupiter 24.79</option></select><button id="go" class="m-btn">Launch</button></div></div>
@@ -200,7 +185,7 @@ function launch(){cancelAnimationFrame(anim);var start=performance.now();(functi
 </script>`,
   },
   {
-    id: 'pendulum', title: 'Pendulum & SHM', blurb: 'Length, amplitude and damping; period vs. the small-angle formula.', matches: PHYSICS, kind: 'visualizer',
+    id: 'pendulum', title: 'Pendulum & SHM', topics: /pendulum|oscillat|simple harmonic|periodic motion/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><div class="m-row"><span class="m-label" style="width:86px">length (m)</span><input id="L" type="range" min="0.2" max="3" step="0.05" value="1.2" style="flex:1"><span class="m-stat" id="Lv"></span></div>
 <div class="m-row"><span class="m-label" style="width:86px">amplitude</span><input id="A" type="range" min="2" max="80" value="25" style="flex:1"><span class="m-stat" id="Av"></span></div>
 <div class="m-row"><span class="m-label" style="width:86px">damping</span><input id="D" type="range" min="0" max="0.5" step="0.01" value="0.05" style="flex:1"><span class="m-stat" id="Dv"></span></div></div>
@@ -220,7 +205,7 @@ document.getElementById('st').innerHTML='<span class="m-stat">T ≈ 2π√(L/g) 
 </script>`,
   },
   {
-    id: 'circuit', title: 'Series & parallel circuit', blurb: 'Ohm’s law with two resistors: current, voltages and power.', matches: ELECTRIC, kind: 'visualizer',
+    id: 'circuit', title: 'Series & parallel circuit', topics: /ohm'?s law|resist|series and parallel|kirchhoff|current and voltage/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><div class="m-row"><span class="m-label" style="width:64px">V (volts)</span><input id="V" type="range" min="1" max="24" value="12" style="flex:1"><span class="m-stat" id="Vv"></span></div>
 <div class="m-row"><span class="m-label" style="width:64px">R₁ (Ω)</span><input id="R1" type="range" min="1" max="100" value="20" style="flex:1"><span class="m-stat" id="R1v"></span></div>
 <div class="m-row"><span class="m-label" style="width:64px">R₂ (Ω)</span><input id="R2" type="range" min="1" max="100" value="60" style="flex:1"><span class="m-stat" id="R2v"></span></div>
@@ -241,7 +226,7 @@ document.getElementById('o').innerHTML=['R_total '+Rt.toFixed(2)+' Ω','I '+(I*1
 </script>`,
   },
   {
-    id: 'normal', title: 'Normal distribution', blurb: 'Move μ and σ and shade P(a ≤ X ≤ b).', matches: STATS, kind: 'visualizer',
+    id: 'normal', title: 'Normal distribution', topics: /normal distribution|gaussian|probability|statistic|random variable|standard deviation/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><div class="m-row"><span class="m-label" style="width:30px">μ</span><input id="mu" type="range" min="-3" max="3" step="0.1" value="0" style="flex:1"><span class="m-stat" id="muv"></span><span class="m-label" style="width:30px">σ</span><input id="sd" type="range" min="0.3" max="3" step="0.05" value="1" style="flex:1"><span class="m-stat" id="sdv"></span></div>
 <div class="m-row"><span class="m-label" style="width:30px">a</span><input id="a" type="range" min="-6" max="6" step="0.1" value="-1" style="flex:1"><span class="m-stat" id="av"></span><span class="m-label" style="width:30px">b</span><input id="b" type="range" min="-6" max="6" step="0.1" value="1" style="flex:1"><span class="m-stat" id="bv"></span></div></div>
 <canvas id="c" width="640" height="280" style="width:100%;margin-top:10px;border-radius:10px"></canvas><div class="m-row" id="o" style="font-size:12px"></div></div>
@@ -260,7 +245,7 @@ document.getElementById('o').innerHTML='<span class="m-stat">P('+a.toFixed(1)+' 
 </script>`,
   },
   {
-    id: 'ideal-gas', title: 'Ideal gas law', blurb: 'PV = nRT with a piston: hold one quantity and change another.', matches: CHEM, kind: 'visualizer',
+    id: 'ideal-gas', title: 'Ideal gas law', topics: /ideal gas|gas law|thermodynam|pressure and volume/, status: 'moeai', kind: 'visualizer',
     code: `<div class="m-card"><div class="m-col"><div class="m-row"><span class="m-label" style="width:88px">T (K)</span><input id="T" type="range" min="100" max="800" value="300" style="flex:1"><span class="m-stat" id="Tv"></span></div>
 <div class="m-row"><span class="m-label" style="width:88px">V (L)</span><input id="V" type="range" min="5" max="50" value="24" style="flex:1"><span class="m-stat" id="Vv"></span></div>
 <div class="m-row"><span class="m-label" style="width:88px">n (mol)</span><input id="n" type="range" min="0.2" max="3" step="0.1" value="1" style="flex:1"><span class="m-stat" id="nv"></span></div></div>
@@ -280,37 +265,50 @@ requestAnimationFrame(loop);
   },
 ];
 
-// PhET's own simulations, run from phet.colorado.edu: a few per field, after MoeAI's.
-const phet = (sim, matches, blurb) => ({ id: `phet-${sim}`, title: `${PHET_SIMS[sim].title} (PhET)`, blurb, matches, kind: 'phet', code: JSON.stringify({ sim }) });
-SIMULATORS.push(
-  phet('circuit-construction-kit-dc', new RegExp(`${LOGIC.source}|${ELECTRIC.source}`), 'Build real circuits with batteries, bulbs, switches and meters.'),
-  phet('ohms-law', ELECTRIC, 'Change voltage and resistance and watch the current respond.'),
-  phet('calculus-grapher', MATH, 'Draw a function and see its derivative and integral live.'),
-  phet('graphing-quadratics', MATH, 'Vertex, roots and coefficients of a parabola, interactively.'),
-  phet('trig-tour', MATH, 'The unit circle, sine, cosine and tangent, together.'),
-  phet('vector-addition', new RegExp(`${MATH.source}|${PHYSICS.source}`), 'Add vectors tip to tail and read off components.'),
-  phet('projectile-motion', PHYSICS, 'Cannons, drag and trajectories, measured.'),
-  phet('masses-and-springs', PHYSICS, 'Springs, oscillation and energy with real controls.'),
-  phet('wave-on-a-string', PHYSICS, 'Frequency, amplitude, damping and standing waves.'),
-  phet('plinko-probability', STATS, 'Binomial distributions from falling balls.'),
-  phet('curve-fitting', STATS, 'Fit polynomials to data and watch χ² change.'),
-  phet('gas-properties', CHEM, 'Pressure, volume and temperature, particle by particle.'),
-  phet('build-an-atom', CHEM, 'Protons, neutrons, electrons: build and identify atoms.'),
-  phet('molecule-shapes', CHEM, 'VSEPR shapes and bond angles in 3D.'),
-);
+import { CALCULUS_SIMS } from './library/calculus';
+import { ODE_SIMS } from './library/ode';
+import { LINEAR_SIMS } from './library/linear';
+import { LOGIC_SIMS } from './library/logic';
+import { EXTERNAL_SIMS } from './library/external';
 
-/** Shown when none of a student's courses matches any simulator yet. */
-export const STARTER_IDS = ['function-plotter', 'python-ide', 'truth-table'];
+const built = (list) => list.map((sim) => ({ kind: 'visualizer', status: 'moeai', ...sim }));
 
-/** For each course, the simulators that belong to it (each simulator listed once, under its first course). */
+/** Everything MoeAI can offer: its own simulators first, then external tools. */
+export const LIBRARY = [
+  ...built([...LOGIC_SIMS, ...CALCULUS_SIMS, ...ODE_SIMS, ...LINEAR_SIMS]),
+  ...SIMULATORS,
+  ...EXTERNAL_SIMS,
+];
+
+/** Shown to a guest whose subjects match nothing yet. */
+export const STARTER_IDS = ['integral-solver', 'matrix-calculator', 'number-systems', 'python-ide'];
+
+/**
+ * What a course is actually about. For a university course this is MoeAI's
+ * course map, built from the lecturer's own files (topics, subtopics,
+ * formulas, glossary): the simulators follow the material, not the course
+ * name. A course without material yet has no simulators. A student's own
+ * subject (no course map) falls back to its name and lecture titles.
+ */
+export function courseText(subject) {
+  if (subject.orgCourseId) return String(subject.topics || '').toLowerCase();
+  return [subject.name, ...(subject.lectures || []).map((l) => l.title)].join(' \n ').toLowerCase();
+}
+
+/** For each course, the simulators its material calls for (each listed once, under its first course). */
 export function simulatorsForSubjects(subjects) {
   const seen = new Set();
   const groups = [];
   for (const subject of subjects) {
-    const name = String(subject.name || '').toLowerCase();
-    const sims = SIMULATORS.filter((sim) => sim.matches.test(name) && !seen.has(sim.id));
+    const text = courseText(subject);
+    if (!text.trim()) { if (subject.orgCourseId) groups.push({ subject, sims: [], pending: true }); continue; }
+    const scored = LIBRARY
+      .filter((sim) => !seen.has(sim.id) && sim.topics && sim.topics.test(text))
+      .map((sim) => ({ sim, hits: (text.match(new RegExp(sim.topics.source, 'g')) || []).length }))
+      .sort((a, b) => (a.sim.status === b.sim.status ? b.hits - a.hits : a.sim.status === 'moeai' ? -1 : 1));
+    const sims = scored.map((x) => x.sim);
     sims.forEach((sim) => seen.add(sim.id));
-    if (sims.length) groups.push({ subject, sims });
+    if (sims.length || subject.orgCourseId) groups.push({ subject, sims, pending: !sims.length });
   }
   return groups;
 }

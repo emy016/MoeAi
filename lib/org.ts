@@ -56,7 +56,20 @@ export type OrgCourse = {
   role: string;
   materials: { id: string; title: string; kind: string; week: number | null; pages: number | null; status: string; summary: string | null }[];
   overview: string | null;
+  topics?: string;
 };
+
+type BrainRow = { overview?: string | null; outline?: unknown; formulas?: unknown; glossary?: unknown } | undefined;
+const list = (v: unknown) => (Array.isArray(v) ? (v as Record<string, unknown>[]) : []);
+function topicText(brain: BrainRow): string {
+  if (!brain) return "";
+  return [
+    brain.overview ?? "",
+    ...list(brain.outline).flatMap((o) => [String(o.topic ?? ""), ...list(o.subtopics).map(String)]),
+    ...list(brain.formulas).map((f) => String(f.name ?? "")),
+    ...list(brain.glossary).map((g) => String(g.term ?? "")),
+  ].join(" \n ").slice(0, 12000);
+}
 
 /** The courses this account is enrolled in (or teaches), with their ready material and MoeAI's course map. */
 export async function orgCourses(sb: SupabaseClient, userId: string): Promise<OrgCourse[]> {
@@ -71,7 +84,7 @@ export async function orgCourses(sb: SupabaseClient, userId: string): Promise<Or
   const ids = courses.map((c) => c.course!.id);
   const [{ data: materials }, { data: brains }] = await Promise.all([
     sb.from("course_materials").select("id, course_id, title, kind, week, pages, status, summary, created_at").in("course_id", ids).order("week", { ascending: true, nullsFirst: false }).order("created_at"),
-    sb.from("course_brain").select("course_id, overview").in("course_id", ids),
+    sb.from("course_brain").select("course_id, overview, outline, formulas, glossary").in("course_id", ids),
   ]);
   return courses
     .map(({ role, course }) => ({
@@ -81,6 +94,9 @@ export async function orgCourses(sb: SupabaseClient, userId: string): Promise<Or
       role,
       materials: (materials ?? []).filter((m) => m.course_id === course!.id).map(({ course_id: _c, ...m }) => m),
       overview: brains?.find((b) => b.course_id === course!.id)?.overview ?? null,
+      // What the course actually covers, from MoeAI's course map (the lecturer's
+      // own files): the app picks simulators from this, not from the course name.
+      topics: topicText(brains?.find((b) => b.course_id === course!.id)),
     }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
