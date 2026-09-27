@@ -29,3 +29,46 @@ export async function checkRateLimit(sb: SupabaseClient, limit = Number(process.
   if (error || !row) return { allowed: true, remaining: limit, limit, resetAt: fallbackReset };
   return { allowed: Boolean(row.allowed), remaining: Number(row.remaining ?? 0), limit, resetAt: new Date(row.reset_at ?? fallbackReset) };
 }
+
+export interface DailyResult {
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  demo: boolean;
+}
+
+const num = (value: string | undefined, fallback: number) => (Number.isFinite(Number(value)) && Number(value) > 0 ? Number(value) : fallback);
+
+/**
+ * Today's allowance. The demo accounts are shared and their sign-in page is
+ * public, so they get a small one (15 by default) to keep the free keys from
+ * being drained; everyone else gets MOEAI_MAX_PER_DAY. Heavier callers (the
+ * organizer) pass their own limits.
+ */
+export async function checkDailyLimit(
+  sb: SupabaseClient,
+  { perDay = num(process.env.MOEAI_MAX_PER_DAY, 150), demoPerDay = num(process.env.MOEAI_DEMO_PER_DAY, 15) }: { perDay?: number; demoPerDay?: number } = {},
+): Promise<DailyResult> {
+  const { data, error } = await sb.rpc("hit_daily_limit", { p_default: perDay, p_demo: demoPerDay });
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row) return { allowed: true, remaining: perDay, limit: perDay, demo: false };
+  return { allowed: Boolean(row.allowed), remaining: Number(row.remaining ?? 0), limit: Number(row.day_limit ?? perDay), demo: Boolean(row.demo) };
+}
+
+/** Guests: counted per day by a salted hash of their IP, never the IP itself. */
+export async function checkGuestLimit(sb: SupabaseClient, ip: string, perDay = num(process.env.MOEAI_GUEST_PER_DAY, 10)): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+  const { createHash } = await import("node:crypto");
+  const salt = process.env.MOEAI_GUEST_SALT || process.env.NEXT_PUBLIC_SUPABASE_URL || "moeai";
+  const key = createHash("sha256").update(`${salt}:${ip}`).digest("hex");
+  const { data, error } = await sb.rpc("hit_guest_limit", { p_key: key, p_limit: perDay });
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row) return { allowed: true, remaining: perDay, limit: perDay };
+  return { allowed: Boolean(row.allowed), remaining: Number(row.remaining ?? 0), limit: perDay };
+}
+
+/** What a student reads when the day is used up. */
+export function dailyLimitMessage(result: { limit: number; demo?: boolean }): string {
+  return result.demo
+    ? `The demo account gets ${result.limit} MoeAI requests a day, and today's are used up. They reset at midnight UTC.`
+    : `You've used today's ${result.limit} MoeAI requests. They reset at midnight UTC.`;
+}

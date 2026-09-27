@@ -537,7 +537,7 @@ end $$;
 -- University models: organization -> program -> year -> course, each course
 -- its own retrieval namespace (pgvector + full text), MoeAI's organized
 -- "brain" per course, and the staff upload bucket.
--- Demo accounts (FUE student 20251938, staff CS-STAFF-01) were seeded
+-- Demo accounts (demo student 20259999, staff CS-STAFF-01) were seeded
 -- directly in the project and are deliberately not in this file.
 -- ============================================================================
 

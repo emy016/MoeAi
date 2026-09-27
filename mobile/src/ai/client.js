@@ -218,3 +218,47 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
   // A stream that broke midway still delivered real text; keep it.
   return { text: answer, provider: 'moeai', model: 'moeai', interrupted: Boolean(streamError), citations, remembered, skills };
 }
+
+/**
+ * Practice material (questions, exams, flashcards, grading) from /api/practice:
+ * a task endpoint without the chat personality, which returns validated JSON
+ * (`json: true`, the default) or plain text. Grounded on the course when the
+ * subject belongs to one; guest lecture files travel as attachments.
+ */
+export async function practiceRequest({ prompt, json = true, subject, lecture, lectureFiles = [] } = {}) {
+  const attachments = await prepareAttachments(lectureFiles);
+  const materials = Array.isArray(lecture?.files) ? lecture.files.map((file) => file?.name).filter(Boolean) : [];
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS) : null;
+  let response;
+  let body = {};
+  try {
+    response = await fetch(`${API_BASE_URL}/api/practice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        prompt: String(prompt || '').slice(0, 12000),
+        json,
+        learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}), ...(lecture?.materialId ? { materialId: lecture.materialId } : {}) },
+        attachments: attachments.filter((item) => !item.note).map(({ name, mimeType, text: fileText, data }) => (
+          fileText !== undefined ? { name, mimeType, text: fileText } : { name, mimeType, data }
+        )),
+      }),
+      ...(controller ? { signal: controller.signal } : {}),
+    });
+    body = await response.json().catch(() => ({}));
+  } catch (error) {
+    const failure = new Error(error?.name === 'AbortError' ? 'MoeAI took too long. Please try again.' : 'MoeAI could not be reached. Check the connection and try again.');
+    failure.name = 'MoeAIUnavailableError';
+    throw failure;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+  if (!response.ok) {
+    const failure = new Error(body?.error || 'MoeAI could not make this set. Please try again.');
+    failure.name = 'MoeAIUnavailableError';
+    throw failure;
+  }
+  return json ? body.json : String(body.text || '');
+}

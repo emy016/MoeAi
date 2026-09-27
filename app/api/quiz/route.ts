@@ -9,7 +9,7 @@
 import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { completeChat, parseJsonBlock } from "@/lib/providers";
-import { checkRateLimit } from "@/lib/ratelimit";
+import { checkDailyLimit, checkRateLimit, dailyLimitMessage } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -65,6 +65,8 @@ export async function POST(req: NextRequest) {
       { status: 429 },
     );
   }
+  const day = await checkDailyLimit(sb);
+  if (!day.allowed) return Response.json({ error: dailyLimitMessage(day) }, { status: 429 });
 
   let body: { topic?: string };
   try {

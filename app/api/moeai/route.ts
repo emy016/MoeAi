@@ -24,7 +24,7 @@ import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { surfaceGuide } from "@/lib/moeai/surface";
 import { supabaseServer } from "@/lib/supabase-server";
-import { checkRateLimit } from "@/lib/ratelimit";
+import { checkDailyLimit, checkGuestLimit, checkRateLimit, dailyLimitMessage } from "@/lib/ratelimit";
 import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
 import { courseBlock, courseBrain, retrieve } from "@/lib/rag/retrieve";
@@ -133,9 +133,15 @@ export async function POST(req: NextRequest) {
     if (!rate.allowed) {
       return fail(429, `You have hit this hour's limit. Try again after ${rate.resetAt.toLocaleTimeString()}.`);
     }
+    const day = await checkDailyLimit(sb!);
+    if (!day.allowed) return fail(429, dailyLimitMessage(day));
   } else {
     const ip = (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
     if (!allowByIp(ip)) return fail(429, "Give me a moment. Try again in a minute.");
+    if (sb) {
+      const day = await checkGuestLimit(sb, ip);
+      if (!day.allowed) return fail(429, `Guests get ${day.limit} MoeAI requests a day. Sign in to keep going.`);
+    }
   }
 
   // ── What the student is actually studying ──────────────────────────────
