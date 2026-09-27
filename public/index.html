@@ -259,7 +259,7 @@
     .section-head p { font-size: 16px; color: var(--txt2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
 
     /* ─── HERO ──────────────────────────────────────────────────── */
-    .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; padding: 120px 0 60px; max-width: 1200px; margin: 0 auto; }
+    .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; padding: 120px 24px 60px; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
     .hero-title { margin-bottom: 24px; }
     @keyframes word-in { to { opacity: 1; transform: translateY(0); } }
 
@@ -360,8 +360,8 @@
       background-size: 34px 34px;
       -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
       mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
-      animation: sg-grid-drift 22s linear infinite;
-      opacity: 0.6;
+      animation: sg-grid-drift 40s linear infinite;
+      opacity: 1;
     }
     @keyframes sg-grid-drift { from { background-position: 0 0, 0 0; } to { background-position: 34px 34px, 34px 34px; } }
     .sg-canvas-host {
@@ -475,7 +475,7 @@
 
     /* ─── RESPONSIVE ───────────────────────────────────────────── */
     @media (max-width: 1024px) { .hero { grid-template-columns: 1fr; padding-top: 100px; } .hero-visual { height: 420px; order: -1; } .nav-links { display: none; } .stats-bar { grid-template-columns: repeat(2, 1fr); } .subjects-grid { grid-template-columns: repeat(2, 1fr); } .footer-grid { grid-template-columns: 1fr 1fr; } .bottom-tab-bar { display: flex; } body { padding-bottom: 68px; } }
-    @media (max-width: 700px) { .hero-stats { grid-template-columns: 1fr 1fr; } .stats-bar { grid-template-columns: 1fr; padding: 32px 20px; gap: 16px; } .float-win { display: none; } .hero-visual { display: none; } .hero { padding-top: 88px; min-height: auto; } .features-grid { grid-template-columns: 1fr; } .subjects-grid { grid-template-columns: 1fr; } .navbar { padding: 8px 14px; gap: 6px; } .nav-auth-btn span { display: none; } .nav-logo-name { font-size: 15px; } .cta-section { padding: 32px 20px; } .cta-section h2 { font-size: 26px; } .bottom-tab-bar { padding: 4px 0 8px; } .tab-item i { font-size: 18px; } .tab-item { font-size: 8px; padding: 2px 8px; } .modal-box { padding: 28px 20px; } .footer-grid { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; text-align: center; } }
+    @media (max-width: 700px) { .hero-stats { grid-template-columns: 1fr 1fr; } .stats-bar { grid-template-columns: 1fr; padding: 32px 20px; gap: 16px; } .float-win { display: none; } .hero-visual { height: 340px; } .hero { padding-top: 88px; min-height: auto; } .features-grid { grid-template-columns: 1fr; } .subjects-grid { grid-template-columns: 1fr; } .navbar { padding: 8px 14px; gap: 6px; } .nav-auth-btn span { display: none; } .nav-logo-name { font-size: 15px; } .cta-section { padding: 32px 20px; } .cta-section h2 { font-size: 26px; } .bottom-tab-bar { padding: 4px 0 8px; } .tab-item i { font-size: 18px; } .tab-item { font-size: 8px; padding: 2px 8px; } .modal-box { padding: 28px 20px; } .footer-grid { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; text-align: center; } }
     @media (max-width: 450px) { .topbar { padding: 8px 10px; } .brand { font-size: 15px; } .brand-mark { width: 28px; height: 28px; font-size: 12px; } .btn-back span { display: none; } .theme-switcher { gap: 2px; padding: 2px 3px; } .theme-dot { width: 10px; height: 10px; } .custom-color-wrap { width: 14px; height: 14px; } }
 
     /* ─── 3D BOOK ──────────────────────────────────────────────────────
@@ -644,13 +644,8 @@
       <div class="orbit-container" id="orbitContainer">
         <div class="sg-grid-bg"></div>
         <div class="ascii-stage">
-          <canvas class="ascii-canvas"
-                  data-ascii-src="/assets/book.webp"
-                  data-ascii-columns="120"
-                  data-ascii-contrast="15"
-                  data-ascii-reveal="78"
-                  aria-label="The EduMoe book, drawn in characters. Move your pointer over it to reveal the picture."></canvas>
-          <p class="ascii-hint"><span></span> Move your cursor over it</p>
+          <canvas class="ascii-canvas" data-braille-src="/assets/moeai-hand.webp"
+                  aria-label="A hand holding the MoeAI book, surrounded by course notes, drawn in shimmering braille characters."></canvas>
         </div>
       </div>
     </div>
@@ -830,29 +825,7 @@
     </div>
   </footer>
 
-  <!-- ─── MOBILE BOTTOM TAB BAR ────────────────────────────────── -->
-  <nav class="bottom-tab-bar" role="navigation" aria-label="Main navigation">
-    <a href="/courses" class="tab-item active" aria-label="Courses">
-      <i class="ic" data-ic="book"></i>
-      <span>Courses</span>
-    </a>
-    <a href="/simulators" class="tab-item" aria-label="Simulators">
-      <i class="ic" data-ic="microchip"></i>
-      <span>Simulators</span>
-    </a>
-    <a href="/moeai" class="tab-item" aria-label="MoeAI">
-      <i class="ic" data-ic="brain"></i>
-      <span>MoeAI</span>
-    </a>
-    <a href="/quizzes" class="tab-item" aria-label="Practice">
-      <i class="ic" data-ic="pencil-alt"></i>
-      <span>Practice</span>
-    </a>
-    <a href="/ranked" class="tab-item" aria-label="Ranked">
-      <i class="ic" data-ic="trophy"></i>
-      <span>Ranked</span>
-    </a>
-  </nav>
+
 
   <!-- ─── MODALS ────────────────────────────────────────────────── -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
@@ -1277,9 +1250,9 @@
           text: texts[Math.floor(Math.random() * texts.length)],
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.2,
-          alpha: 0.06 + Math.random() * 0.12,
+          vx: (Math.random() - 0.5) * 0.12,
+          vy: (Math.random() - 0.5) * 0.08,
+          alpha: 0.16 + Math.random() * 0.18,
           size: 12 + Math.random() * 14
         });
       }
@@ -1313,7 +1286,7 @@
           ctx.font = `${p.size}px var(--font-mono)`;
           ctx.fillStyle = isTerm ?
             `rgba(79, 255, 143, ${p.alpha * 1.4})` :
-            `rgba(100, 100, 150, ${p.alpha})`;
+            `rgba(150, 150, 205, ${p.alpha})`;
           ctx.fillText(p.text, p.x, p.y);
         }
         requestAnimationFrame(draw);
@@ -1590,13 +1563,7 @@
     // ============================================================
     //  MOBILE TAB BAR
     // ============================================================
-    document.querySelectorAll('.tab-item').forEach(tab => {
-      tab.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-      });
-    });
+    // The mobile bar is drawn by /assets/edumoe-shell.js (shared by every EduMoe page).
 
     // ============================================================
     //  FOOTER YEAR
@@ -1615,14 +1582,14 @@
         }
         animateStats();
         initScrollEffects();
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        document.querySelector('.tab-item:first-child')?.classList.add('active');
       }, 800);
     });
 
     console.log('🚀 EDUMOE V3 Ultimate Homepage loaded.');
   </script>
-  <script src="/assets/ascii-reveal.js" defer></script>
+  <script src="/assets/ascii-braille.js" defer></script>
+  <script src="/assets/edumoe-shell.js" defer></script>
+  <script src="/assets/edumoe-mascot.js" defer></script>
   <script src="/assets/brand.js" defer></script>
   <script>
     // The login modal signs in for real, through /api/auth (Supabase Auth).
