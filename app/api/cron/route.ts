@@ -21,6 +21,11 @@ export const maxDuration = 60;
 
 const DAY = 86_400_000;
 
+// MoeAI's proactive DMs are paused while the DM is out of the app.
+// Set MOEAI_PROACTIVE=on to bring them back.
+const proactiveOn = () => process.env.MOEAI_PROACTIVE === "on";
+const paused = { sent: 0, considered: 0, paused: true };
+
 export async function GET(req: NextRequest) {
   // Vercel Cron sends the secret as a bearer token. Reject anything else, so
   // this cannot be triggered by anyone who finds the URL.
@@ -35,14 +40,14 @@ export async function GET(req: NextRequest) {
   // ?job=proactive runs only MoeAI's messages (an hourly schedule can call it:
   // see docs/SETUP.md); ?job=reflect only its self-review. The daily run does all.
   const job = new URL(req.url).searchParams.get("job");
-  if (job === "proactive") return Response.json({ ok: true, proactive: await runProactive(db, complete) });
+  if (job === "proactive") return Response.json({ ok: true, proactive: proactiveOn() ? await runProactive(db, complete) : paused });
   if (job === "reflect") {
     await seedDocs(db);
     return Response.json({ ok: true, reflect: await reflect(db, complete) });
   }
   await seedDocs(db).catch(() => undefined);
   const reflected = await reflect(db, complete).catch(() => ({ lessons: 0 }));
-  const proactive = await runProactive(db, complete).catch(() => ({ sent: 0, considered: 0 }));
+  const proactive = proactiveOn() ? await runProactive(db, complete).catch(() => ({ sent: 0, considered: 0 })) : paused;
   /**
  * `body` is what the student reads. `prompt` is what gets sent to MoeAI if they
  * act on it — they are not the same sentence, and echoing the notice back at

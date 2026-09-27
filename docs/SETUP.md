@@ -62,13 +62,10 @@ push subscriptions, file digests, verified course codes, Arena questions).
 
 1. Open https://moe-ai-sable.vercel.app/moeai and sign in with the demo student
    **20259999** (same password as before).
-2. Community tab → **Turn on** notifications, allow them in the browser.
-3. Trigger MoeAI's messages once by hand:
-   `curl -H "Authorization: Bearer YOUR_CRON_SECRET" "https://moe-ai-sable.vercel.app/api/cron?job=proactive"`
-   A student gets a message only when there is a reason (a deadline in the
-   next hours, no lecture opened yet, a quiet few days, or sometimes a fun
-   fact), at most three a day and never between 1am and 9am their time.
-4. Tutor page: sign in as staff, open a course, **Organize**. It now reads one
+2. MoeAI's DM, notifications and proactive messages are paused for now (the
+   Community tab is empty). To bring the proactive messages back later, add
+   `MOEAI_PROACTIVE` = `on` in Vercel.
+3. Tutor page: sign in as staff, open a course, **Organize**. It now reads one
    file at a time and names any file it could not read.
-5. https://moe-ai-sable.vercel.app/api/health shows which keys and features are
+4. https://moe-ai-sable.vercel.app/api/health shows which keys and features are
    configured (names only, never values).

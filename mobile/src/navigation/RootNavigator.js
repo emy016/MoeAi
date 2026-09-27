@@ -12,7 +12,7 @@ import { usePreferences } from '../context/AppPreferences';
 import { useAccount } from '../account/AccountContext';
 import { usePersonal } from '../personal/PersonalContext';
 import CustomTabBar, { TAB_ORDER } from './CustomTabBar';
-import { consumeLaunchLink, onOpenDM } from '../dm/dmBus';
+import { consumeLaunchLink } from '../dm/dmBus';
 
 const COMPONENTS={Home:React.memo(HomeScreen),Practice:React.memo(PracticeScreen),Simulators:React.memo(SimulatorsScreen),Community:React.memo(CommunityScreen)};
 const TITLE_KEYS={Home:'home',Practice:'practice',Simulators:'simulators',Community:'community'};
@@ -28,8 +28,7 @@ export default function RootNavigator(){
  useEffect(()=>{progress.stopAnimation();if(!motion){progress.setValue(tabIndex);return;}Animated.spring(progress,{toValue:tabIndex,friction:Pager.FRICTION,tension:Pager.TENSION,overshootClamping:tabIndex===0||tabIndex===LAST_INDEX,useNativeDriver:true,isInteraction:false}).start();},[tabIndex,progress,motion]);
  useEffect(()=>{const sub=BackHandler.addEventListener('hardwareBackPress',()=>{if(menuOpen){setMenuOpen(false);return true;}if(route==='settings'){closeSettings();return true;}return false;});return()=>sub.remove();},[menuOpen,route,closeSettings]);
  const select=useCallback((next)=>{if(next!==tabIndex){setDirection(next>tabIndex?1:-1);setTabIndex(next);if(next===0)requestAnimationFrame(()=>homeResetRef.current?.());}},[tabIndex]);
- // A notification reply (in-app or a tapped web push) opens the DM in Community.
- useEffect(()=>onOpenDM(()=>{setRoute('tabs');select(TAB_ORDER.indexOf('Community'));}),[select]);
+ // The DM is paused: an old push link (/moeai?dm=1) just gets its query cleaned.
  useEffect(()=>{consumeLaunchLink();},[]);
  const snap=useCallback(()=>Animated.spring(progress,{toValue:tabIndex,friction:Pager.FRICTION,tension:Pager.TENSION,overshootClamping:tabIndex===0||tabIndex===LAST_INDEX,useNativeDriver:true,isInteraction:false}).start(),[progress,tabIndex]);
  const swipe=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>false,onMoveShouldSetPanResponder:(_,g)=>route==='tabs'&&horizontal(g),onMoveShouldSetPanResponderCapture:()=>false,onPanResponderGrant:()=>{progress.stopAnimation();dragStart.current=tabIndex;progress.setValue(tabIndex);},onPanResponderMove:(_,g)=>{const next=Math.max(0,Math.min(LAST_INDEX,dragStart.current-g.dx/width));progress.setValue(next);},onPanResponderRelease:(_,g)=>{const threshold=Math.max(Pager.SWIPE_THRESHOLD_PX,width*Pager.SWIPE_THRESHOLD_FRACTION);const flick=Math.abs(g.vx)>Pager.SWIPE_FLICK_VELOCITY&&Math.abs(g.dx)>Pager.SWIPE_FLICK_MIN_DX;if((g.dx<-threshold||(flick&&g.vx<0))&&tabIndex<LAST_INDEX)select(tabIndex+1);else if((g.dx>threshold||(flick&&g.vx>0))&&tabIndex>0)select(tabIndex-1);else snap();},onPanResponderTerminate:snap,onPanResponderTerminationRequest:()=>false}),[width,tabIndex,route]);

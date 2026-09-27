@@ -14,6 +14,7 @@ import { API_BASE_URL } from '../ai/client';
 import { useAccount } from '../account/AccountContext';
 import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
 import { lectureProgress } from '../subjects/subjectStore';
+import { DM_KINDS } from '../dm/dmBus';
 
 const DISMISSED_KEY = storageKey('nudges-dismissed-v1');
 const today = () => new Date().toISOString().slice(0, 10);
@@ -61,7 +62,8 @@ export function useNudges(subjects, t) {
   }, [account.status, revision]);
 
   const nudge = useMemo(() => {
-    const fromServer = remote.find((item) => !dismissed.has(item.id));
+    // MoeAI's DM messages are paused, so its DM-style nudges are not shown.
+    const fromServer = remote.find((item) => !dismissed.has(item.id) && !DM_KINDS.has(item.kind));
     if (fromServer) {
       const subject = fromServer.course_id ? subjects.find((s) => s.orgCourseId === fromServer.course_id) : null;
       const lecture = subject && (subject.lectures.find((l) => l.materialId === fromServer.material_id) || subject.lectures[0]);
