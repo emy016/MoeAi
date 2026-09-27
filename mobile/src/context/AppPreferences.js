@@ -46,7 +46,7 @@ export function AppPreferencesProvider({ children }) {
 
   const effectiveTheme = prefs.theme === 'system' ? (systemScheme === 'light' ? 'light' : 'dark') : prefs.theme;
   const language = prefs.language || 'en';
-  const colors = useMemo(() => makeColors(effectiveTheme, prefs.accent, prefs.surface, prefs.tint), [effectiveTheme, prefs.accent, prefs.surface, prefs.tint]);
+  const colors = useMemo(() => makeColors(effectiveTheme, prefs.accent, prefs.surface, false), [effectiveTheme, prefs.accent, prefs.surface]);
   const t = useCallback((key, values) => {
     const template = translations[language]?.[key] ?? translations.en[key] ?? key;
     if (!values || typeof template !== 'string') return template;

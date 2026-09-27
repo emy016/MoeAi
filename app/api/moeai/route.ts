@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
     try {
       const recent = messages.filter((m) => m.role === "user").slice(-2).map((m) => m.content).join("\n");
       const [{ data: course }, passages, brain] = await Promise.all([
-        sb.from("courses").select("code, title").eq("id", courseId).maybeSingle(),
+        sb.from("courses").select("code, title, code_verified").eq("id", courseId).maybeSingle(),
         retrieve(sb, courseId, recent, 6, materialId),
         courseBrain(sb, courseId),
       ]);

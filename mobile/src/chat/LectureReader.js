@@ -7,15 +7,37 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChatBubbleLeftRightIcon, XMarkIcon } from 'react-native-heroicons/solid';
+import { ChatBubbleLeftRightIcon, MoonIcon, SunIcon, XMarkIcon } from 'react-native-heroicons/solid';
 import RichMessage from './RichMessage';
 import { API_BASE_URL } from '../ai/client';
 import ElasticPressable from '../components/ElasticPressable';
 import { Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
+import { makeColors } from '../constants/colors';
+import { AsyncStorage, readStoredValue, storageKey } from '../storage/persistedStorage';
+
+const READER_KEY = storageKey('lecture-reader-v1');
+const SIZES = [13, 14, 15, 17, 19];
+
+/** Slide text reads better as Markdown: bullet glyphs from PDFs become list items. */
+function tidy(text) {
+  return String(text || '')
+    .replace(/^[ \t]*[•▪◦●○■□➢➤►▶∙·]\s*/gm, '- ')
+    .replace(/^[ \t]*[oq]\s{2,}(?=\S)/gm, '  - ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
 export default function LectureReader({ visible, materialId, title, onClose, onAsk }) {
-  const { colors, type, t, isRTL } = usePreferences();
+  const { colors: appColors, type, t, isRTL, accent, surface, effectiveTheme } = usePreferences();
+  // The reader has its own light/dark switch and text size: a long lecture on
+  // white paper at night is not the same as a quick look in the app's theme.
+  const [reader, setReader] = useState({ theme: null, size: 1 });
+  useEffect(() => { readStoredValue(READER_KEY).then((raw) => { try { const v = JSON.parse(raw || '{}'); setReader((r) => ({ ...r, ...v })); } catch (_) {} }).catch(() => {}); }, []);
+  const updateReader = useCallback((patch) => setReader((r) => { const next = { ...r, ...patch }; AsyncStorage.setItem(READER_KEY, JSON.stringify(next)).catch(() => {}); return next; }), []);
+  const colors = reader.theme ? makeColors(reader.theme, accent, surface, false) : appColors;
+  const isLight = (reader.theme || effectiveTheme) === 'light';
+  const fontSize = SIZES[Math.max(0, Math.min(SIZES.length - 1, reader.size ?? 1))];
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [state, setState] = useState({ status: 'idle', pages: [], summary: '', error: '' });
@@ -59,20 +81,29 @@ export default function LectureReader({ visible, materialId, title, onClose, onA
           </View>
         </ElasticPressable>
       </View>
-      <RichMessage text={item.content} color={colors.textPrimary} textAlign={isRTL ? 'right' : 'left'} fontStyle={type(14, 'regular', 21)} maxWidth={textWidth} />
+      <RichMessage text={tidy(item.content)} color={colors.textPrimary} textAlign={isRTL ? 'right' : 'left'} fontStyle={type(fontSize, 'regular', Math.round(fontSize * 1.55))} maxWidth={textWidth} />
     </View>
-  ), [colors, isRTL, onAsk, t, textWidth, type]);
+  ), [colors, fontSize, isRTL, onAsk, t, textWidth, type]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} presentationStyle="fullScreen">
       <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top + 6 }]}>
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <View style={[styles.header, { borderBottomColor: colors.border, gap: 8 }]}>
           <View style={styles.headerText}>
             <Text numberOfLines={1} style={[{ color: colors.textPrimary }, type(16, 'bold', 21)]}>{title}</Text>
             <Text numberOfLines={1} style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>
               {state.status === 'ready' ? `${t('pageN').replace('{n}', String(current))} / ${state.pages.length}` : t('readLecture')}
             </Text>
           </View>
+          <Pressable onPress={() => updateReader({ size: Math.max(0, (reader.size ?? 1) - 1) })} hitSlop={6} accessibilityRole="button" accessibilityLabel="Smaller text" style={[styles.close, { backgroundColor: colors.cardButton }]}>
+            <Text style={[{ color: colors.textPrimary }, type(12, 'bold', 16)]}>A−</Text>
+          </Pressable>
+          <Pressable onPress={() => updateReader({ size: Math.min(SIZES.length - 1, (reader.size ?? 1) + 1) })} hitSlop={6} accessibilityRole="button" accessibilityLabel="Larger text" style={[styles.close, { backgroundColor: colors.cardButton }]}>
+            <Text style={[{ color: colors.textPrimary }, type(15, 'bold', 18)]}>A+</Text>
+          </Pressable>
+          <Pressable onPress={() => updateReader({ theme: isLight ? 'dark' : 'light' })} hitSlop={6} accessibilityRole="button" accessibilityLabel={isLight ? 'Dark reading mode' : 'Light reading mode'} style={[styles.close, { backgroundColor: colors.cardButton }]}>
+            {isLight ? <MoonIcon size={18} color={colors.textPrimary} /> : <SunIcon size={18} color={colors.textPrimary} />}
+          </Pressable>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('close')} style={[styles.close, { backgroundColor: colors.cardButton }]}>
             <XMarkIcon size={20} color={colors.textPrimary} />
           </Pressable>

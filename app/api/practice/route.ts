@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     try {
       const topic = [learning?.lecture, learning?.subject].filter((v) => typeof v === "string" && v).join(" ") || "key concepts, definitions, worked examples";
       const [{ data: course }, passages, brain] = await Promise.all([
-        sb.from("courses").select("code, title").eq("id", courseId).maybeSingle(),
+        sb.from("courses").select("code, title, code_verified").eq("id", courseId).maybeSingle(),
         retrieve(sb, courseId, topic, 8, materialId),
         courseBrain(sb, courseId),
       ]);

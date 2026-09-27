@@ -18,19 +18,19 @@ export const AccentPresets = {
   green: { dark: '#66C98D', light: '#31985B' },
   blue: { dark: '#668CEB', light: '#3D68C7' },
   red: { dark: '#EB6674', light: '#C53F51' },
-  pink: { dark: '#EE72B8', light: '#C23A88' },
-  teal: { dark: '#4FC8C0', light: '#17877F' },
-  amber: { dark: '#F0B44C', light: '#B77708' },
-  indigo: { dark: '#7C83F2', light: '#4B50C8' },
-  lime: { dark: '#A6D35A', light: '#5E8E17' },
-  sky: { dark: '#52B6F0', light: '#1478B5' },
-  coral: { dark: '#F2856D', light: '#C4492D' },
-  crimson: { dark: '#E0506A', light: '#A8213D' },
+  // The extra accents are spread around the colour wheel so no two look alike
+  // next to the main five (orange, green, blue, red, purple).
+  pink: { dark: '#E464D2', light: '#B02F9E' },   // magenta
+  teal: { dark: '#38C9DB', light: '#0E8594' },   // cyan
+  amber: { dark: '#EDC645', light: '#A07C00' },  // gold
+  lime: { dark: '#A5D64A', light: '#5C8C10' },   // chartreuse
+  slate: { dark: '#93A3BA', light: '#4D5E76' },  // cool grey
+  mocha: { dark: '#C29A74', light: '#8A5E3A' },  // warm brown
 };
 
 /** The five in the animated row, then the rest of the palette. */
 export const MAIN_ACCENTS = ['orange', 'green', 'blue', 'red', 'purple'];
-export const MORE_ACCENTS = ['pink', 'teal', 'amber', 'indigo', 'lime', 'sky', 'coral', 'crimson'];
+export const MORE_ACCENTS = ['pink', 'teal', 'amber', 'lime', 'slate', 'mocha'];
 
 /**
  * Background styles. Each replaces the surfaces of one mode and keeps the

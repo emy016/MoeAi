@@ -25,7 +25,6 @@ export default function Studio({ onPick, compact }) {
   // The empty chat centers its content, so the row needs a real width or it grows past the screen.
   return (
     <View style={[styles.wrap, !compact && { width: Math.min(width - 32, 720) }]}>
-      <Text style={[{ color: colors.textMuted, textAlign: isRTL ? 'right' : 'left' }, type(11, 'bold', 14)]}>{t('studioTitle')}</Text>
       <ScrollView horizontal style={styles.scroll} showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={[styles.row, isRTL && { flexDirection: 'row-reverse' }]}>
         {STUDIO_TOOLS.map((tool) => (
           <ElasticPressable key={tool.id} shape="pill" onPress={() => onPick(t(tool.prompt), { studio: tool.id })} accessibilityRole="button" accessibilityLabel={t(tool.label)}>

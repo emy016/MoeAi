@@ -17,7 +17,7 @@ export async function staffFor(courseId: unknown): Promise<StaffContext | Respon
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return Response.json({ error: "Sign in as course staff." }, { status: 401 });
   const [{ data: course }, { data: canTeach }] = await Promise.all([
-    sb.from("courses").select("id, code, title").eq("id", courseId).maybeSingle(),
+    sb.from("courses").select("id, code, title, code_verified").eq("id", courseId).maybeSingle(),
     sb.rpc("can_teach_course", { course: courseId }),
   ]);
   if (!course) return Response.json({ error: "Course not found." }, { status: 404 });

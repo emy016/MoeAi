@@ -103,7 +103,7 @@ export default function SimulatorsScreen() {
       <View style={styles.scroll}>
         <Card>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }, align, type(16, 'bold')]}>{t('availableSimulators')}</Text>
-          <Text style={[{ color: colors.textSecondary }, align, type(13, 'regular', 19)]}>{groups.length ? t('simulatorsForYou') : t('simulatorsEmpty')}</Text>
+          <Text style={[{ color: colors.textSecondary }, align, type(13, 'regular', 19)]}>{groups.length ? '' : t('simulatorsEmpty')}</Text>
         </Card>
         {(groups.length ? groups : [{ subject: { id: 'starter', name: t('simulatorsStarter') }, sims: starters }]).map(({ subject, sims }) => (
           <View key={subject.id || subject.name} style={styles.group}>

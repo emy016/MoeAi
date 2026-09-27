@@ -1,7 +1,9 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { streamGemini } from "../ai/gemini";
-import { parseJsonBlock } from "../providers";
+import { completeChat } from "../providers";
+import { parseModelJson } from "../moeai/latex-json";
+import { courseName } from "./retrieve";
 import { ingestText } from "./ingest";
 
 /**
@@ -30,95 +32,155 @@ export type Brain = {
   summaries?: { id: string; summary: string }[];
 };
 
-const BUDGET = 110_000;
-
 async function complete(system: string, user: string, opts: { json?: boolean; tools?: unknown[]; maxOutputTokens?: number; onEvent?: (e: Record<string, unknown>) => void } = {}) {
   let out = "";
   for await (const delta of streamGemini({ system, contents: [{ role: "user", parts: [{ text: user }] }], temperature: 0.3, maxOutputTokens: opts.maxOutputTokens ?? 12000, ...opts })) out += delta;
   return out;
 }
 
-/** Everything uploaded for the course, trimmed evenly to what one model call can read. */
-async function courseText(sb: SupabaseClient, courseId: string) {
-  const { data: materials } = await sb
-    .from("course_materials")
-    .select("id, title, week, kind, status")
-    .eq("course_id", courseId)
-    .in("status", ["ready"])
-    .neq("kind", "generated")
-    .order("week", { ascending: true, nullsFirst: false });
-  if (!materials?.length) return { materials: [], text: "" };
-  const { data: chunks } = await sb
-    .from("course_chunks")
-    .select("material_id, idx, page, content")
-    .eq("course_id", courseId)
-    .in("material_id", materials.map((m) => m.id))
-    .order("idx")
-    .limit(4000);
-  const total = (chunks ?? []).reduce((n, c) => n + c.content.length, 0);
-  const keepEvery = Math.max(1, Math.ceil(total / BUDGET));
-  const text = materials.map((m) => {
-    const own = (chunks ?? []).filter((c) => c.material_id === m.id);
-    const kept = own.filter((_, i) => i % keepEvery === 0);
-    return `=== MATERIAL id=${m.id} "${m.title}"${m.week ? ` (week ${m.week})` : ""} ===\n${kept.map((c) => `[p.${c.page}] ${c.content}`).join("\n")}`;
-  }).join("\n\n");
-  return { materials, text };
+const MATERIAL_BUDGET = 24_000; // characters of one file per digest call
+const MERGE_BUDGET = 60_000;
+
+type Digest = {
+  summary: string;
+  topics: string[];
+  glossary: Brain["glossary"];
+  formulas: Brain["formulas"];
+  mistakes: Brain["mistakes"];
+  practice: Brain["practice"];
+};
+
+const ORGANIZER = [
+  "You are the MoeAI Organizer. A university lecturer uploaded their course files; you turn them into the knowledge base a tutor will teach from.",
+  "Stay faithful to the lecturer's material: their notation, terminology, order and level. Do not invent syllabus content.",
+  "Output ONLY valid JSON. Put formulas in LaTeX without $ delimiters, and double every backslash inside JSON strings (\\\\frac, \\\\int).",
+].join("\n");
+
+/** One call, JSON back, LaTeX-safe parsing; falls back to the other providers when Gemini is busy. */
+async function completeJson<T>(system: string, user: string, maxOutputTokens: number): Promise<T> {
+  let raw = "";
+  try {
+    raw = await complete(system, user, { json: true, maxOutputTokens });
+  } catch {
+    raw = (await completeChat([{ role: "system", content: system }, { role: "user", content: user }], { maxTokens: Math.min(maxOutputTokens, 6000) })).text;
+  }
+  const parsed = parseModelJson<T>(raw);
+  if (!parsed) throw new Error("MoeAI's answer was not readable JSON. Try again.");
+  return parsed;
 }
 
-export async function buildBrain(sb: SupabaseClient, course: { id: string; code: string; title: string }): Promise<Brain> {
-  const { materials, text } = await courseText(sb, course.id);
-  if (!materials.length) throw new Error("Upload and process at least one file first.");
+const arr = <T,>(v: T[] | undefined) => (Array.isArray(v) ? v : []);
 
-  const system = [
-    "You are the MoeAI Organizer. A university lecturer uploaded their course files; you turn them into the knowledge base a tutor will teach from.",
-    "Stay faithful to the lecturer's material: their notation, terminology, order and level. Do not invent syllabus content.",
-    "Output ONLY valid JSON matching the schema you are given. Use LaTeX (no $ delimiters) in formula fields.",
-  ].join("\n");
-  const user = [
-    `Course: ${course.code} ${course.title}`,
+/** Files the organizer reads: processed lecture files, not MoeAI's own notes. */
+async function readyMaterials(sb: SupabaseClient, courseId: string) {
+  const { data } = await sb
+    .from("course_materials")
+    .select("id, title, week, digest")
+    .eq("course_id", courseId)
+    .eq("status", "ready")
+    .neq("kind", "generated")
+    .order("week", { ascending: true, nullsFirst: false });
+  return (data ?? []) as { id: string; title: string; week: number | null; digest: Digest | null }[];
+}
+
+/**
+ * Step 1, per file: what this file teaches (topics, glossary, formulas,
+ * common mistakes, two practice questions), sized to finish well inside one
+ * serverless call. Saved on the file, so a failed file can be retried alone.
+ */
+export async function digestMaterial(sb: SupabaseClient, course: { id: string; code: string; title: string; code_verified?: boolean | null }, materialId: string): Promise<Digest> {
+  const { data: material } = await sb.from("course_materials").select("id, title, week").eq("id", materialId).eq("course_id", course.id).maybeSingle();
+  if (!material) throw new Error("That file is not in this course.");
+  const { data: chunks } = await sb.from("course_chunks").select("idx, page, content").eq("material_id", materialId).order("idx").limit(600);
+  const total = (chunks ?? []).reduce((n, c) => n + c.content.length, 0);
+  if (!total) throw new Error(`"${material.title}" has no readable text yet. Process it first.`);
+  const keepEvery = Math.max(1, Math.ceil(total / MATERIAL_BUDGET));
+  const text = (chunks ?? []).filter((_, i) => i % keepEvery === 0).map((c) => `[p.${c.page}] ${c.content}`).join("\n").slice(0, MATERIAL_BUDGET + 2000);
+  const digest = await completeJson<Digest>(ORGANIZER, [
+    `Course: ${courseName(course)}. File: "${material.title}"${material.week ? ` (week ${material.week})` : ""}.`,
+    "Return JSON with exactly these keys:",
+    '{"summary": "two sentences: what this file teaches", "topics": ["topic in the lecturer\'s words"],',
+    ' "glossary": [{"term": "...", "definition": "one sentence in the file\'s own words", "source": "p.N"}],  (3-10)',
+    ' "formulas": [{"name": "...", "latex": "...", "when": "when to use it"}],  (0-8)',
+    ' "mistakes": [{"mistake": "a specific error students make here", "fix": "how to avoid it"}],  (1-4)',
+    ' "practice": [{"question": "exam-style question from this file", "answer": "worked answer", "topic": "...", "difficulty": "easy|medium|hard"}]}  (2)',
     "",
+    "FILE TEXT:",
+    text,
+  ].join("\n"), 5000);
+  const clean: Digest = {
+    summary: String(digest.summary || "").slice(0, 600),
+    topics: arr(digest.topics).map(String).slice(0, 12),
+    glossary: arr(digest.glossary).slice(0, 12),
+    formulas: arr(digest.formulas).slice(0, 10),
+    mistakes: arr(digest.mistakes).slice(0, 5),
+    practice: arr(digest.practice).slice(0, 3),
+  };
+  const { error } = await sb.from("course_materials").update({ digest: clean, summary: clean.summary || null }).eq("id", materialId);
+  if (error) throw new Error(error.message);
+  return clean;
+}
+
+/**
+ * Step 2, the course: merge the file digests into the course map (overview,
+ * week-by-week outline, merged glossary and formulas, mistakes, practice,
+ * gaps). The digests are small, so this reads the whole course at once.
+ */
+export async function mergeBrain(sb: SupabaseClient, course: { id: string; code: string; title: string; code_verified?: boolean | null }): Promise<Brain> {
+  const materials = await readyMaterials(sb, course.id);
+  if (!materials.length) throw new Error("Upload and process at least one file first.");
+  const digested = materials.filter((m) => m.digest);
+  if (!digested.length) throw new Error("No file has been read yet. Organize again.");
+  const digestText = JSON.stringify(digested.map((m) => ({ file: m.title, week: m.week, ...m.digest }))).slice(0, MERGE_BUDGET);
+  const merged = await completeJson<Brain>(ORGANIZER, [
+    `Course: ${courseName(course)}. Below are digests of each lecture file, in course order.`,
     "Return JSON with exactly these keys:",
     '{"overview": "markdown course map, 150-300 words: what the course is about, how the topics build on each other, what to master first",',
-    ' "outline": [{"week": number|null, "topic": "...", "subtopics": ["..."], "materials": ["material title"]}],',
-    ' "glossary": [{"term": "...", "definition": "one or two sentences in the course\'s own words", "source": "material title, p.N"}],  (15-40 entries)',
-    ' "formulas": [{"name": "...", "latex": "...", "when": "when to use it"}],',
-    ' "mistakes": [{"mistake": "a specific error students make on this material", "fix": "how to avoid it"}],  (6-12)',
-    ' "practice": [{"question": "exam-style question grounded in the material", "answer": "worked answer", "topic": "...", "difficulty": "easy|medium|hard"}],  (8-12)',
-    ' "gaps": [{"topic": "a concept the material uses or assumes but never explains well", "why": "where it is needed"}],  (2-5)',
-    ' "summaries": [{"id": "material id exactly as given", "summary": "two sentences"}]}',
+    ' "outline": [{"week": number|null, "topic": "...", "subtopics": ["..."], "materials": ["file title"]}],',
+    ' "glossary": [{"term": "...", "definition": "...", "source": "file title, p.N"}],  (merge duplicates, 15-40)',
+    ' "formulas": [{"name": "...", "latex": "...", "when": "..."}],  (merge duplicates)',
+    ' "mistakes": [{"mistake": "...", "fix": "..."}],  (6-12, the most important)',
+    ' "practice": [{"question": "...", "answer": "...", "topic": "...", "difficulty": "easy|medium|hard"}],  (8-12, across the course)',
+    ' "gaps": [{"topic": "a concept the files use or assume but never explain well", "why": "where it is needed"}],  (2-5)',
+    ' "code": "the course code exactly as printed on the files (e.g. CS 103), or null if the files never show one"}',
     "",
-    "COURSE MATERIAL:",
-    text,
-  ].join("\n");
-
-  const raw = await complete(system, user, { json: true, maxOutputTokens: 16000 });
-  const brain = parseJsonBlock<Brain>(raw);
-  if (!brain || typeof brain.overview !== "string") throw new Error("MoeAI could not organize this course. Try again.");
-
-  const arr = <T,>(v: T[] | undefined) => (Array.isArray(v) ? v : []);
+    "FILE DIGESTS:",
+    digestText,
+  ].join("\n"), 9000);
+  if (typeof merged.overview !== "string" || !merged.overview.trim()) throw new Error("MoeAI returned an empty course map. Try again.");
   const { error } = await sb.from("course_brain").upsert({
     course_id: course.id,
-    overview: brain.overview,
-    outline: arr(brain.outline),
-    glossary: arr(brain.glossary),
-    formulas: arr(brain.formulas),
-    mistakes: arr(brain.mistakes),
-    practice: arr(brain.practice),
-    gaps: arr(brain.gaps),
+    overview: merged.overview,
+    outline: arr(merged.outline),
+    glossary: arr(merged.glossary),
+    formulas: arr(merged.formulas),
+    mistakes: arr(merged.mistakes),
+    practice: arr(merged.practice),
+    gaps: arr(merged.gaps),
     updated_at: new Date().toISOString(),
   });
   if (error) throw new Error(error.message);
+  // A code printed on the lecturer's own files replaces the seeded guess.
+  const printed = typeof (merged as { code?: unknown }).code === "string" ? String((merged as { code?: string }).code) : "";
+  if (printed && !course.code_verified) await sb.rpc("set_course_code", { p_course: course.id, p_code: printed }).then(() => {}, () => {});
+  return merged;
+}
 
-  const ids = new Set(materials.map((m) => m.id));
-  await Promise.all(arr(brain.summaries).filter((s) => ids.has(s.id) && s.summary).map((s) =>
-    sb.from("course_materials").update({ summary: String(s.summary).slice(0, 600) }).eq("id", s.id),
-  ));
-  return brain;
+/** Everything at once (server-side callers): digest files that have none, then merge. */
+export async function buildBrain(sb: SupabaseClient, course: { id: string; code: string; title: string; code_verified?: boolean | null }): Promise<Brain> {
+  for (const m of await readyMaterials(sb, course.id)) if (!m.digest) await digestMaterial(sb, course, m.id);
+  return mergeBrain(sb, course);
+}
+
+/** Which files still need a digest, for the organizer page to walk through one call at a time. */
+export async function organizePlan(sb: SupabaseClient, courseId: string, fresh: boolean) {
+  const materials = await readyMaterials(sb, courseId);
+  return materials.map((m) => ({ id: m.id, title: m.title, needsDigest: fresh || !m.digest }));
 }
 
 export async function researchGap(
   sb: SupabaseClient,
-  course: { id: string; code: string; title: string },
+  course: { id: string; code: string; title: string; code_verified?: boolean | null },
   gap: { topic: string; why?: string },
   userId: string,
 ) {
@@ -131,7 +193,7 @@ export async function researchGap(
   };
   const system = "You are the MoeAI Organizer writing a supplementary study note for a university course. Research the topic, then write clearly for a first-year student. Use Markdown and LaTeX ($...$). Be accurate; prefer standard textbook treatments.";
   const user = [
-    `Course: ${course.code} ${course.title}`,
+    `Course: ${courseName(course)}`,
     `Topic the lecture material assumes but does not explain: ${gap.topic}`,
     gap.why ? `Where it is needed: ${gap.why}` : "",
     "",

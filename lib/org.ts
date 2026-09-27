@@ -62,7 +62,7 @@ export type OrgCourse = {
 export async function orgCourses(sb: SupabaseClient, userId: string): Promise<OrgCourse[]> {
   const { data: enrolled } = await sb
     .from("course_enrollments")
-    .select("role, courses(id, code, title, description, year, semester, accent)")
+    .select("role, courses(id, code, code_verified, title, description, year, semester, accent)")
     .eq("user_id", userId);
   const courses = (enrolled ?? [])
     .map((e) => ({ role: e.role as string, course: (Array.isArray(e.courses) ? e.courses[0] : e.courses) as Omit<OrgCourse, "role" | "materials" | "overview"> | null }))
@@ -76,9 +76,11 @@ export async function orgCourses(sb: SupabaseClient, userId: string): Promise<Or
   return courses
     .map(({ role, course }) => ({
       ...course!,
+      // Seeded codes were guesses: students see a code only once it is verified.
+      code: (course as { code_verified?: boolean }).code_verified ? course!.code : "",
       role,
-      materials: (materials ?? []).filter((m) => m.course_id === course!.id).map(({ course_id: _c, created_at: _d, ...m }) => m),
+      materials: (materials ?? []).filter((m) => m.course_id === course!.id).map(({ course_id: _c, ...m }) => m),
       overview: brains?.find((b) => b.course_id === course!.id)?.overview ?? null,
     }))
-    .sort((a, b) => a.code.localeCompare(b.code));
+    .sort((a, b) => a.title.localeCompare(b.title));
 }

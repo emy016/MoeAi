@@ -31,6 +31,7 @@ import { usePersonal } from '../personal/PersonalContext';
 import { modelLabel, useAccount } from '../account/AccountContext';
 import KaTeXMessage from '../chat/KaTeXMessage';
 import RichMessage from '../chat/RichMessage';
+import MoeAIMark from '../components/MoeAIMark';
 import Studio from '../chat/Studio';
 import CalendarAlertModal from '../components/CalendarAlertModal';
 import ChatAttachmentPreview from '../components/ChatAttachmentPreview';
@@ -220,7 +221,7 @@ function ChatEmptyState({ lecture, subject, model, onPick, onStudio, onRead }) {
   const grounded = Boolean(subject?.orgCourseId);
   return (
     <View style={styles.empty}>
-      <View style={[styles.emptyMark, { backgroundColor: colors.card }]}><SparklesIcon size={26} color={colors.accent} /></View>
+      <MoeAIMark size={60} color={colors.accent} />
       <Text style={[styles.emptyTitle, { color: colors.textPrimary }, type(20, 'bold', 26)]}>{lecture?.title || t('newChat')}</Text>
       {model ? (
         <View style={[styles.modelChip, { backgroundColor: colors.card }]}>
@@ -228,7 +229,7 @@ function ChatEmptyState({ lecture, subject, model, onPick, onStudio, onRead }) {
           <Text style={[{ color: colors.textSecondary }, type(11, 'bold', 15)]}>{model}</Text>
         </View>
       ) : null}
-      <Text style={[styles.emptyText, { color: colors.textMuted }, type(13, 'regular', 19)]}>{grounded ? t('groundedNote') : t('emptyChat')}</Text>
+      {!grounded ? <Text style={[styles.emptyText, { color: colors.textMuted }, type(13, 'regular', 19)]}>{t('emptyChat')}</Text> : null}
       <Studio onPick={onStudio} />
       <View style={[styles.suggestions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {SUGGESTIONS.map((key) => (

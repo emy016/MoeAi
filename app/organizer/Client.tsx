@@ -184,9 +184,25 @@ export default function Client() {
     setError("");
     setTab("brain");
     setBusy("MoeAI is organizing the course");
-    note(`Organizing ${course.code} from ${uploaded.filter((m) => m.status === "ready").length} files…`);
+    note(`Organizing ${course.code || course.title} from ${uploaded.filter((m) => m.status === "ready").length} files…`);
     try {
-      const { brain: built } = await api<{ brain: Brain }>("/api/organizer/brain", { method: "POST", json: { courseId: course.id } });
+      // One file per call, then one merge: each step fits in a serverless call,
+      // and a failed file is named instead of failing the whole course.
+      const { files } = await api<{ files: { id: string; title: string; needsDigest: boolean }[] }>("/api/organizer/brain", { method: "POST", json: { courseId: course.id, step: "plan", fresh: false } });
+      const failed: string[] = [];
+      for (const [i, file] of files.filter((f) => f.needsDigest).entries()) {
+        setBusy(`MoeAI is reading ${file.title} (${i + 1}/${files.length})`);
+        try {
+          await api("/api/organizer/brain", { method: "POST", json: { courseId: course.id, step: "digest", materialId: file.id } });
+          note(`✓ Read ${file.title}`);
+        } catch (err) {
+          failed.push(file.title);
+          note(`✗ ${file.title}: ${err instanceof Error ? err.message : "could not read it"}`);
+        }
+      }
+      setBusy("MoeAI is building the course map");
+      const { brain: built } = await api<{ brain: Brain }>("/api/organizer/brain", { method: "POST", json: { courseId: course.id, step: "merge" } });
+      if (failed.length) note(`${failed.length} file${failed.length > 1 ? "s" : ""} skipped; organize again to retry ${failed.length > 1 ? "them" : "it"}.`);
       note(`✓ Course map, ${list(built.glossary).length} glossary terms, ${list(built.formulas).length} formulas, ${list(built.mistakes).length} common mistakes, ${list(built.practice).length} practice questions`);
       await refresh();
       if (thenResearch) {
@@ -275,10 +291,10 @@ export default function Client() {
               <h2>Your courses</h2>
               <div className="org-list" style={{ marginTop: 0 }}>
                 {courses.map((c) => (
-                  <button key={c.id} className="org-item" onClick={() => setCourseId(c.id)} style={{ cursor: "pointer", borderColor: c.id === courseId ? "rgba(244,63,109,0.6)" : undefined }}>
+                  <button key={c.id} className="org-item" onClick={() => setCourseId(c.id)} style={{ cursor: "pointer", outline: c.id === courseId ? "2px solid var(--app-accent)" : undefined }}>
                     <span style={{ display: "grid" }}>
-                      <strong>{c.code}</strong>
-                      <span className="org-muted" style={{ margin: 0 }}>{c.title}</span>
+                      <strong>{c.title}</strong>
+                      <span className="org-muted" style={{ margin: 0 }}>{c.code || "No verified code yet"}</span>
                     </span>
                   </button>
                 ))}
@@ -295,7 +311,13 @@ export default function Client() {
           <section className="org-card" style={{ minWidth: 0 }}>
             <div className="org-row" style={{ justifyContent: "space-between" }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 18 }}>{course?.code} {course?.title}</h2>
+                <h2 style={{ margin: 0, fontSize: 18 }}>{course?.code ? `${course.code} ` : ""}{course?.title}</h2>
+                <button className="org-btn ghost small" style={{ marginTop: 6 }} onClick={async () => {
+                  if (!course) return;
+                  const code = window.prompt("Course code as printed on your slides (e.g. CS103). MoeAI also reads it from the files when you organize.", course.code || "");
+                  if (!code) return;
+                  try { await api("/api/organizer/brain", { method: "POST", json: { courseId: course.id, step: "code", code } }); window.location.reload(); } catch (err) { setError(err instanceof Error ? err.message : "Could not save the code."); }
+                }}>{course?.code ? "Edit course code" : "Set course code"}</button>
                 <p className="org-muted">
                   {uploaded.length} files · {uploaded.reduce((n, m) => n + (m.chunk_count ?? 0), 0)} passages
                   {brain?.updated_at ? ` · brain updated ${new Date(brain.updated_at).toLocaleString()}` : " · no brain yet"}
@@ -474,7 +496,7 @@ function TryIt({ course }: { course: Course }) {
       const res = await fetch("/api/moeai", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ surface: "workspace", messages: [{ role: "user", content: question }], learning: { courseId: course.id, subject: `${course.code} ${course.title}` } }),
+        body: JSON.stringify({ surface: "workspace", messages: [{ role: "user", content: question }], learning: { courseId: course.id, subject: course.title } }),
       });
       if (!res.ok || !res.body) throw new Error((await res.json().catch(() => ({}))).error || "MoeAI did not answer.");
       const reader = res.body.getReader();

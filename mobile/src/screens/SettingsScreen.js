@@ -161,7 +161,6 @@ export default function SettingsScreen(){
       <Inner title={t('theme')} description={t('themeDesc')}><Segmented value={p.theme} options={THEME_OPTIONS} onChange={v=>setPreference('theme',v)}/></Inner>
       <Inner title={t('accentColor')} description={t('accentDesc')} stack><View style={s.accentBlock}><AccentSelector value={p.accent} onChange={value=>setPreference('accent',value)}/></View><MoreAccents value={p.accent} onChange={value=>setPreference('accent',value)}/></Inner>
       <Inner title={t('surfaceTitle')} description={t('surfaceDesc')} stack><SurfacePicker value={p.surface} onChange={value=>setPreference('surface',value)}/></Inner>
-      <Inner title={t('tintTitle')} description={t('tintDesc')}><Toggle value={!!p.tint} onChange={v=>setPreference('tint',v)} label={t('tintTitle')}/></Inner>
       <Inner title={t('appLanguage')} description={t('languageDesc')} onPress={()=>setLanguageOpen(true)}><View style={s.valueWrap}><Text numberOfLines={1} style={[{color:colors.accent,textAlign:isRTL?'left':'right'},type(13,'semiBold')]}>{lang.nativeName}</Text><Text numberOfLines={1} style={[{color:colors.textMuted,textAlign:isRTL?'left':'right'},type(10)]}>{lang.names[p.language]}</Text></View></Inner>
     </Section>
     <Section title={t('accessibility')}>

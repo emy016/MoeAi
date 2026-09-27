@@ -295,11 +295,11 @@ Object.assign(en, {
   surfaceTitle: 'Background style', surfaceDesc: 'Pick the surfaces the whole app is painted on.',
   surfaceDefault: 'Classic', surfaceMidnight: 'Midnight', surfaceAmoled: 'Pure black', surfaceWarm: 'Warm', surfaceForest: 'Forest',
   tintTitle: 'Tint with accent', tintDesc: 'Wash your accent color lightly into every surface.',
-  pink: 'Pink', teal: 'Teal', amber: 'Amber', indigo: 'Indigo', lime: 'Lime', sky: 'Sky', coral: 'Coral', crimson: 'Crimson',
+  pink: 'Magenta', teal: 'Cyan', amber: 'Gold', slate: 'Slate', mocha: 'Mocha', indigo: 'Indigo', lime: 'Lime', sky: 'Sky', coral: 'Coral', crimson: 'Crimson',
 });
 Object.assign(ar, {
   surfaceTitle: 'شكل الخلفية', surfaceDesc: 'اختار الألوان اللي التطبيق كله مرسوم عليها.',
   surfaceDefault: 'كلاسيك', surfaceMidnight: 'منتصف الليل', surfaceAmoled: 'أسود صافي', surfaceWarm: 'دافي', surfaceForest: 'غابة',
   tintTitle: 'لوّن بلون التمييز', tintDesc: 'خلي لون التمييز يبان خفيف على كل الأسطح.',
-  pink: 'بمبي', teal: 'تركواز', amber: 'كهرماني', indigo: 'نيلي', lime: 'ليموني', sky: 'سماوي', coral: 'مرجاني', crimson: 'قرمزي',
+  pink: 'فوشيا', teal: 'سماوي', amber: 'دهبي', slate: 'رمادي', mocha: 'موكا', indigo: 'نيلي', lime: 'ليموني', sky: 'سماوي', coral: 'مرجاني', crimson: 'قرمزي',
 });

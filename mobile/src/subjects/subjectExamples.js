@@ -72,7 +72,7 @@ export function orgSubjects(courses) {
   return (Array.isArray(courses) ? courses : []).map((course) => ({
     id: `org-${course.id}`,
     orgCourseId: course.id,
-    code: course.code,
+    code: course.code || '',
     name: course.title,
     owner: 'university',
     iconQuery: course.title,
@@ -83,7 +83,7 @@ export function orgSubjects(courses) {
       title: m.week ? `Week ${m.week}: ${m.title}` : m.title,
       summary: m.summary || '',
       progress: 0,
-      createdAt: `2026-09-${String(Math.min(28, 1 + index * 3)).padStart(2, '0')}T09:00:00.000Z`,
+      createdAt: m.created_at || new Date().toISOString(),
       files: [],
     })),
   }));
