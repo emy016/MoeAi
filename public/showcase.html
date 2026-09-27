@@ -310,7 +310,60 @@
     .sg-canvas-host canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
     /* Below this width the sphere costs more than it gives, so the page simply drops it. */
     @media (max-width: 700px) { .sphere-band { display: none; } }
-  </style>
+  
+    /* ─── TIMELINE (moeai-timeline.js; port of the Hyperiux Timeline) ─── */
+    .tl-intro { text-align: center; padding: 70px 20px 0; }
+    .tl { position: relative; height: 200vw; --tl-accent: #ea4349; color: var(--txt1); }
+    .tl-stick { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; padding-top: 9vh; box-sizing: border-box; }
+    .tl-track { display: flex; align-items: center; gap: 5vw; padding: 0 5vw; width: 250vw; height: 46vw; max-height: 86vh; box-sizing: border-box; }
+    .tl-hero { flex: none; width: 30vw; height: 100%; border-radius: 1.2vw; overflow: hidden; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tl-accent) 28%, transparent), transparent 70%), var(--bg2); display: grid; place-items: center; }
+    .tl-hero img { width: 92%; height: 92%; object-fit: contain; }
+    .tl-body { position: relative; height: 100%; flex: 1; min-width: 0; }
+    .tl-axis { position: absolute; left: 0; top: 49%; width: 100%; display: flex; align-items: center; }
+    .tl-cap { width: .8vw; height: .8vw; border-radius: 50%; background: var(--tl-accent); flex: none; }
+    .tl-grow { height: 2px; width: 0; border-radius: 2px; background: var(--tl-accent); }
+    .tl-half { height: 50%; display: flex; width: 100%; }
+    .tl-title { width: 16%; flex: none; padding-top: 1.5vw; }
+    .tl-title h2 { font-size: 3vw; line-height: .95; margin: 0; }
+    .tl-period { width: 30%; flex: none; padding-top: 2vw; }
+    .tl-period p { font-size: 1.65vw; color: var(--txt3); margin: 0; }
+    .tl-items { display: flex; height: 100%; gap: 12vw; }
+    .tl-bottom .tl-items { gap: 17vw; margin-left: 5vw; }
+    .tl-item { position: relative; height: 100%; width: 26vw; padding: 0 2.6vw; box-sizing: border-box; flex: none; }
+    .tl-stem { position: absolute; left: 0; top: 0; height: 100%; }
+    .tl-stem.below { top: auto; bottom: -1%; display: flex; flex-direction: column; justify-content: flex-end; }
+    .tl-dot { width: 1vw; height: 1vw; border-radius: 50%; background: var(--tl-accent); transform: translateX(-50%); }
+    .tl-line { width: 2px; height: 94%; background: var(--tl-accent); border-radius: 2px; margin-left: -1px; }
+    .tl-copy { margin-top: -1vw; display: flex; flex-direction: column; gap: .6vw; }
+    .tl-item.below .tl-copy { height: 100%; justify-content: flex-end; margin-top: 0; }
+    .tl-img { width: 100%; height: 8vw; object-fit: cover; object-position: top; border-radius: .9vw; background: var(--bg2); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .tl-copy h4 { font-size: 1.9vw; line-height: 1; margin: 0; }
+    .tl-copy p { font-size: 1.05vw; line-height: 1.25; color: var(--txt2); margin: 0; width: 95%; }
+    @media (max-width: 600px) {
+      .tl { height: 400vh; }
+      .tl-stick { top: 0; padding-top: 12vh; }
+      .tl-track { width: 800vw; height: 80vh; padding: 0 7vw; }
+      .tl-hero { width: 85vw; height: 65vw; border-radius: 5vw; }
+      .tl-cap { width: 2vw; height: 2vw; }
+      .tl-title { width: 26%; padding-top: 5vw; } .tl-title h2 { font-size: 8.5vw; }
+      .tl-period { width: 30%; padding-top: 5vw; } .tl-period p { font-size: 4.2vw; }
+      .tl-items, .tl-bottom .tl-items { gap: 40vw; margin-left: 7vw; }
+      .tl-item { width: 70vw; padding: 0 7vw; }
+      .tl-dot { width: 2.5vw; height: 2.5vw; }
+      .tl-img { height: 34vw; border-radius: 3vw; }
+      .tl-copy h4 { font-size: 6.4vw; } .tl-copy p { font-size: 4.4vw; }
+    }
+    /* No GSAP or reduced motion: the same strip, scrolled by hand. */
+    .tl.tl-static { height: auto; } .tl.tl-static .tl-stick { position: relative; height: auto; overflow-x: auto; padding: 20px 0 30px; }
+    .tl.tl-static .tl-grow { width: 98%; }
+    .tl.tl-static .tl-track { height: 38vw; } @media (max-width: 600px) { .tl.tl-static .tl-track { height: 90vw; width: 560vw; } }
+    /* Gallery: every accent is the student's own. */
+    .accent-gallery { display: flex; gap: 14px; overflow-x: auto; padding: 8px 20px 26px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .accent-gallery::-webkit-scrollbar { display: none; }
+    .accent-gallery figure { flex: none; width: 210px; margin: 0; scroll-snap-align: center; }
+    .accent-gallery img { width: 100%; aspect-ratio: 400 / 860; object-fit: cover; object-position: top; border-radius: 22px; background: var(--bg2); box-shadow: 0 14px 36px rgba(0,0,0,.35); }
+    .accent-gallery figcaption { font-size: 13px; color: var(--txt3); margin-top: 8px; text-align: center; }
+</style>
 </head>
 <body>
   <div class="orbs" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
@@ -365,6 +418,28 @@
   <section class="sphere-band" aria-label="MoeAI, visualised">
     <div class="sphere-stage" id="sphereStage"><div class="sg-grid-bg"></div></div>
     <p class="sphere-caption">Every lecture, every equation, every snippet you were handed — circling one place, instead of scattered across eight folders and a group chat.</p>
+  </section>
+
+
+  <!-- ─── TIMELINE ──────────────────────────────────────────── -->
+  <section class="tl-intro" aria-label="MoeAI timeline">
+    <h2 class="center">From a Telegram channel to a tutor that knows your course.</h2>
+  </section>
+  <section id="journey" class="tl"></section>
+
+  <!-- ─── ACCENT GALLERY ─────────────────────────────────────── -->
+  <section class="band" aria-label="MoeAI in every colour">
+    <h2 class="center">Your colours, your MoeAI.</h2>
+    <div class="accent-gallery">
+      <figure><img src="/assets/showcase/dm-red.webp" alt="The DM with MoeAI, in red" loading="lazy"><figcaption>DM, red</figcaption></figure>
+      <figure><img src="/assets/showcase/practice-green.webp" alt="A practice question with rendered math, in green" loading="lazy"><figcaption>Practice, green</figcaption></figure>
+      <figure><img src="/assets/showcase/ode-cyan.webp" alt="The first-order ODE solver, in cyan" loading="lazy"><figcaption>ODE solver, cyan</figcaption></figure>
+      <figure><img src="/assets/showcase/matrix-gold.webp" alt="The matrix calculator, in gold" loading="lazy"><figcaption>Matrices, gold</figcaption></figure>
+      <figure><img src="/assets/showcase/kmap-blue.webp" alt="The Karnaugh map simplifier in light mode, blue" loading="lazy"><figcaption>K-maps, blue on light</figcaption></figure>
+      <figure><img src="/assets/showcase/sims-cyan.webp" alt="Simulators picked from the course material" loading="lazy"><figcaption>Simulators, cyan</figcaption></figure>
+      <figure><img src="/assets/showcase/chat-magenta.webp" alt="Home, in magenta" loading="lazy"><figcaption>Home, magenta</figcaption></figure>
+      <figure><img src="/assets/showcase/home-orange.webp" alt="Home, in orange" loading="lazy"><figcaption>Home, orange</figcaption></figure>
+    </div>
   </section>
 
   <!-- ─── THE PROBLEM ───────────────────────────────────────── -->
@@ -656,6 +731,7 @@
     }
   </script>
   <script src="/assets/sphere-gallery.js" defer></script>
+  <script src="/assets/moeai-timeline.js" defer></script>
   <script src="/assets/brand.js" defer></script>
   <script src="/assets/edumoe-shell.js" defer></script>
 </body>

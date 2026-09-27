@@ -192,7 +192,7 @@ Object.assign(en, {
   askPagePrompt: 'Explain page {n} of this lecture ({heading}) step by step.',
   suggestSummary: 'Summarize this lecture', suggestExplain: 'Explain the main idea simply', suggestExample: 'Walk me through a worked example', suggestQuiz: 'Quiz me on this lecture',
   groundedNote: "I answer from your lecturer's own slides and cite the page, so you can check.",
-  youAreOn: "YOU'RE ON", ragBadge: 'Course-grounded', modelPitch: 'Your tutor answers from your faculty\'s own material: {courses} courses, {lectures} lectures, cited to the page. Pick a course to start.',
+  youAreOn: "YOU'RE ON", ragBadge: 'Course-grounded', modelPitch: '{courses} courses · {lectures} lectures',
   cancel: 'Cancel',
 });
 Object.assign(ar, {
@@ -207,7 +207,7 @@ Object.assign(ar, {
   askPagePrompt: 'اشرحلي صفحة {n} من المحاضرة دي ({heading}) خطوة بخطوة.',
   suggestSummary: 'لخّصلي المحاضرة', suggestExplain: 'اشرحلي الفكرة الأساسية ببساطة', suggestExample: 'حل معايا مثال خطوة بخطوة', suggestQuiz: 'اختبرني في المحاضرة',
   groundedNote: 'بجاوب من سلايدات الدكتور نفسها وبقولك رقم الصفحة، عشان تتأكد بنفسك.',
-  youAreOn: 'إنت على', ragBadge: 'مبني على موادك', modelPitch: 'المساعد بتاعك بيجاوب من مواد كليتك نفسها: {courses} مواد و{lectures} محاضرة، ومعاها رقم الصفحة. اختار مادة وابدأ.',
+  youAreOn: 'إنت على', ragBadge: 'مبني على موادك', modelPitch: '{courses} مواد · {lectures} محاضرة',
   cancel: 'إلغاء',
 });
 
