@@ -879,6 +879,9 @@
     html.embed .btn, html.embed .btn-primary, html.embed button.primary { background: var(--accent) !important; background-image: none !important; color: #fff !important; border: none !important; border-radius: 999px !important; box-shadow: none !important; font-weight: 700 !important; }
     html.embed .mode-tab.active, html.embed .lb-filter.active { background: var(--accent) !important; color: #fff !important; }
     html.embed .crt-overlay, html.embed .theme-switcher { display: none !important; }
+    html.embed .mode-tabs, html.embed .mode-tabs.lg { background: transparent !important; padding: 0 !important; gap: 6px !important; }
+    html.embed .p-rank-badge, html.embed .rank-badge { background: var(--bg3) !important; color: var(--accent) !important; }
+    html.embed .page-head > p { color: var(--txt3); }
     /* Same shapes as the app: no outlines anywhere, pill badges, 6px rounded bars, unlocked items tinted rather than outlined. */
     html.embed [class*="badge"], html.embed .avatar, html.embed [class*="avatar"] { border: none !important; }
     html.embed .rank-progress, html.embed .ach-progress { height: 6px !important; border-radius: 3px !important; background: var(--bg3) !important; }
@@ -931,8 +934,8 @@
   <!-- ─── CONTENT ───────────────────────────────────────────────── -->
   <div class="wrap" id="app">
     <div class="page-head">
-      <h1><i class="ic" data-ic="trophy"></i> Ultimate Ranked Arena</h1>
-      <p>Play real students live, or train against 8 bots. Climb the Elo ladder and prove your mastery.</p>
+      <h1><i class="ic" data-ic="trophy"></i> Ranked Arena</h1>
+      <p>Questions come from your own courses. Play classmates live or train against bots.</p>
       <div class="stats-row" id="statsRow">
         <div class="stat-pill">🏆 <span class="num" id="statElo">1200</span> Elo</div>
         <div class="stat-pill">✅ <span class="num" id="statWins">0</span> wins</div>
@@ -1300,7 +1303,28 @@
       { q: 'What is the correct way to allocate memory in C++?', choices: ['malloc', 'new', 'calloc', 'alloc'], correct: 1, exp: 'The <code>new</code> keyword allocates memory on the heap.', diff: 'medium' },
     ];
 
+    // Questions from the student's own courses (MoeAI's course map and lecture
+    // passages, /api/ranked/questions). The bank above is only the fallback for
+    // guests and courses without material yet.
+    let MATERIAL_POOL = [];
+    async function loadMaterialQuestions() {
+      try {
+        const res = await fetch('/api/ranked/questions?count=20', { credentials: 'include' });
+        const data = await res.json();
+        if (Array.isArray(data.questions) && data.questions.length) MATERIAL_POOL = data.questions.map((q) => ({ ...q, concept: q.course || 'Your course' }));
+      } catch (_) {}
+    }
+    loadMaterialQuestions();
+
     function getRandomQuestions(count) {
+      if (MATERIAL_POOL.length >= Math.min(count, 3)) {
+        const mine = [...MATERIAL_POOL].sort(() => Math.random() - 0.5).slice(0, count);
+        const ids = new Set(mine);
+        MATERIAL_POOL = MATERIAL_POOL.filter((q) => !ids.has(q));
+        if (MATERIAL_POOL.length < 10) loadMaterialQuestions();
+        if (mine.length >= count) return mine;
+        return mine.concat([...RANKED_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, count - mine.length));
+      }
       const shuffled = [...RANKED_QUESTIONS];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -2484,6 +2508,17 @@
     window.closeTournamentResults = closeTournamentResults;
     window.closeTournamentModal = closeTournamentModal;
     window.showToast = showToast;
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/contrib/auto-render.min.js" defer></script>
+  <script>
+    /* Formulas in course questions ($...$) are typeset as they appear. */
+    (function () {
+      var t = null;
+      function typeset() { if (!window.renderMathInElement) return; var el = document.getElementById('matchContainer') || document.body; try { window.renderMathInElement(el, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false }); } catch (e) {} }
+      new MutationObserver(function (list) { for (var i = 0; i < list.length; i++) { var n = list[i].target; if (n && n.closest && n.closest('.katex')) return; } clearTimeout(t); t = setTimeout(typeset, 50); }).observe(document.documentElement, { childList: true, subtree: true });
+    })();
   </script>
   <script src="/assets/brand.js" defer></script>
   <script src="/assets/ranked-live.js" defer></script>
