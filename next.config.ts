@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/moeai": ["./prompts/**"],
     "/api/health": ["./prompts/**"],
+    "/api/dm": ["./prompts/**"],
+    "/api/cron": ["./prompts/**"],
   },
 
   // The app shell and its version file must never be served from a cache:

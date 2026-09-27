@@ -10,6 +10,7 @@
 import * as directives from "./directives.ts";
 import { ARABIC_SCRIPT_TARGETS, FRANCO_TARGETS, MIXED_TARGETS, type LanguageDecision } from "./language.ts";
 import { boostedTags, type Signals } from "./signals.ts";
+import { voiceCalibration } from "./voice.ts";
 import { estimateTokens, MODULE_ORDER, Priority, type SpecRegistry, type Unit } from "./specs.ts";
 
 const CONDITIONAL = new Set(["MEMORY", "TOOLS"]);
@@ -120,9 +121,10 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
 
   const contract = directives.runtimeContract(opts.assistantName ?? "MoeAI");
   const languageBlock = directives.languageDirective(opts.decision);
+  const voiceBlock = voiceCalibration(opts.decision.target);
   const appContext = (opts.appContext ?? []).filter(Boolean);
   const reference = (opts.referenceContext ?? []).filter(Boolean);
-  const fixed = [contract, directives.PERSONALITY_ACTIVATION, directives.TUTORING_ACTIVATION, languageBlock, ...appContext];
+  const fixed = [contract, directives.PERSONALITY_ACTIVATION, directives.TUTORING_ACTIVATION, languageBlock, voiceBlock, ...appContext];
   const fixedCost = fixed.reduce((sum, b) => sum + estimateTokens(b), 0);
   const available = Math.max(600, opts.budgetTokens - fixedCost);
 
@@ -156,6 +158,9 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
   if (!tutoringActivated) parts.push(directives.TUTORING_ACTIVATION);
   parts.push(directives.RESPONSE_STYLE_ACTIVATION);
   parts.push(...appContext);
+  // Examples of the voice sit last before the language rule: what the model
+  // reads right before the conversation is what it imitates.
+  parts.push(voiceBlock);
   parts.push(languageBlock);
 
   const system = parts.join("\n\n").trim() + "\n";

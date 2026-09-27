@@ -28,7 +28,7 @@ export type AttachedImage = { name: string; dataUrl: string };
 // memory policy in full) buried the personality: with 24,000 tokens the same
 // model answered like a generic assistant; with the bot's selection it sounds
 // like Emy. Tested side by side on the same messages.
-const GEMINI_BUDGET_TOKENS = 5_900;
+const GEMINI_BUDGET_TOKENS = 6_500; // + the voice calibration examples
 const GROQ_BUDGET_TOKENS = 5_900;
 
 /** For the health check: are Eslam's files loaded and mapped? */

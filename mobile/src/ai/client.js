@@ -163,6 +163,7 @@ export async function generateMoeAIReply({ text, files = [], lectureFiles = [], 
       body: JSON.stringify({
         surface: 'app',
         personal: personalForRequest(),
+        awareness: awarenessForRequest(),
         ...(replyLanguage ? { replyLanguage } : {}),
         messages: [...cleanHistory(history), { role: 'user', content: question.slice(0, MAX_MESSAGE_CHARS) }],
         learning: { subject: subject?.name || '', lecture: lecture?.title || '', materials, ...(subject?.orgCourseId ? { courseId: subject.orgCourseId } : {}), ...(lecture?.materialId ? { materialId: lecture.materialId } : {}) },
@@ -261,4 +262,25 @@ export async function practiceRequest({ prompt, json = true, subject, lecture, l
     throw failure;
   }
   return json ? body.json : String(body.text || '');
+}
+
+/** The device's clock, so MoeAI knows it is 4am for the student (not for the server). */
+export function awarenessForRequest() {
+  const now = new Date();
+  return { now: now.toISOString(), tzOffsetMinutes: now.getTimezoneOffset() };
+}
+
+/**
+ * Tells MoeAI what the student just did elsewhere in the app, so every chat
+ * (and the DM) knows. Fire and forget; guests are ignored by the server.
+ */
+export function reportEvent(kind, summary, data = {}) {
+  try {
+    fetch(`${API_BASE_URL}/api/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ kind, summary: String(summary || '').slice(0, 280), data }),
+    }).catch(() => {});
+  } catch (_) {}
 }

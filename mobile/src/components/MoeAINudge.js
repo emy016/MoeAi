@@ -31,7 +31,7 @@ export default function MoeAINudge({ nudge, onAccept, onDismiss }) {
       <Text style={[{ color: colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}>{nudge.body}</Text>
       <View style={[styles.actions, row]}>
         <ElasticPressable shape="pill" onPress={() => onAccept(nudge)} accessibilityRole="button">
-          <View style={[styles.button, { backgroundColor: colors.accent }]}><Text style={[{ color: '#fff' }, type(12, 'bold', 16)]}>{t('nudgeGo')}</Text></View>
+          <View style={[styles.button, { backgroundColor: colors.accent }]}><Text style={[{ color: '#fff' }, type(12, 'bold', 16)]}>{['dm', 'deadline', 'start', 'fun', 'night', 'dormant'].includes(nudge.kind) ? t('nudgeReply') : t('nudgeGo')}</Text></View>
         </ElasticPressable>
         <ElasticPressable shape="pill" onPress={() => onDismiss(nudge)} accessibilityRole="button">
           <View style={[styles.button, { backgroundColor: colors.cardButton }]}><Text style={[{ color: colors.textSecondary }, type(12, 'bold', 16)]}>{t('nudgeLater')}</Text></View>

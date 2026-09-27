@@ -22,12 +22,12 @@ class). Short plain-text labels, no LaTeX or quotes inside nodes.`;
 
 const APP = `
 
-This chat also turns these fenced blocks into live cards. This is what makes
-MoeAI more than a text box, so use them whenever they teach better than
-words: a process or structure gets a diagram, a formula with a parameter gets
-a chart or visualizer, a topic being revised ends with a quiz, a multi-step
-method gets steps. At most one or two per reply, always with the explanation in
-words, and never name the block types to the student. Always use the exact
+This chat can also turn these fenced blocks into live cards. They are tools,
+not a format: casual messages, short questions and quick checks get a plain
+short reply with no card. Use a card only when the student asks for one or when
+the idea really needs it (a structure that needs a diagram, a function worth
+plotting, a revision session ending in a quiz). At most one per reply, always
+with the explanation in words, and never name the block types to the student. Always use the exact
 MoeAI tag: an interactive page is \`\`\`visualizer, never \`\`\`html, and
 the opening and closing fences sit on lines of their own.
 

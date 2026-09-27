@@ -8,6 +8,13 @@
  */
 import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { completeChat } from "@/lib/providers";
+import { reflect, seedDocs } from "@/lib/moeai/alive";
+import { runProactive } from "@/lib/moeai/proactive";
+
+/** One short model call for the jobs below (reflection, proactive lines). */
+const complete = async (system: string, prompt: string) =>
+  (await completeChat([{ role: "system", content: system }, { role: "user", content: prompt }], { maxTokens: 1200 })).text;
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -24,6 +31,18 @@ export async function GET(req: NextRequest) {
 
   const db = supabaseAdmin();
   const now = Date.now();
+
+  // ?job=proactive runs only MoeAI's messages (an hourly schedule can call it:
+  // see docs/SETUP.md); ?job=reflect only its self-review. The daily run does all.
+  const job = new URL(req.url).searchParams.get("job");
+  if (job === "proactive") return Response.json({ ok: true, proactive: await runProactive(db, complete) });
+  if (job === "reflect") {
+    await seedDocs(db);
+    return Response.json({ ok: true, reflect: await reflect(db, complete) });
+  }
+  await seedDocs(db).catch(() => undefined);
+  const reflected = await reflect(db, complete).catch(() => ({ lessons: 0 }));
+  const proactive = await runProactive(db, complete).catch(() => ({ sent: 0, considered: 0 }));
   /**
  * `body` is what the student reads. `prompt` is what gets sent to MoeAI if they
  * act on it — they are not the same sentence, and echoing the notice back at
@@ -114,5 +133,7 @@ const rows: { user_id: string; kind: string; body: string; prompt: string; actio
     considered: rows.length,
     created: toInsert.length,
     skippedWithPending: rows.length - toInsert.length,
+    reflected,
+    proactive,
   });
 }

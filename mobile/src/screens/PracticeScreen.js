@@ -4,7 +4,7 @@ import { ActivityIndicator, Animated, Modal, PanResponder, Platform, ScrollView,
 import KaTeXMessage from '../chat/KaTeXMessage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AcademicCapIcon, ArchiveBoxIcon, ArrowLeftIcon, CheckCircleIcon, DocumentTextIcon, MagnifyingGlassIcon, MinusIcon, PencilSquareIcon, PlusIcon, RectangleStackIcon, Squares2X2Icon, XCircleIcon } from 'react-native-heroicons/outline';
-import { API_BASE_URL } from '../ai/client';
+import { API_BASE_URL, reportEvent } from '../ai/client';
 import Card from '../components/Card';
 import ElasticPressable from '../components/ElasticPressable';
 import ProgressRing from '../components/ProgressRing';
@@ -341,6 +341,14 @@ export default function PracticeScreen({ active = false, onInnerTabChange, onAre
     try { const items = await generateQuestions(session.settings, 2); if (!store.recordGeneration('questions', 2)) throw new Error('Daily limit reached.'); setSession((old) => ({ ...old, items: [...old.items, ...items] })); setIndex(index + 1); }
     catch (cause) { setError(cause?.message || 'Could not load questions.'); } finally { generating.current = false; setBusy(false); }
   };
+  // MoeAI hears about every finished set, wherever the student talks to it next.
+  useEffect(() => {
+    if (view !== 'result' || !result || !session) return;
+    const kind = session.mode === 'exam' ? 'exam' : session.mode === 'flashcards' ? 'flashcards' : 'practice';
+    const where = [session.settings.subject?.name, session.settings.lecture?.title].filter(Boolean).join(' / ') || 'all subjects';
+    reportEvent(kind, `${kind === 'exam' ? 'Timed exam' : kind === 'flashcards' ? 'Flashcards' : 'Practice questions'} on ${where}: ${result.correct}/${result.total}`, { correct: result.correct, total: result.total });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, result]);
   const tally = (correct) => { const nextFeedback = { ...feedback, [index]: { correct } }; setFeedback(nextFeedback); setFlipped(false); flipProgress.setValue(0); if (index + 1 < session.items.length) setIndex(index + 1); else { setResult({ correct: Object.values(nextFeedback).filter((item) => item.correct).length, total: session.items.length }); setView('result'); } };
   const closeResult = () => { setView('home'); setSession(null); setResult(null); setError(''); clearSaved(); };
   return <View style={[s.root, { backgroundColor: colors.background }]}>

@@ -29,6 +29,7 @@ import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
 import { courseBlock, courseBrain, retrieve } from "@/lib/rag/retrieve";
 import { backfillEmbeddings } from "@/lib/rag/backfill";
+import { aliveBlocks, logEvent, looksLikeCorrection, type Awareness } from "@/lib/moeai/alive";
 import { loadPersonal, parseWritten, personalBlock, personalFromRequest, saveWritten, type Personal } from "@/lib/moeai/personal";
 
 export const runtime = "nodejs";
@@ -244,6 +245,13 @@ export async function POST(req: NextRequest) {
     extra.push(`Attachments that could not be included: ${attached.described.join("; ")}. Do not guess their contents.`);
   }
 
+  // ── MoeAI itself, and what is happening right now ───────────────────────
+  // Its own SYSTEM / INSTRUCTIONS / MEMORY files, the student's local time,
+  // what is due soon and what they did elsewhere in the app (DM, arena,
+  // practice, simulators), so every chat is the same MoeAI.
+  const awareness = { ...((raw as { awareness?: Awareness })?.awareness ?? {}), surface: learning ? "a lecture chat" : "the chat" };
+  extra.push(...await aliveBlocks(userId ? sb : null, userId, awareness).catch(() => []));
+
   // ── What the chat can render ────────────────────────────────────────────
   // The MoeAI app draws diagrams, charts and interactive visualizers and runs
   // code; the workspace renders Markdown, math and Mermaid.
@@ -292,6 +300,17 @@ export async function POST(req: NextRequest) {
           // Every extraction is a second model call, so it runs on a cadence
           // rather than on every turn.
           void extractMemory(sb!, userId, question, answer);
+        }
+        if (userId && answer) {
+          // The activity log every surface reads; a correction becomes a lesson
+          // MoeAI reviews when it rewrites its MEMORY.md.
+          const where = (raw?.learning as { lecture?: unknown; subject?: unknown } | undefined);
+          const place = [where?.subject, where?.lecture].filter((v) => typeof v === "string" && v).join(" / ");
+          void logEvent(sb!, "chat", `Asked${place ? ` in ${place}` : ""}: ${question.slice(0, 140)}`, Number.isFinite(Number(awareness.tzOffsetMinutes)) ? { tz: Number(awareness.tzOffsetMinutes) } : {});
+          const previous = [...messages].slice(0, -1).reverse().find((m) => m.role === "assistant")?.content ?? "";
+          if (previous && looksLikeCorrection(question)) {
+            void logEvent(sb!, "correction", `Student said "${question.slice(0, 120)}" about MoeAI's reply "${previous.replace(/\s+/g, " ").slice(0, 150)}"`);
+          }
         }
         if (userId) {
           void sb!
