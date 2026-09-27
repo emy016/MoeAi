@@ -22,7 +22,7 @@
     { id: 'm7', year: '2026', month: 'September', content: 'Lecturers upload their courses; MoeAI teaches from their own slides.', img: '/assets/showcase/tutor-crop.webp' },
   ];
   var TITLE = 'MoeAI, so far';
-  var PERIOD = '2025 — 2026';
+  var PERIOD = '2025–2026';
   var ACCENT = '#ea4349';
   var CDN = 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/';
 
