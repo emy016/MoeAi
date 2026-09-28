@@ -9,20 +9,19 @@
  * cannot load, the same content is a normal horizontally scrollable strip.
  *
  * EDIT THE MILESTONES HERE: dates and wording are a draft to correct.
- * Items alternate above and below the line in date order (4 above, 3 below).
+ * Items alternate above and below the line in date order (3 above, 3 below).
  */
 (function () {
   var MILESTONES = [
-    { id: 'm1', year: '2025', month: 'September', content: 'CS Epic Save starts on Telegram: shared notes and past exams for first-year Computer Science.', img: '/assets/showcase/tg-thanks.webp' },
-    { id: 'm2', year: '2025', month: 'November', content: 'The channel passes 200 students before the first midterms.', img: '/assets/showcase/tg-video.webp' },
-    { id: 'm3', year: '2026', month: 'January', content: 'Emy, the study bot, answers in Egyptian Arabic, Franco and English.', img: '/assets/showcase/tg-bot.webp' },
-    { id: 'm4', year: '2026', month: 'March', content: 'EduMoe goes online: courses, simulators, quizzes and a ranked arena.', img: '/assets/showcase/edumoe-site.webp' },
-    { id: 'm5', year: '2026', month: 'June', content: 'The MoeAI app, built in React Native, is tested by 11 students.', img: '/assets/showcase/home-orange.webp' },
-    { id: 'm6', year: '2026', month: 'August', content: 'MoeAI is pitched at the GenAI Hackathon 2026.', img: '/assets/showcase/hackathon.webp' },
-    { id: 'm7', year: '2026', month: 'September', content: 'Lecturers upload their courses; MoeAI teaches from their own slides.', img: '/assets/showcase/tutor-crop.webp' },
+    { id: 'm1', year: '2026', month: 'January', content: 'CS Epic Save starts on Telegram, as a study community, not a startup.', img: '/assets/showcase/tg-thanks.webp' },
+    { id: 'm2', year: '2026', month: 'March', content: 'The channel passes 140 students before the second semester of first year.', img: '/assets/showcase/tg-video.webp' },
+    { id: 'm3', year: '2026', month: 'Late April', content: 'MoeAI is born: an AI that knows our Computer Science curriculum.', img: '/assets/showcase/tg-bot.webp' },
+    { id: 'm4', year: '2026', month: 'September', content: 'The MoeAI app, built in React Native, opens to every university and organization. Anyone can use it.', img: '/assets/showcase/home-orange.webp' },
+    { id: 'm5', year: '2026', month: 'Late September', content: 'Lecturers upload their courses, and MoeAI teaches from their own slides.', img: '/assets/showcase/tutor-crop.webp' },
+    { id: 'm6', year: '2026', month: 'October', content: 'MoeAI is pitched at the GenAI Hackathon 2026.', img: '/assets/showcase/hackathon.webp' },
   ];
   var TITLE = 'MoeAI, so far';
-  var PERIOD = '2025–2026';
+  var PERIOD = '2026';
   var ACCENT = '#ea4349';
   var CDN = 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/';
 
@@ -74,8 +73,8 @@
       .fromTo(track, { xPercent: 0 }, { xPercent: function () { return -shift(); }, immediateRender: false });
     gsap.to(root.querySelector('.journey-line'), { width: mobile ? '65%' : '98%', ease: 'none', scrollTrigger: { trigger: root, start: mobile ? 'top 30%' : 'top 25%', end: mobile ? '80% 50%' : '92% bottom', scrub: true } });
     var positions = mobile
-      ? [[22, 32], [28, 38], [36, 46], [45, 55], [52, 62], [60, 70], [69, 79]]
-      : [[6, 26], [16, 36], [26, 46], [35, 55], [45, 65], [55, 75], [65, 85]];
+      ? [[22, 33], [31, 42], [40, 51], [49, 60], [58, 69], [67, 78]]
+      : [[6, 26], [18, 38], [30, 50], [42, 62], [54, 74], [66, 86]];
     MILESTONES.forEach(function (m, i) {
       var below = i % 2 === 1;
       gsap.set('.jl-' + m.id, { scaleY: 0, transformOrigin: below ? 'top' : 'bottom' });
