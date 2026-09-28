@@ -5,30 +5,49 @@
  *    a floating pill, the current page highlighted, links that actually
  *    navigate (the old bar cancelled its own clicks), and room for the phone's
  *    home indicator. Replaces each page's own bottom bar.
- * 2. No liquid glass. backdrop-filter blurs everything behind an element on
- *    every frame, which is what made the site lag on phones and laptops; the
- *    same surfaces are drawn solid instead, and the huge blurred background
- *    orbs become plain gradients.
+ * 2. Liquid glass everywhere, kept light where it costs the most. Desktop
+ *    gets the full glass (blur, saturation, reflections, drifting orbs). On phones and low-power machines (html.perf-low, set by each
+ *    page) the glass keeps its look with a smaller blur and no saturation
+ *    pass, and the orbs behind it stop drifting: a backdrop blur over
+ *    something that changes every frame is recomputed every frame.
  *
  * Not used inside the MoeAI app (embedded pages opt out with ?embed=1).
  */
 (function () {
   if (/[?&]embed=1/.test(location.search) || document.documentElement.classList.contains('embed')) return;
 
+  // Same rule the home page uses; the other pages never set it.
+  (function () {
+    var html = document.documentElement;
+    if (html.classList.contains('perf-low')) return;
+    var cores = navigator.hardwareConcurrency || 4, mem = navigator.deviceMemory || 4;
+    var coarse = window.matchMedia('(pointer: coarse)').matches, small = window.matchMedia('(max-width: 900px)').matches;
+    if (cores <= 4 || mem <= 4 || (coarse && small)) { html.classList.add('perf-low'); window.__perfLow = true; }
+  })();
+
   var css = [
-    '*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }',
-    '.lg-effect, .lg-shine { display: none !important; }',
-    '.navbar { background: color-mix(in srgb, var(--bg1, #0b0b10) 94%, transparent) !important; }',
-    '.bg-orb { filter: none !important; opacity: 0.55; animation-duration: 60s !important; }',
+    'html.perf-low .lg-effect { -webkit-backdrop-filter: blur(9px) !important; backdrop-filter: blur(9px) !important; }',
+    'html.perf-low .navbar { -webkit-backdrop-filter: blur(10px) !important; backdrop-filter: blur(10px) !important; }',
+    // The orbs were radial gradients blurred by 120px, which cost more than all
+    // the glass together (4 fps vs 33 in the test browser). The same soft glow
+    // is drawn as a wider gradient with an eased falloff and no filter.
+    '.bg-orb { filter: none !important; }',
+    '.bg-orb-1 { background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0%, color-mix(in srgb, var(--accent) 9%, transparent) 30%, color-mix(in srgb, var(--accent) 3%, transparent) 55%, transparent 72%) !important; }',
+    '.bg-orb-2 { background: radial-gradient(circle, color-mix(in srgb, var(--accent2) 13%, transparent) 0%, color-mix(in srgb, var(--accent2) 7%, transparent) 30%, color-mix(in srgb, var(--accent2) 2.5%, transparent) 55%, transparent 72%) !important; }',
+    '.bg-orb-3 { background: radial-gradient(circle, color-mix(in srgb, var(--accent3) 10%, transparent) 0%, color-mix(in srgb, var(--accent3) 5%, transparent) 30%, color-mix(in srgb, var(--accent3) 2%, transparent) 55%, transparent 72%) !important; }',
+    'html.perf-low .bg-orb { animation: none !important; will-change: auto !important; }',
     '.bottom-tab-bar { display: none !important; }',
     '.em-dock { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1200;',
     '  display: none; align-items: center; gap: 2px; padding: 6px; border-radius: 28px; width: min(calc(100% - 24px), 440px); box-sizing: border-box;',
-    '  background: #23252c; box-shadow: 0 10px 30px rgba(0,0,0,0.35); font-family: "Nunito Sans", system-ui, sans-serif; }',
-    'html[data-theme="light"] .em-dock { background: #ffffff; box-shadow: 0 10px 30px rgba(20,10,40,0.15); }',
+    '  background: rgba(35,37,44,0.62); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);',
+    '  box-shadow: inset 1px 1.5px 0 -0.5px rgba(255,255,255,0.22), inset -1px -1px 0 -0.5px rgba(255,255,255,0.12), inset 0 0 0 1px rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.35);',
+    '  font-family: "Nunito Sans", system-ui, sans-serif; }',
+    'html.perf-low .em-dock { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); background: rgba(35,37,44,0.78); }',
+    'html[data-theme="light"] .em-dock { background: rgba(255,255,255,0.7); box-shadow: inset 1px 1.5px 0 -0.5px rgba(255,255,255,0.9), inset 0 0 0 1px rgba(20,10,40,0.06), 0 10px 30px rgba(20,10,40,0.15); }',
     '.em-dock a { flex: 1; min-width: 0; display: grid; justify-items: center; gap: 2px; padding: 7px 2px 6px; border-radius: 22px; color: #8d8f95; text-decoration: none; font-size: 10.5px; font-weight: 700; -webkit-tap-highlight-color: transparent; transition: color .2s, background .2s; }',
     '.em-dock a svg { width: 22px; height: 22px; }',
-    '.em-dock a.on { color: #F5F4F2; background: #2e3036; }',
-    'html[data-theme="light"] .em-dock a.on { color: #24212A; background: #ECE8F1; }',
+    '.em-dock a.on { color: #F5F4F2; background: rgba(255,255,255,0.09); }',
+    'html[data-theme="light"] .em-dock a.on { color: #24212A; background: rgba(36,33,42,0.07); }',
     '.em-dock a.center { color: #fff; }',
     '.em-dock a.center .em-orb { width: 42px; height: 42px; margin-top: -2px; border-radius: 50%; display: grid; place-items: center; background: #ea4349; box-shadow: 0 6px 16px rgba(234,67,73,0.4); }',
     '.em-dock a.center span { display: none; }',

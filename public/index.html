@@ -624,7 +624,7 @@
         <a href="/courses" class="btn btn-fire">
           <i class="ic" data-ic="play"></i> Start Learning
         </a>
-        <a href="/simulators" class="btn lg lg-pill" style="padding:12px 24px; border:1px solid var(--glass-border);">
+        <a href="/simulators" class="btn lg lg-pill" style="padding:12px 24px; border:1px solid var(--glass-border); color:inherit; text-decoration:none;">
           <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
           <i class="ic" data-ic="code"></i> Try Simulators
         </a>
@@ -1043,6 +1043,19 @@
         });
       }
 
+      // Pin every letter to the width of its real glyph. The scramble swaps in
+      // wider or narrower look-alikes; without this the line reflows on every
+      // frame and pushes the whole hero (and the book beside it) around.
+      function lockWidths() {
+        chars.forEach((c) => { c.el.style.width = ''; });
+        const widths = chars.map((c) => c.el.getBoundingClientRect().width);
+        chars.forEach((c, i) => { c.el.style.width = widths[i] + 'px'; c.el.style.textAlign = 'center'; });
+      }
+      lockWidths();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockWidths);
+      let relock = null;
+      window.addEventListener('resize', () => { clearTimeout(relock); relock = setTimeout(lockWidths, 150); });
+
       // Measure each character's rendered row so 'multiLine' mode and
       // both hover modes can reason about "this line" even when the
       // browser — not an authored '\n' — decided where text wraps.
@@ -1264,7 +1277,16 @@
       canvas.addEventListener('mouseleave', () => { mouseX = -9999;
         mouseY = -9999; });
 
-      function draw() {
+      // Everything glassy blurs this canvas, so each redraw re-blurs every
+      // glass panel on screen. Phones and slower machines redraw at 20 fps
+      // (the drift is slow enough that nobody sees the difference), and
+      // nothing is drawn while the tab is hidden.
+      const frameGap = window.__perfLow ? 50 : 16;
+      let lastDraw = 0;
+      function draw(now) {
+        requestAnimationFrame(draw);
+        if (document.hidden || (now || 0) - lastDraw < frameGap) return;
+        lastDraw = now || 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const isTerm = document.documentElement.getAttribute('data-theme') === 'terminal';
         for (const p of particles) {
@@ -1289,9 +1311,8 @@
             `rgba(150, 150, 205, ${p.alpha})`;
           ctx.fillText(p.text, p.x, p.y);
         }
-        requestAnimationFrame(draw);
       }
-      draw();
+      requestAnimationFrame(draw);
 
       window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
