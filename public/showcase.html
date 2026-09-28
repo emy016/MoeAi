@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MoeAI — the tutor that knows your syllabus | EduMoe</title>
-  <meta name="description" content="MoeAI is a generative AI tutor for Egyptian university students. It answers from your own lectures in Egyptian Arabic, Franco-Arabic or English, remembers each student, and builds simulations, graphs, mind maps, flashcards and practice exams on the spot." />
+  <meta name="description" content="MoeAI is an AI tutor that answers from your own lectures in Arabic, Franco or English, remembers each student, and builds simulations, graphs and practice exams." />
   <link rel="canonical" href="https://moe-ai-sable.vercel.app/showcase" />
 
   <meta property="og:type" content="website" />
@@ -359,6 +359,9 @@
     .tl.tl-static .tl-grow { width: 98%; }
     .tl.tl-static .tl-track { height: 38vw; } @media (max-width: 600px) { .tl.tl-static .tl-track { height: 90vw; width: 560vw; } }
     /* Gallery: every accent is the student's own. */
+    .demo-phone { width: min(78vw, 290px); aspect-ratio: 400 / 860; margin: 10px auto 34px; border-radius: 38px; padding: 10px; box-sizing: border-box; background: #0c0c10;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 70px rgba(0,0,0,.45); }
+    .demo-video { width: 100%; height: 100%; border-radius: 30px; object-fit: cover; display: block; background: #16161c; }
     .accent-gallery { display: flex; gap: 14px; overflow-x: auto; padding: 8px 20px 26px; scroll-snap-type: x mandatory; scrollbar-width: none; }
     .accent-gallery::-webkit-scrollbar { display: none; }
     .accent-gallery figure { flex: none; width: 210px; margin: 0; scroll-snap-align: center; }
@@ -397,10 +400,8 @@
     <span class="eyebrow">MOEAI · BY EDUMOE</span>
     <h1>The tutor that knows<br><em>your</em> syllabus.</h1>
     <p class="lede">
-      MoeAI is a generative AI tutor for Egyptian university students. It answers from
-      <strong>your</strong> lectures, remembers <strong>you</strong> from one week to the next,
-      and doesn't just write: it builds the simulation, the graph, the mind map, the flashcards
-      and the practice exam for the thing you're stuck on, in Arabic, Franco or English.
+      An AI tutor that answers from <strong>your</strong> lectures, remembers <strong>you</strong>,
+      and builds the simulation, graph or practice exam you need. In Arabic, Franco or English.
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="/moeai">Open MoeAI <span aria-hidden="true">→</span></a>
@@ -418,7 +419,7 @@
   <!-- ─── THE SPHERE ────────────────────────────────────────── -->
   <section class="sphere-band" aria-label="MoeAI, visualised">
     <div class="sphere-stage" id="sphereStage"><div class="sg-grid-bg"></div></div>
-    <p class="sphere-caption">Every lecture, every equation, every snippet you were handed — circling one place, instead of scattered across eight folders and a group chat.</p>
+    <p class="sphere-caption">Your lectures, equations and notes in one place, not eight folders and a group chat.</p>
   </section>
 
 
@@ -431,6 +432,7 @@
   <!-- ─── ACCENT GALLERY ─────────────────────────────────────── -->
   <section class="band" aria-label="Inside the app">
     <h2 class="center">Inside the app.</h2>
+    <figure class="demo-phone"><video class="demo-video" data-src="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A one-minute recording of the MoeAI app"></video></figure>
     <div class="accent-gallery">
       <figure><img src="/assets/showcase/dm-red.webp" alt="Chatting with MoeAI" loading="lazy"><figcaption>Chat</figcaption></figure>
       <figure><img src="/assets/showcase/practice-lime.webp" alt="A practice question with rendered math" loading="lazy"><figcaption>Practice</figcaption></figure>
@@ -449,11 +451,9 @@
         <span class="eyebrow">THE PROBLEM</span>
         <h2>Generic AI explains the subject. It can't explain <em>your course.</em></h2>
         <p>
-          You ask about electrodynamics. It answers with Newtonian motion, in formal
-          English, using examples from a university you've never been to. Your professor
-          teaches a different method, and the AI has never heard of them.
+          Ask a general chatbot about your course and it answers from the internet, in formal
+          English, with a method your professor doesn't use.
         </p>
-        <p>An hour gone. Tab closed. Cram the night before.</p>
       </div>
       <div class="compare">
         <div class="col bad">
@@ -475,8 +475,7 @@
     <span class="eyebrow center">THE PART NOBODY ELSE DOES</span>
     <h2 class="center">Ask however you actually talk.</h2>
     <p class="center sub">
-      Detected per message, from rules tuned on real Egyptian students — not guessed
-      by the model, which drifts to English the moment you say “pointer”.
+      It replies in whatever you wrote in, message by message.
     </p>
     <div class="chat-grid">
       <div class="chat lg lg-card">
@@ -495,7 +494,7 @@
         <div class="bubble ai">Honestly? Because C++ decided variables weren't complicated enough. Here's the actual reason…</div>
       </div>
     </div>
-    <p class="note">Mixed is normal too — <code>el problem هنا إنك بتخلط بين the address و the value</code> is exactly how students write, and it's handled.</p>
+    <p class="note">Mixed works too: <code>el problem هنا إنك بتخلط بين the address و the value</code></p>
   </section>
 
   <!-- ─── PILLARS ───────────────────────────────────────────── -->
@@ -505,23 +504,20 @@
     <div class="cards">
       <article class="card lg lg-card">
         <span class="num">01</span><h3>Your curriculum</h3>
-        <p>Before answering, MoeAI searches your actual lectures and anything you've
-        uploaded, then cites the part it used. No material? It says so instead of
-        inventing a syllabus.</p>
+        <p>It searches your lectures first and cites the slide it used. If it has nothing
+        from your course, it tells you.</p>
         <span class="status live">Live · Logic Design, Differential Equations, Linear Algebra</span>
       </article>
       <article class="card lg lg-card">
         <span class="num">02</span><h3>Your language</h3>
-        <p>Egyptian Arabic, Franco-Arabic or English, decided per message and enforced,
-        so technical terms stay readable without flipping the whole answer to English.</p>
+        <p>Egyptian Arabic, Franco or English, picked per message. Technical terms stay
+        in English where they belong.</p>
         <span class="status live">Live · 19 regression tests</span>
       </article>
       <article class="card lg lg-card">
         <span class="num">03</span><h3>You</h3>
-        <p>MoeAI remembers each student: your name, how you like things explained, your exam
-        dates, the mistake you keep making. Some things it keeps in mind always, others only
-        when that topic comes up. Open <em>Memory</em> in the app to read, pin, edit or delete
-        every one of them, switch on skills, or tell it how to work with you.</p>
+        <p>Your name, your exam dates, the mistake you keep making. Open <em>Memory</em>
+        to read, edit or delete any of it.</p>
         <span class="status live">Live · memory, skills, custom instructions</span>
       </article>
     </div>
@@ -533,15 +529,14 @@
     <h2 class="center">It makes the thing that makes it click.</h2>
     <p class="center sub">
       Ask about projectile motion and you get a simulation you can drag. Ask how a matrix
-      transforms space and you get the animation. Every one of these is generated for your
-      question, on the spot, inside the chat, and grounded in your lecture.
+      transforms space and you get the animation.
     </p>
     <div class="feat">
       <div><b>Interactive visualizers</b><span>Sliders, canvases and live math, written for your question</span></div>
       <div><b>Charts &amp; graphs</b><span>Plot any function or dataset it's explaining</span></div>
       <div><b>3D scenes</b><span>Rotate the surface, the vector field, the molecule</span></div>
       <div><b>Step animations</b><span>Math that moves, one step at a time, like a lecture video</span></div>
-      <div><b>Real PhET labs</b><span>University of Colorado simulations, with tasks set by MoeAI</span></div>
+      <div><b>Physics labs</b><span>Ready-made simulations, with a task from MoeAI</span></div>
       <div><b>Diagrams &amp; mind maps</b><span>Flowcharts, state machines, trees, course maps</span></div>
       <div><b>Runnable code</b><span>Python and JavaScript that run in the chat</span></div>
       <div><b>Quizzes &amp; flashcards</b><span>Tap to answer, flip to check, explained when wrong</span></div>
@@ -553,7 +548,6 @@
       <div><b>Flashcards</b><span>A deck you flip through before the exam</span></div>
       <div><b>A practice quiz</b><span>Five questions, mixed difficulty, explained</span></div>
       <div><b>Revision slides</b><span>Short slides, one idea each</span></div>
-      <div><b>An audio overview</b><span>Two minutes, read aloud, for the bus</span></div>
     </div>
   </section>
 
@@ -562,23 +556,20 @@
     <span class="eyebrow center">WHAT'S NEW</span>
     <h2 class="center">MoeAI · Computer Science.</h2>
     <p class="center sub">
-      Sign in with your university and you land on your faculty's own model: every lecture of
-      Logic Design and Differential Equations, and Linear Algebra's first lecture, read page by
-      page, checked, and searchable by meaning and by word.
+      Sign in with your university and MoeAI already has your courses: Logic Design,
+      Differential Equations and Linear Algebra, read page by page.
     </p>
     <div class="feat">
       <div><b>Your lecture, first</b><span>Open a lecture and its pages lead every answer</span></div>
       <div><b>Cited to the page</b><span>Tap a citation to read the passage it used</span></div>
       <div><b>Read the lecture</b><span>The slides, formulas and all, inside the chat</span></div>
-      <div><b>Voice mode</b><span>Talk it through hands-free; it talks back</span></div>
-      <div><b>Read aloud</b><span>Any answer, in Arabic or English</span></div>
+      <div><b>Dictation</b><span>Say your question, it types it</span></div>
       <div><b>Edit &amp; resend</b><span>Fix a question without starting over</span></div>
       <div><b>Tell your lecturer</b><span>Thumbs up or down reach the course staff</span></div>
       <div><b>Ranked, in the app</b><span>The Elo arena, one tab away</span></div>
       <div><b>It remembers you</b><span>Memory you can read and edit, and skills you switch on</span></div>
       <div><b>It asks back</b><span>Tappable choices when a quick answer from you changes the reply</span></div>
       <div><b>Exam mode</b><span>A timed practice exam with a countdown, graded by MoeAI</span></div>
-      <div><b>Make it yours</b><span>13 accent colors, 5 background styles, tinted surfaces</span></div>
     </div>
   </section>
 
@@ -589,23 +580,15 @@
         <span class="eyebrow">FOR UNIVERSITIES</span>
         <h2>Upload a course once. Every student gets a tutor that knows it.</h2>
         <p>
-          Professors and TAs manage their course's MoeAI from the <a href="/tutor">Tutor page</a>:
-          upload lectures, sheets and past exams; MoeAI reads them, builds a map of the course,
-          the formulas and the mistakes students make, and flags what is missing. Anything
-          MoeAI writes on its own waits for staff approval, and staff can ask it exactly what a
-          student would to see how it answers. Students sign in through the university and
-          find their courses already there.
-        </p>
-        <p>
-          Organizations get an admin dashboard: members, roles, invitations tied to a
-          verified email, suspensions, and the plan. Every permission is enforced by the
-          database, not the browser.
+          Lecturers upload slides, sheets and past exams on the <a href="/tutor">Tutor page</a>.
+          MoeAI reads them and maps the course. Anything it writes on its own waits for their
+          approval. Students sign in and find their courses there.
         </p>
         <a class="btn btn-primary" href="/tutor">Open the Tutor page</a>
         <a class="btn" href="/start/organization">Bring MoeAI to your organization</a>
       </div>
       <div class="drop lg lg-card">
-        <div class="file"><span>🎓</span><div><b>University sign-in</b><small>SSO through the university; SAML-ready</small></div></div>
+        <div class="file"><span>🎓</span><div><b>University sign-in</b><small>Students sign in through the university</small></div></div>
         <div class="file"><span>🗂️</span><div><b>Tutor page</b><small>upload · OCR · index · course brain · review</small></div></div>
         <div class="file"><span>🛡️</span><div><b>Admin dashboard</b><small>members · invitations · roles · plan</small></div></div>
       </div>
@@ -619,13 +602,8 @@
         <span class="eyebrow">LIBRARY MODE</span>
         <h2>Bring your own syllabus.</h2>
         <p>
-          Drop in a PDF, paste your notes, or upload subtitles exported from a lecture
-          video. MoeAI indexes it and teaches from it — citing which part it used.
-        </p>
-        <p>
-          That's what makes MoeAI work for anyone, not just one faculty: a
-          medical student, a tutor with their own material, an organisation with a
-          private curriculum.
+          Drop in a PDF or your notes. MoeAI teaches from them and cites the part it used.
+          Works for any subject, not just ours.
         </p>
         <a class="btn" href="/moeai">Try it with your own lecture</a>
       </div>
@@ -664,7 +642,7 @@
         <a class="btn btn-primary" href="/moeai">Open MoeAI</a>
       </article>
       <article class="card lg lg-card">
-        <h3>Android</h3><p>Native app: subjects, lectures, calendar, attachments, hold-to-talk.</p>
+        <h3>Android</h3><p>Subjects, lectures, calendar, practice and simulators.</p>
         <span class="status soon">In development · v0.2.3</span>
       </article>
       <article class="card lg lg-card">
@@ -696,9 +674,8 @@
   <section class="close lg lg-card">
     <h2>Built by a student who got tired of explaining pointers twice.</h2>
     <p>
-      EduMoe started as a study channel for first-year Computer Science students. Around
-      230 students — roughly half the year — already learn from it. MoeAI is what that
-      channel was always trying to become.
+      It started as a Telegram channel for first-year Computer Science. About 230 students
+      use it now. MoeAI is where that channel was heading.
     </p>
     <div class="hero-cta center">
       <a class="btn btn-primary" href="/start?next=/moeai">Get started <span aria-hidden="true">→</span></a>
@@ -731,6 +708,17 @@
     }
   </script>
   <script src="/assets/sphere-gallery.js" defer></script>
+  <script>
+    // The demo loads and plays only when it is on screen.
+    (function () {
+      var v = document.querySelector('.demo-video'); if (!v) return;
+      if (!('IntersectionObserver' in window)) { v.src = v.dataset.src; v.controls = true; return; }
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      new IntersectionObserver(function (es) { es.forEach(function (e) {
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (reduce) v.controls = true; else v.play().catch(function () {}); } else if (v.src) v.pause();
+      }); }, { threshold: 0.35 }).observe(v);
+    })();
+  </script>
   <script src="/assets/moeai-timeline.js" defer></script>
   <script src="/assets/brand.js" defer></script>
   <script src="/assets/edumoe-shell.js" defer></script>

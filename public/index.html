@@ -262,12 +262,26 @@
     /* ─── TYPOGRAPHY ───────────────────────────────────────────── */
     .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
     .section { padding: 80px 0 60px; }
+    .wrap.section { padding-left: 28px; padding-right: 28px; }
     .sf-display { font-family: var(--font-display); font-size: clamp(48px, 7vw, 84px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
     .sf-title { font-family: var(--font-display); font-size: clamp(32px, 5vw, 52px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
     .gradient-text { background: linear-gradient(135deg, var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .section-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; margin-bottom: 14px; }
     .section-head { text-align: center; margin-bottom: 40px; }
     .section-head p { font-size: 16px; color: var(--txt2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+    /* ─── SEE IT ───────────────────────────────────────────────── */
+    .see-grid { display: grid; grid-template-columns: minmax(0, 270px) minmax(0, 1fr); gap: 36px; align-items: center; }
+    .see-phone { margin: 0; width: 100%; max-width: 270px; box-sizing: border-box; aspect-ratio: 400 / 860; border-radius: 38px; padding: 10px; background: #0c0c10;
+      box-shadow: 0 0 0 1px var(--glass-border2), 0 30px 70px rgba(0,0,0,.45), 0 0 90px -30px var(--accent-glow); }
+    .see-video { width: 100%; height: 100%; border-radius: 30px; object-fit: cover; display: block; background: #16161c; }
+    .see-shots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .see-shots figure { margin: 0; }
+    .see-shots img { width: 100%; aspect-ratio: 400 / 700; object-fit: cover; object-position: top; border-radius: 18px; display: block;
+      box-shadow: 0 0 0 1px var(--glass-border), 0 14px 34px rgba(0,0,0,.35); }
+    .see-shots figcaption { font-size: 13px; color: var(--txt3); margin-top: 8px; }
+    @media (max-width: 1024px) { .see-grid { grid-template-columns: minmax(0, 1fr); justify-items: center; } .see-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; } }
+    @media (max-width: 700px) { .see-phone { max-width: min(78vw, 300px); } }
 
     /* ─── HERO ──────────────────────────────────────────────────── */
     .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; padding: 120px 24px 60px; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
@@ -631,8 +645,8 @@
     <div class="hero-left">
       <h1 class="sf-display hero-title" id="heroTitle" aria-label="Learn Computer Science The Cool Way"></h1>
       <p class="hero-desc">
-        Built by one CS student, not a company.<br />
-        Live compilers and real simulators — plus the same notes 230 of your classmates already lean on before finals.
+        Made by a CS student for the rest of the batch.<br />
+        Run code, try the simulators, and ask MoeAI about your own lectures.
       </p>
       <div class="hero-ctas">
         <a href="/courses" class="btn btn-fire">
@@ -665,69 +679,87 @@
     </div>
   </div>
 
+  <!-- ─── SEE IT ────────────────────────────────────────────────── -->
+  <div class="wrap section reveal see-it">
+    <div class="section-head">
+      <div class="section-label">See it</div>
+      <h2 class="sf-title">One minute in the app</h2>
+    </div>
+    <div class="see-grid">
+      <figure class="see-phone">
+        <video class="see-video" data-src="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A one-minute recording of the MoeAI app: a recap from the lecture, a practice question, and the ODE, K-map and matrix tools"></video>
+      </figure>
+      <div class="see-shots">
+        <figure><img src="/assets/showcase/practice-lime.webp" alt="A practice question with the worked answer" loading="lazy"><figcaption>Practice from your course</figcaption></figure>
+        <figure><img src="/assets/showcase/ode-cyan.webp" alt="The ODE solver with a slope field" loading="lazy"><figcaption>ODE solver</figcaption></figure>
+        <figure><img src="/assets/showcase/kmap-blue.webp" alt="The Karnaugh map simplifier" loading="lazy"><figcaption>K-maps</figcaption></figure>
+        <figure><img src="/assets/showcase/tg-video.webp" alt="The CS Epic Save Telegram channel" loading="lazy"><figcaption>The Telegram channel</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
   <!-- ─── FEATURES (8 cards) ────────────────────────────────────── -->
   <div class="wrap section reveal">
     <div class="section-head">
-      <div class="section-label">Why EDUMOE</div>
-      <h2 class="sf-title">Built for CS Students</h2>
-      <p>Everything for Computing Fundamentals through Probability &amp; Statistics — built by someone taking the same courses right now</p>
+      <div class="section-label">What's inside</div>
+      <h2 class="sf-title">The tools we wanted in first year</h2>
     </div>
     <div class="features-grid">
       <!-- Card 1 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="terminal"></i></div>
-        <h3>Live C++ Compiler</h3>
-        <p>Write and run C++ code directly in your browser. No setup, no downloads.</p>
+        <h3>C++ compiler</h3>
+        <p>Write C++ and press run. Nothing to install.</p>
       </div>
       <!-- Card 2 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="microchip"></i></div>
-        <h3>Logic Simulator</h3>
-        <p>Build circuits with AND, OR, XOR, NAND gates. Auto‑generated truth tables.</p>
+        <h3>Logic simulator</h3>
+        <p>Wire up gates, get the truth table.</p>
       </div>
       <!-- Card 3 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="square-root-alt"></i></div>
-        <h3>Math Solver</h3>
-        <p>Solve integrals, derivatives, and ODEs step‑by‑step. Plot functions instantly.</p>
+        <h3>Math solver</h3>
+        <p>Integrals and ODEs, step by step, with a plot.</p>
       </div>
       <!-- Card 4 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="brain"></i></div>
-        <h3>MoeAI Assistant</h3>
-        <p>AI that understands your curriculum. Ask anything about your CS courses.</p>
+        <h3>MoeAI</h3>
+        <p>Ask about a lecture. It answers from the slides.</p>
       </div>
       <!-- Card 5 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="layer-group"></i></div>
-        <h3>Smart Flashcards</h3>
-        <p>Create and review flashcards for any topic. Spaced repetition coming soon.</p>
+        <h3>Flashcards</h3>
+        <p>Make a deck, go through it before the quiz.</p>
       </div>
       <!-- Card 6 -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="telegram"></i></div>
-        <h3>Telegram Community</h3>
-        <p>The same channel 230 CS students already use before midterms — t.me/CS_Epic_Save.</p>
+        <h3>Telegram</h3>
+        <p>Where we share notes and past exams.</p>
       </div>
       <!-- Card 7 – NEW: Discrete Mathematics -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="project-diagram"></i></div>
-        <h3>Discrete Mathematics</h3>
-        <p>Learn set theory, logic, proofs, combinatorics, and graph theory with interactive visual tools.</p>
+        <h3>Discrete math</h3>
+        <p>Sets, logic and graphs you can play with.</p>
       </div>
       <!-- Card 8 – NEW: Competitive Arena -->
       <div class="feature-card lg lg-card">
         <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
         <div class="feature-icon"><i class="ic" data-ic="trophy"></i></div>
-        <h3>Competitive Arena</h3>
-        <p>Battle bots in ranked matches, climb the Elo ladder, and win tournaments to prove your skills.</p>
+        <h3>Ranked</h3>
+        <p>Beat the bot on your course, climb the ladder.</p>
       </div>
     </div>
   </div>
@@ -735,9 +767,8 @@
   <!-- ─── SUBJECTS ─────────────────────────────────────────────── -->
   <div class="wrap section reveal">
     <div class="section-head">
-      <div class="section-label">The Curriculum</div>
-      <h2 class="sf-title">Every Subject, Covered</h2>
-      <p>Computing Fundamentals, Calculus, Physics, Discrete Math, Structured Programming, Differential Equations, Logic Design, Probability &amp; Statistics — your actual first-year syllabus</p>
+      <div class="section-label">The courses</div>
+      <h2 class="sf-title">All of first year</h2>
     </div>
     <div class="subjects-grid">
       <div class="subj-card" onclick="showToast('📘 Structured Programming — coming soon')">
@@ -1612,6 +1643,17 @@
     // ============================================================
     //  LOADER & INIT
     // ============================================================
+    // The demo video loads and plays only once it scrolls into view (3 MB).
+    (function () {
+      const v = document.querySelector('.see-video');
+      if (!v || !('IntersectionObserver' in window)) { if (v) { v.src = v.dataset.src; } return; }
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      new IntersectionObserver((entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (!reduce) v.play().catch(() => {}); else v.controls = true; }
+        else if (v.src) v.pause();
+      }), { threshold: 0.35 }).observe(v);
+    })();
+
     // The loader goes as soon as the page can be read, not after every image
     // and web font has arrived (that took seconds on a slow connection), and
     // never stays longer than 1.2 s.
