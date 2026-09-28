@@ -175,12 +175,12 @@
     #loader {
       position: fixed; inset: 0; z-index: 9999; background: var(--bg1);
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
     #loader.out { opacity: 0; transform: scale(1.05); pointer-events: none; }
     .loader-wordmark { font-family: var(--font-display); font-size: 56px; font-weight: 700; letter-spacing: -0.04em; animation: loader-pulse 1.2s ease-in-out infinite alternate; }
     .loader-progress { width: 220px; height: 3px; background: var(--glass-border); border-radius: 3px; overflow: hidden; }
-    .loader-bar { height: 100%; width: 0%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); animation: loader-fill 2.2s ease forwards; }
+    .loader-bar { height: 100%; width: 0%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); animation: loader-fill .7s ease-out forwards; }
     @keyframes loader-fill { 100% { width: 100%; } }
     @keyframes loader-pulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
 
@@ -200,7 +200,7 @@
     /* ─── NAVBAR ────────────────────────────────────────────────── */
     .navbar {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
-      width: calc(100% - 40px); max-width: 1200px;
+      width: calc(100% - 40px); max-width: 1360px; box-sizing: border-box;
       display: flex; align-items: center; gap: 12px;
       padding: 10px 20px;
       border: 1px solid var(--glass-border);
@@ -222,6 +222,19 @@
     .soon-badge { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 999px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; vertical-align: middle; margin-left: 2px; }
     .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; }
     .theme-switcher { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--tint); position: relative; }
+    /* One swatch in the bar; the colours open under it on hover, focus or tap. */
+    .theme-switcher { padding: 0; border: 0; background: none; }
+    .theme-trigger { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--glass-border2); cursor: pointer; flex-shrink: 0;
+      background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 45%, #fff), var(--accent) 60%); box-shadow: 0 0 0 3px var(--tint2); }
+    .theme-pop { position: absolute; top: calc(100% + 10px); right: -8px; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px;
+      border: 1px solid var(--glass-border); background: color-mix(in srgb, var(--bg2) 70%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .18s, transform .18s, visibility 0s .18s; z-index: 5; }
+    .theme-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 12px; }
+    .theme-switcher:hover .theme-pop, .theme-switcher:focus-within .theme-pop { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .18s; }
+    .nav-btn-link { white-space: nowrap; }
+    /* Zoomed laptops (see edumoe-shell.js) have less room: the footer already links these two. */
+    @media (min-width: 1025px) and (max-width: 1439px) { .nav-extra { display: none; } }
+    @media (min-width: 1025px) and (max-width: 1199px) { .nav-btn-link { padding: 8px 11px; } .nav-right { gap: 8px; } }
     .theme-dot { width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; }
     .theme-dot:hover { transform: scale(1.2); }
     .theme-dot.active { transform: scale(1.15); box-shadow: 0 0 0 2px var(--bg1), 0 0 0 4px var(--txt1); }
@@ -252,9 +265,7 @@
     .sf-display { font-family: var(--font-display); font-size: clamp(48px, 7vw, 84px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
     .sf-title { font-family: var(--font-display); font-size: clamp(32px, 5vw, 52px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
     .gradient-text { background: linear-gradient(135deg, var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .section-label { display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px 5px 12px; border: 1px solid var(--glass-border); border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--txt2); text-transform: uppercase; margin-bottom: 20px; background: var(--tint); }
-    .section-label-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: dot-pulse 2s infinite; }
-    @keyframes dot-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .section-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; margin-bottom: 14px; }
     .section-head { text-align: center; margin-bottom: 40px; }
     .section-head p { font-size: 16px; color: var(--txt2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
 
@@ -355,11 +366,11 @@
     .sg-grid-bg {
       position: absolute; inset: -20%; pointer-events: none; z-index: 2;
       background-image:
-        linear-gradient(var(--glass-border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+        linear-gradient(color-mix(in srgb, var(--accent) 34%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--accent) 34%, transparent) 1px, transparent 1px);
       background-size: 34px 34px;
-      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
-      mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 0%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 25%, transparent 80%);
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 25%, transparent 80%);
       animation: sg-grid-drift 40s linear infinite;
       opacity: 1;
     }
@@ -368,7 +379,7 @@
       position: absolute; inset: 0; z-index: 3; overflow: hidden;
     }
     .sg-canvas-host canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-    @media (max-width: 700px) { .sg-grid-bg, .sg-canvas-host { display: none; } }
+    @media (max-width: 700px) { .sg-canvas-host { display: none; } .sg-grid-bg { animation: none; } }
 
     .fw-large { width: 190px; }
     .fw-small { width: 150px; }
@@ -590,11 +601,13 @@
       <a href="/quizzes" class="nav-btn-link">Quizzes</a>
       <a href="/ranked" class="nav-btn-link">Ranked</a>
       <a href="/moeai" class="nav-btn-link nav-moeai">MoeAI</a>
-      <a href="/showcase" class="nav-btn-link">Why MoeAI</a>
-      <a href="/about" class="nav-btn-link">About</a>
+      <a href="/showcase" class="nav-btn-link nav-extra">Why MoeAI</a>
+      <a href="/about" class="nav-btn-link nav-extra">About</a>
     </div>
     <div class="nav-right">
-      <div class="theme-switcher">
+      <div class="theme-switcher" tabindex="-1">
+        <button class="theme-trigger" type="button" aria-label="Theme colour" title="Theme colour"></button>
+        <div class="theme-pop">
         <button class="theme-dot td-ruby active" id="td-ruby" onclick="setTheme('ruby', this)"></button>
         <button class="theme-dot td-lava" id="td-lava" onclick="setTheme('lava', this)"></button>
         <button class="theme-dot td-space" id="td-space" onclick="setTheme('space', this)"></button>
@@ -605,6 +618,7 @@
           <input type="color" id="customColorPicker" value="#e11d48" aria-label="Custom accent color" />
         </div>
         <button class="theme-dot td-terminal" id="td-terminal" onclick="setTheme('terminal', this)" title="Terminal mode"></button>
+        </div>
       </div>
       <button class="crt-toggle" id="crtToggle" onclick="toggleCRT()" title="Toggle CRT scanlines"><i class="ic" data-ic="tv"></i></button>
       <button class="nav-auth-btn" onclick="openModal('loginModal')"><i class="ic" data-ic="user"></i> <span>Log in</span></button>
@@ -654,7 +668,7 @@
   <!-- ─── FEATURES (8 cards) ────────────────────────────────────── -->
   <div class="wrap section reveal">
     <div class="section-head">
-      <div class="section-label"><div class="section-label-dot"></div>Why EDUMOE</div>
+      <div class="section-label">Why EDUMOE</div>
       <h2 class="sf-title">Built for CS Students</h2>
       <p>Everything for Computing Fundamentals through Probability &amp; Statistics — built by someone taking the same courses right now</p>
     </div>
@@ -721,7 +735,7 @@
   <!-- ─── SUBJECTS ─────────────────────────────────────────────── -->
   <div class="wrap section reveal">
     <div class="section-head">
-      <div class="section-label"><div class="section-label-dot"></div>The Curriculum</div>
+      <div class="section-label">The Curriculum</div>
       <h2 class="sf-title">Every Subject, Covered</h2>
       <p>Computing Fundamentals, Calculus, Physics, Discrete Math, Structured Programming, Differential Equations, Logic Design, Probability &amp; Statistics — your actual first-year syllabus</p>
     </div>
@@ -1047,9 +1061,13 @@
       // wider or narrower look-alikes; without this the line reflows on every
       // frame and pushes the whole hero (and the book beside it) around.
       function lockWidths() {
-        chars.forEach((c) => { c.el.style.width = ''; });
-        const widths = chars.map((c) => c.el.getBoundingClientRect().width);
-        chars.forEach((c, i) => { c.el.style.width = widths[i] + 'px'; c.el.style.textAlign = 'center'; });
+        // Measure the real letter even if a scrambled look-alike is showing.
+        const shown = chars.map((c) => c.el.textContent);
+        chars.forEach((c) => { c.el.style.width = ''; c.el.textContent = c.char; });
+        // Rects are in screen pixels; the page may be zoomed (edumoe-shell.js).
+        const z = (el.currentCSSZoom || parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
+        const widths = chars.map((c) => c.el.getBoundingClientRect().width / z);
+        chars.forEach((c, i) => { c.el.style.width = widths[i] + 'px'; c.el.textContent = shown[i]; });
       }
       lockWidths();
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockWidths);
@@ -1331,7 +1349,7 @@
       ].forEach(v => root.style.removeProperty(v));
       document.querySelectorAll('.bg-orb-1, .bg-orb-2, .bg-orb-3, .btn-fire, .nav-cta, ' +
           '.nav-logo-mark, .m-btn-fire, .feature-icon, .float-win-badge, ' +
-          '.gradient-text, .section-label-dot, .tab-item')
+          '.gradient-text, .tab-item')
         .forEach(el => {
           el.style.removeProperty('background');
           el.style.removeProperty('color');
@@ -1594,17 +1612,22 @@
     // ============================================================
     //  LOADER & INIT
     // ============================================================
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        if (loader) {
-          loader.classList.add('out');
-          setTimeout(() => loader.style.display = 'none', 500);
-        }
-        animateStats();
-        initScrollEffects();
-      }, 800);
-    });
+    // The loader goes as soon as the page can be read, not after every image
+    // and web font has arrived (that took seconds on a slow connection), and
+    // never stays longer than 1.2 s.
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      if (!loader || loader.classList.contains('out')) return;
+      loader.classList.add('out');
+      setTimeout(() => loader.style.display = 'none', 450);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 250));
+    else setTimeout(hideLoader, 250);
+    setTimeout(hideLoader, 1200);
+    let started = false;
+    function startPage() { if (started) return; started = true; animateStats(); initScrollEffects(); }
+    window.addEventListener('load', startPage);
+    setTimeout(startPage, 1500);
 
     console.log('🚀 EDUMOE V3 Ultimate Homepage loaded.');
   </script>

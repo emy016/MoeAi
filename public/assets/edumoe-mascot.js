@@ -162,9 +162,16 @@
     if (dock && getComputedStyle(dock).display !== 'none') return Array.prototype.slice.call(dock.querySelectorAll('a'));
     return Array.prototype.slice.call(document.querySelectorAll('.nav-links a, .navbar a.nav-btn-link'));
   }
+  // edumoe-shell.js zooms the page on computers. Rects come back in screen
+  // pixels, but Moe's own translate() is zoomed too, so divide it back out.
+  function zoom() { return parseFloat(getComputedStyle(document.documentElement).zoom) || 1; }
+  function rect(el) {
+    var r = el.getBoundingClientRect(), z = zoom();
+    return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z };
+  }
   function perchOn(el, hop) {
     if (!el) return;
-    var r = el.getBoundingClientRect();
+    var r = rect(el);
     if (!r.width) return;
     moveTo(r.left + r.width / 2 - W / 2, r.top - H + 9, hop);
   }
@@ -177,7 +184,7 @@
   // Eyes follow the pointer.
   document.addEventListener('pointermove', function (e) {
     lastInput = Date.now(); if (mood === 'lazy' || mood === 'sleep') { setMood('surprised'); setTimeout(function () { if (mood === 'surprised') setMood('happy'); }, 600); }
-    var cx = pos.x + W / 2, cy = pos.y + H * 0.58, dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
+    var z = zoom(), cx = pos.x + W / 2, cy = pos.y + H * 0.58, dx = e.clientX / z - cx, dy = e.clientY / z - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
     pupils.style.transform = 'translate(' + (dx / d * 1.6 * k).toFixed(2) + 'px,' + (dy / d * 1.6 * k).toFixed(2) + 'px)';
   }, { passive: true });
 
@@ -254,11 +261,11 @@
   })();
 
   // Mischief: point at a random button and giggle, or hide behind a card.
-  function visible(el) { var r = el.getBoundingClientRect(); return r.width > 30 && r.height > 20 && r.top > 70 && r.bottom < window.innerHeight - 90 && r.left > 0 && r.right < window.innerWidth; }
+  function visible(el) { var r = el.getBoundingClientRect(); return r.width > 30 && r.height > 20 && r.top > 70 && r.bottom < window.innerHeight - 90 && r.left > 0 && r.right < window.innerWidth; } // screen pixels on both sides
   function pointAtButton() {
     var buttons = Array.prototype.slice.call(document.querySelectorAll('main a.btn, a.btn, button, .nav-cta, .feature-card, .subj-card, .cta-section a')).filter(visible);
     if (!buttons.length) return false;
-    var target = buttons[Math.floor(Math.random() * buttons.length)], r = target.getBoundingClientRect();
+    var target = buttons[Math.floor(Math.random() * buttons.length)], r = rect(target);
     busy = true;
     moveTo(Math.max(6, r.left - 62), Math.max(70, r.top + r.height / 2 - 30), true);
     setTimeout(function () {
@@ -270,7 +277,7 @@
   function hideBehindCard() {
     var cards = Array.prototype.slice.call(document.querySelectorAll('.feature-card, .subj-card, .stat-card, .lg-card')).filter(visible);
     if (!cards.length) return false;
-    var card = cards[Math.floor(Math.random() * cards.length)], r = card.getBoundingClientRect();
+    var card = cards[Math.floor(Math.random() * cards.length)], r = rect(card);
     busy = true; pet.classList.add('hiding'); shadow.style.opacity = '0';
     if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
     card.style.zIndex = '2';

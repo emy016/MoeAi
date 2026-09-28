@@ -36,6 +36,12 @@
     '.bg-orb-2 { background: radial-gradient(circle, color-mix(in srgb, var(--accent2) 13%, transparent) 0%, color-mix(in srgb, var(--accent2) 7%, transparent) 30%, color-mix(in srgb, var(--accent2) 2.5%, transparent) 55%, transparent 72%) !important; }',
     '.bg-orb-3 { background: radial-gradient(circle, color-mix(in srgb, var(--accent3) 10%, transparent) 0%, color-mix(in srgb, var(--accent3) 5%, transparent) 30%, color-mix(in srgb, var(--accent3) 2%, transparent) 55%, transparent 72%) !important; }',
     'html.perf-low .bg-orb { animation: none !important; will-change: auto !important; }',
+    // Bigger by default on computers: the pages were designed small, and
+    // everyone was zooming in by hand. Phones and tablets keep 100%.
+    'html, body { overflow-x: clip; }',
+    '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } }',
+    '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } }',
+    '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } }',
     '.bottom-tab-bar { display: none !important; }',
     '.em-dock { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1200;',
     '  display: none; align-items: center; gap: 2px; padding: 6px; border-radius: 28px; width: min(calc(100% - 24px), 440px); box-sizing: border-box;',

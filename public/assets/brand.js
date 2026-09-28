@@ -44,7 +44,20 @@
     document.head.appendChild(link);
   }
 
-  function boot() { favicon(); paint(); }
+  // Theme switches reset these elements' inline styles (and custom colours
+  // write a gradient onto them), which brought the old coloured tile back
+  // behind the mark. A stylesheet rule wins over both: the mark sits on
+  // nothing, in its own colours, whatever the theme.
+  function lockStyle() {
+    if (document.getElementById("moe-mark-lock")) return;
+    var s = document.createElement("style");
+    s.id = "moe-mark-lock";
+    s.textContent = "[data-moe-painted]{background:none!important;background-image:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;clip-path:none!important;filter:none!important;color:inherit!important}"
+      + "[data-moe-painted] .moe-mark-svg path{transition:none!important}";
+    document.head.appendChild(s);
+  }
+
+  function boot() { lockStyle(); favicon(); paint(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
   // Pages that build their nav after load get a second pass.
