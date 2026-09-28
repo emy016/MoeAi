@@ -279,11 +279,22 @@
     .section-head { text-align: center; margin-bottom: 40px; }
     .section-head p { font-size: 16px; color: var(--txt2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
 
+    .journey-home { padding: 80px 0 40px; }
+    .subj-note { text-align: center; color: var(--txt3); font-size: 14px; margin: -10px auto 26px; max-width: 560px; }
+    a.subj-card { text-decoration: none; color: inherit; display: block; }
+    .subj-status { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; border: 1px solid transparent; }
+    .chip-in { color: #4ade80; background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.25); }
+    .chip-yt { color: #ff6b6b; background: rgba(255,80,80,.1); border-color: rgba(255,80,80,.28); }
+    .chip-soon { color: var(--accent2); background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+    .chip-none { color: var(--txt3); background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
+    .subj-year { margin: 44px 0 18px; font-size: 20px; letter-spacing: -.01em; }
+    .subj-year span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-left: 10px; }
     /* ─── SEE IT ───────────────────────────────────────────────── */
     .see-grid { display: grid; grid-template-columns: minmax(0, 270px) minmax(0, 1fr); gap: 36px; align-items: center; }
-    .see-phone { margin: 0; width: 100%; max-width: 270px; box-sizing: border-box; aspect-ratio: 400 / 860; border-radius: 38px; padding: 10px; background: #0c0c10;
+    .see-phone { margin: 0; width: 100%; max-width: 270px; box-sizing: content-box; aspect-ratio: 390 / 844; border-radius: 40px; padding: 9px; background: #0c0c10;
       box-shadow: 0 0 0 1px var(--glass-border2), 0 30px 70px rgba(0,0,0,.45), 0 0 90px -30px var(--accent-glow); }
-    .see-video { width: 100%; height: 100%; border-radius: 30px; object-fit: cover; display: block; background: #16161c; }
+    .see-video { width: 100%; height: 100%; border-radius: 31px; object-fit: contain; display: block; background: #16161c; }
     .see-shots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
     .see-shots figure { margin: 0; }
     .see-shots img { width: 100%; aspect-ratio: 400 / 700; object-fit: cover; object-position: top; border-radius: 18px; display: block;
@@ -672,7 +683,7 @@
       </div>
       <div class="hero-stats">
         <div class="stat-card"><div class="stat-val" id="stat-students">—</div><div class="stat-lbl">Students</div></div>
-        <div class="stat-card"><div class="stat-val">8</div><div class="stat-lbl">Courses</div></div>
+        <div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">In MoeAI</div></div>
         <div class="stat-card"><div class="stat-val">Free</div><div class="stat-lbl">Always</div></div>
         <div class="stat-card"><div class="stat-val">🇪🇬</div><div class="stat-lbl">Egypt</div></div>
       </div>
@@ -692,11 +703,11 @@
   <div class="wrap section reveal see-it">
     <div class="section-head">
       <div class="section-label">See it</div>
-      <h2 class="sf-title">One minute in the app</h2>
+      <h2 class="sf-title">30 seconds in the app</h2>
     </div>
     <div class="see-grid">
       <figure class="see-phone">
-        <video class="see-video" data-src="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A one-minute recording of the MoeAI app: a recap from the lecture, a practice question, and the ODE, K-map and matrix tools"></video>
+        <video class="see-video" data-src="/assets/video/moeai-demo.mp4" data-src-webm="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A 30-second recording of the MoeAI app: a recap from the lecture, a practice question, and the ODE, K-map and matrix tools"></video>
       </figure>
       <div class="see-shots">
         <figure><img src="/assets/showcase/practice-lime.webp" alt="A practice question with the worked answer" loading="lazy"><figcaption>Practice from your course</figcaption></figure>
@@ -707,126 +718,91 @@
     </div>
   </div>
 
-  <!-- ─── FEATURES (8 cards) ────────────────────────────────────── -->
-  <div class="wrap section reveal">
-    <div class="section-head">
-      <div class="section-label">What's inside</div>
-      <h2 class="sf-title">The tools we wanted in first year</h2>
-    </div>
-    <div class="features-grid">
-      <!-- Card 1 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="terminal"></i></div>
-        <h3>C++ compiler</h3>
-        <p>Write C++ and press run. Nothing to install.</p>
-      </div>
-      <!-- Card 2 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="microchip"></i></div>
-        <h3>Logic simulator</h3>
-        <p>Wire up gates, get the truth table.</p>
-      </div>
-      <!-- Card 3 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="square-root-alt"></i></div>
-        <h3>Math solver</h3>
-        <p>Integrals and ODEs, step by step, with a plot.</p>
-      </div>
-      <!-- Card 4 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="brain"></i></div>
-        <h3>MoeAI</h3>
-        <p>Ask about a lecture. It answers from the slides.</p>
-      </div>
-      <!-- Card 5 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="layer-group"></i></div>
-        <h3>Flashcards</h3>
-        <p>Make a deck, go through it before the quiz.</p>
-      </div>
-      <!-- Card 6 -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="telegram"></i></div>
-        <h3>Telegram</h3>
-        <p>Where we share notes and past exams.</p>
-      </div>
-      <!-- Card 7 – NEW: Discrete Mathematics -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="project-diagram"></i></div>
-        <h3>Discrete math</h3>
-        <p>Sets, logic and graphs you can play with.</p>
-      </div>
-      <!-- Card 8 – NEW: Competitive Arena -->
-      <div class="feature-card lg lg-card">
-        <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-        <div class="feature-icon"><i class="ic" data-ic="trophy"></i></div>
-        <h3>Ranked</h3>
-        <p>Beat the bot on your course, climb the ladder.</p>
-      </div>
-    </div>
-  </div>
+  <!-- ─── TIMELINE (moeai-timeline.js) ─────────────────────────── -->
+  <section id="journey" class="journey-home" aria-label="MoeAI so far"></section>
 
   <!-- ─── SUBJECTS ─────────────────────────────────────────────── -->
   <div class="wrap section reveal">
     <div class="section-head">
       <div class="section-label">The courses</div>
-      <h2 class="sf-title">All of first year</h2>
+      <h2 class="sf-title">Where each course stands</h2>
     </div>
+    <p class="subj-note">Mostly revisions and summaries, not full lecture series. Older revision videos are on the Telegram channel and moving to YouTube.</p>
     <div class="subjects-grid">
-      <div class="subj-card" onclick="showToast('📘 Structured Programming — coming soon')">
-        <div class="subj-term">Term 2 · C++</div>
-        <div class="subj-name">Structured Programming</div>
-        <div class="subj-code">structured_programming.cpp</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="terminal"></i> Compiler</span><span><i class="ic" data-ic="code"></i> Exercises</span></div>
-      </div>
-      <div class="subj-card" onclick="showToast('🔌 Logic Design — coming soon')">
-        <div class="subj-term">Term 2 · Digital</div>
-        <div class="subj-name">Logic Design</div>
-        <div class="subj-code">logic_design.v</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="microchip"></i> Simulator</span><span><i class="ic" data-ic="table"></i> Truth tables</span></div>
-      </div>
-      <div class="subj-card" onclick="showToast('📐 Differential Equations — coming soon')">
-        <div class="subj-term">Term 2 · Math</div>
+      <a class="subj-card" href="https://www.youtube.com/@moemen.mp4" target="_blank" rel="noopener noreferrer">
+        <div class="subj-term">Year 1 · Term 2</div>
         <div class="subj-name">Differential Equations</div>
         <div class="subj-code">diff_equations.tex</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="square-root-alt"></i> Solver</span><span><i class="ic" data-ic="chart-line"></i> Plots</span></div>
+        <div class="subj-status"><span class="chip chip-in">In MoeAI</span><span class="chip chip-yt">Final revision + summary on YouTube</span></div>
+      </a>
+      <a class="subj-card" href="/moeai">
+        <div class="subj-term">Year 1 · Term 2</div>
+        <div class="subj-name">Logic Design</div>
+        <div class="subj-code">logic_design.v</div>
+        <div class="subj-status"><span class="chip chip-in">In MoeAI</span><span class="chip chip-in">Simulators</span></div>
+      </a>
+      <div class="subj-card" onclick="showToast('Not covered yet.')">
+        <div class="subj-term">Year 1 · Term 2</div>
+        <div class="subj-name">Structured Programming</div>
+        <div class="subj-code">structured_programming.cpp</div>
+        <div class="subj-status"><span class="chip chip-none">Not covered yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('🎲 Probability & Statistics — coming soon')">
-        <div class="subj-term">Term 2 · Math</div>
+      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+        <div class="subj-term">Year 1 · Term 2</div>
         <div class="subj-name">Probability &amp; Statistics</div>
         <div class="subj-code">probability.tex</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="dice"></i> Visualizer</span><span><i class="ic" data-ic="percent"></i> Distributions</span></div>
+        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('∫ Calculus — coming soon')">
-        <div class="subj-term">Term 1 · Math</div>
+      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+        <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Calculus</div>
         <div class="subj-code">calculus.tex</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="infinity"></i> Limits</span><span><i class="ic" data-ic="square-root-alt"></i> Integrals</span></div>
+        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('⚡ Physics — coming soon')">
-        <div class="subj-term">Term 1 · Science</div>
+      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+        <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Physics</div>
         <div class="subj-code">physics.tex</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="bolt"></i> Circuits</span><span><i class="ic" data-ic="atom"></i> Fields</span></div>
+        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('🔢 Discrete Mathematics — coming soon')">
-        <div class="subj-term">Term 1 · Math</div>
+      <div class="subj-card" onclick="showToast('Not covered yet.')">
+        <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Discrete Mathematics</div>
         <div class="subj-code">discrete_math.tex</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="project-diagram"></i> Sets</span><span><i class="ic" data-ic="check-double"></i> Logic</span></div>
+        <div class="subj-status"><span class="chip chip-none">Not covered yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('💾 Computing Fundamentals — coming soon')">
-        <div class="subj-term">Term 1 · Core</div>
+      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+        <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Computing Fundamentals</div>
         <div class="subj-code">computing_fund.c</div>
-        <div class="subj-meta"><span><i class="ic" data-ic="binary"></i> Binary</span><span><i class="ic" data-ic="memory"></i> Systems</span></div>
+        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
+      </div>
+    </div>
+    <h3 class="subj-year">Year 2 · Term 1 <span>coming very soon</span></h3>
+    <div class="subjects-grid">
+      <a class="subj-card" href="/moeai">
+        <div class="subj-term">Year 2 · Term 1</div>
+        <div class="subj-name">Linear Algebra</div>
+        <div class="subj-code">linear_algebra.m</div>
+        <div class="subj-status"><span class="chip chip-soon">Coming very soon</span><span class="chip chip-in">First lectures in MoeAI</span></div>
+      </a>
+      <div class="subj-card" onclick="showToast('Coming very soon.')">
+        <div class="subj-term">Year 2 · Term 1</div>
+        <div class="subj-name">Object-Oriented Programming</div>
+        <div class="subj-code">oop.java</div>
+        <div class="subj-status"><span class="chip chip-soon">Coming very soon</span></div>
+      </div>
+      <div class="subj-card" onclick="showToast('Coming very soon.')">
+        <div class="subj-term">Year 2 · Term 1</div>
+        <div class="subj-name">Computer Networks</div>
+        <div class="subj-code">networks.pcap</div>
+        <div class="subj-status"><span class="chip chip-soon">Coming very soon</span></div>
+      </div>
+      <div class="subj-card" onclick="showToast('Coming very soon.')">
+        <div class="subj-term">Year 2 · Term 1</div>
+        <div class="subj-name">Advanced Probability</div>
+        <div class="subj-code">adv_probability.tex</div>
+        <div class="subj-status"><span class="chip chip-soon">Coming very soon</span></div>
       </div>
     </div>
   </div>
@@ -835,10 +811,10 @@
   <div class="wrap">
     <div class="stats-bar lg lg-panel">
       <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-      <div class="stat-item"><div class="stat-number">230+</div><div class="stat-label">Active Students</div></div>
-      <div class="stat-item"><div class="stat-number">8</div><div class="stat-label">Full Courses</div></div>
-      <div class="stat-item"><div class="stat-number">7</div><div class="stat-label">Simulators</div></div>
-      <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">Community</div></div>
+      <div class="stat-item"><div class="stat-number">230+</div><div class="stat-label">Students on Telegram</div></div>
+      <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">Courses in MoeAI</div></div>
+      <div class="stat-item"><div class="stat-number">15+</div><div class="stat-label">Simulators in MoeAI</div></div>
+      <div class="stat-item"><div class="stat-number">2</div><div class="stat-label">Revisions on YouTube</div></div>
       <div class="stat-item"><div class="stat-number">0 EGP</div><div class="stat-label">Always Free</div></div>
     </div>
   </div>
@@ -864,7 +840,7 @@
           <p>Interactive CS education for students across Egypt. Built by a student. Free forever.</p>
           <div class="footer-social">
             <a href="https://t.me/CS_Epic_Save" target="_blank" rel="noopener noreferrer" class="fsoc"><i class="ic" data-ic="telegram"></i></a>
-            <a href="#" class="fsoc" onclick="showToast('📺 YouTube coming soon!')"><i class="ic" data-ic="youtube"></i></a>
+            <a href="https://www.youtube.com/@moemen.mp4" target="_blank" rel="noopener noreferrer" class="fsoc" aria-label="YouTube"><i class="ic" data-ic="youtube"></i></a>
             <a href="#" class="fsoc" onclick="showToast('📬 Contact coming soon!')"><i class="ic" data-ic="envelope"></i></a>
           </div>
         </div>
@@ -1672,10 +1648,10 @@
     // The demo video loads and plays only once it scrolls into view (3 MB).
     (function () {
       const v = document.querySelector('.see-video');
-      if (!v || !('IntersectionObserver' in window)) { if (v) { v.src = v.dataset.src; } return; }
+      if (!v || !('IntersectionObserver' in window)) { if (v) { v.src = (v.canPlayType('video/mp4; codecs="avc1.640028"') ? v.dataset.src : v.dataset.srcWebm); } return; }
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       new IntersectionObserver((entries) => entries.forEach((e) => {
-        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (!reduce) v.play().catch(() => {}); else v.controls = true; }
+        if (e.isIntersecting) { if (!v.src) v.src = (v.canPlayType('video/mp4; codecs="avc1.640028"') ? v.dataset.src : v.dataset.srcWebm); if (!reduce) v.play().catch(() => {}); else v.controls = true; }
         else if (v.src) v.pause();
       }), { threshold: 0.35 }).observe(v);
     })();
@@ -1700,6 +1676,7 @@
     console.log('🚀 EDUMOE V3 Ultimate Homepage loaded.');
   </script>
   <script src="/assets/ascii-braille.js" defer></script>
+  <script src="/assets/moeai-timeline.js" defer></script>
   <script src="/assets/edumoe-shell.js" defer></script>
   <script src="/assets/edumoe-mascot.js" defer></script>
   <script src="/assets/brand.js" defer></script>

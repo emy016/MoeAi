@@ -118,10 +118,11 @@
 
     /* Ambient light, the same trick the homepage uses. */
     .orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; display: block; }
-    .o1 { width: 520px; height: 520px; background: var(--glow); top: -180px; left: -120px; }
-    .o2 { width: 420px; height: 420px; background: var(--glow2); top: 40%; right: -140px; }
-    .o3 { width: 380px; height: 380px; background: var(--glow2); bottom: -120px; left: 30%; }
+    /* Soft gradients instead of a 90px filter blur: same glow, none of the lag under glass. */
+    .orb { position: absolute; border-radius: 50%; opacity: 0.6; display: block; }
+    .o1 { width: 760px; height: 760px; background: radial-gradient(circle, var(--glow) 0%, transparent 68%); top: -300px; left: -240px; }
+    .o2 { width: 640px; height: 640px; background: radial-gradient(circle, var(--glow2) 0%, transparent 68%); top: 34%; right: -250px; }
+    .o3 { width: 600px; height: 600px; background: radial-gradient(circle, var(--glow2) 0%, transparent 68%); bottom: -230px; left: 26%; }
 
     /* Liquid glass, matching the rest of the site. */
     .lg { position: relative; isolation: isolate;
@@ -129,8 +130,19 @@
       border: 1px solid var(--glass-border);
       backdrop-filter: blur(var(--glass-blur)) saturate(var(--sat));
       -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--sat));
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow),
+        inset 1.5px 2px 0 -1px rgba(255,255,255,.28),
+        inset -1.5px -1.5px 0 -1px rgba(255,255,255,.14),
+        inset 0 0 0 1px rgba(255,255,255,.04),
+        inset 0 -8px 18px -12px rgba(0,0,0,.5);
     }
+    /* A soft sheen across the top of every glass surface. */
+    .lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+      background: linear-gradient(160deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 28%, transparent 55%); }
+    .feat div, .file { position: relative; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+      background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
+      box-shadow: inset 1px 1.5px 0 -.5px rgba(255,255,255,.2), 0 10px 26px rgba(0,0,0,.25); }
+    html.perf-low .lg, html.perf-low .feat div, html.perf-low .file { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .lg-card { border-radius: var(--radius-lg); }
     .lg-pill { border-radius: 999px; }
 
@@ -311,57 +323,13 @@
     /* Below this width the sphere costs more than it gives, so the page simply drops it. */
     @media (max-width: 700px) { .sphere-band { display: none; } }
   
-    /* ─── TIMELINE (moeai-timeline.js; port of the Hyperiux Timeline) ─── */
-    .tl-intro { text-align: center; padding: 70px 20px 0; }
-    .tl { position: relative; height: 200vw; --tl-accent: #ea4349; color: var(--txt1); }
-    .tl-stick { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; padding-top: 9vh; box-sizing: border-box; }
-    .tl-track { display: flex; align-items: center; gap: 5vw; padding: 0 5vw; width: 250vw; height: 46vw; max-height: 86vh; box-sizing: border-box; }
-    .tl-hero { flex: none; width: 30vw; height: 100%; border-radius: 1.2vw; overflow: hidden; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tl-accent) 28%, transparent), transparent 70%), var(--bg2); display: grid; place-items: center; }
-    .tl-hero img { width: 92%; height: 92%; object-fit: contain; }
-    .tl-body { position: relative; height: 100%; flex: 1; min-width: 0; }
-    .tl-axis { position: absolute; left: 0; top: 49%; width: 100%; display: flex; align-items: center; }
-    .tl-cap { width: .8vw; height: .8vw; border-radius: 50%; background: var(--tl-accent); flex: none; }
-    .tl-grow { height: 2px; width: 0; border-radius: 2px; background: var(--tl-accent); }
-    .tl-half { height: 50%; display: flex; width: 100%; }
-    .tl-title { width: 16%; flex: none; padding-top: 1.5vw; }
-    .tl-title h2 { font-size: 3vw; line-height: .95; margin: 0; }
-    .tl-period { width: 30%; flex: none; padding-top: 2vw; }
-    .tl-period p { font-size: 1.65vw; color: var(--txt3); margin: 0; }
-    .tl-items { display: flex; height: 100%; gap: 12vw; }
-    .tl-bottom .tl-items { gap: 17vw; margin-left: 5vw; }
-    .tl-item { position: relative; height: 100%; width: 26vw; padding: 0 2.6vw; box-sizing: border-box; flex: none; }
-    .tl-stem { position: absolute; left: 0; top: 0; height: 100%; }
-    .tl-stem.below { top: auto; bottom: -1%; display: flex; flex-direction: column; justify-content: flex-end; }
-    .tl-dot { width: 1vw; height: 1vw; border-radius: 50%; background: var(--tl-accent); transform: translateX(-50%); }
-    .tl-line { width: 2px; height: 94%; background: var(--tl-accent); border-radius: 2px; margin-left: -1px; }
-    .tl-copy { margin-top: -1vw; display: flex; flex-direction: column; gap: .6vw; }
-    .tl-item.below .tl-copy { height: 100%; justify-content: flex-end; margin-top: 0; }
-    .tl-img { display: block; width: auto; max-width: 100%; height: min(16vw, 32vh); object-fit: contain; align-self: flex-start; border-radius: .9vw; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-    .tl-copy h4 { font-size: 1.9vw; line-height: 1; margin: 0; }
-    .tl-copy p { font-size: 1.05vw; line-height: 1.25; color: var(--txt2); margin: 0; width: 95%; }
-    @media (max-width: 600px) {
-      .tl { height: 400vh; }
-      .tl-stick { top: 0; padding-top: 12vh; }
-      .tl-track { width: 800vw; height: 80vh; padding: 0 7vw; }
-      .tl-item.below .tl-copy { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; }
-      .tl-hero { width: 85vw; height: 65vw; border-radius: 5vw; }
-      .tl-cap { width: 2vw; height: 2vw; }
-      .tl-title { width: 26%; padding-top: 5vw; } .tl-title h2 { font-size: 8.5vw; }
-      .tl-period { width: 30%; padding-top: 5vw; } .tl-period p { font-size: 4.2vw; }
-      .tl-items, .tl-bottom .tl-items { gap: 40vw; margin-left: 7vw; }
-      .tl-item { width: 70vw; padding: 0 7vw; }
-      .tl-dot { width: 2.5vw; height: 2.5vw; }
-      .tl-img { height: min(40vw, 18vh); border-radius: 3vw; }
-      .tl-copy h4 { font-size: 6.4vw; } .tl-copy p { font-size: 4.4vw; }
-    }
-    /* No GSAP or reduced motion: the same strip, scrolled by hand. */
-    .tl.tl-static { height: auto; } .tl.tl-static .tl-stick { position: relative; height: auto; overflow-x: auto; padding: 20px 0 30px; }
-    .tl.tl-static .tl-grow { width: 98%; }
-    .tl.tl-static .tl-track { height: 38vw; } @media (max-width: 600px) { .tl.tl-static .tl-track { height: 90vw; width: 560vw; } }
     /* Gallery: every accent is the student's own. */
-    .demo-phone { width: min(78vw, 290px); aspect-ratio: 400 / 860; margin: 10px auto 34px; border-radius: 38px; padding: 10px; box-sizing: border-box; background: #0c0c10;
+    .demo-phone { width: min(78vw, 300px); aspect-ratio: 390 / 844; margin: 10px auto 18px; border-radius: 42px; padding: 9px; box-sizing: content-box; background: #0c0c10;
       box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 70px rgba(0,0,0,.45); }
-    .demo-video { width: 100%; height: 100%; border-radius: 30px; object-fit: cover; display: block; background: #16161c; }
+    .demo-screen { position: relative; width: 100%; height: 100%; border-radius: 33px; overflow: hidden; background: #16161c; }
+    .demo-video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .demo-screen iframe { position: absolute; left: 0; top: 0; width: 390px; height: 844px; border: 0; transform-origin: 0 0; }
+    .demo-toggle { text-align: center; margin-bottom: 34px; }
     .accent-gallery { display: flex; gap: 14px; overflow-x: auto; padding: 8px 20px 26px; scroll-snap-type: x mandatory; scrollbar-width: none; }
     .accent-gallery::-webkit-scrollbar { display: none; }
     .accent-gallery figure { flex: none; width: 210px; margin: 0; scroll-snap-align: center; }
@@ -410,7 +378,7 @@
     <div class="hero-stats">
       <div><b>230+</b><span>students already</span></div>
       <div><b>191</b><span>lecture pages, cited to the page</span></div>
-      <div><b>3</b><span>full university courses grounded</span></div>
+      <div><b>3</b><span>courses in MoeAI so far</span></div>
       <div><b>3</b><span>languages, per message</span></div>
       <div><b>12</b><span>kinds of things it generates</span></div>
     </div>
@@ -424,15 +392,13 @@
 
 
   <!-- ─── TIMELINE ──────────────────────────────────────────── -->
-  <section class="tl-intro" aria-label="MoeAI timeline">
-    <h2 class="center">From a Telegram channel to a tutor that knows your course.</h2>
-  </section>
-  <section id="journey" class="tl"></section>
+  <section id="journey" style="padding: 70px 0 40px" aria-label="MoeAI so far"></section>
 
   <!-- ─── ACCENT GALLERY ─────────────────────────────────────── -->
   <section class="band" aria-label="Inside the app">
     <h2 class="center">Inside the app.</h2>
-    <figure class="demo-phone"><video class="demo-video" data-src="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A one-minute recording of the MoeAI app"></video></figure>
+    <figure class="demo-phone"><div class="demo-screen"><video class="demo-video" data-src="/assets/video/moeai-demo.mp4" data-src-webm="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A 30-second recording of the MoeAI app"></video></div></figure>
+    <div class="demo-toggle"><button type="button" class="btn" id="demoLive">Try it live</button></div>
     <div class="accent-gallery">
       <figure><img src="/assets/showcase/dm-red.webp" alt="Chatting with MoeAI" loading="lazy"><figcaption>Chat</figcaption></figure>
       <figure><img src="/assets/showcase/practice-lime.webp" alt="A practice question with rendered math" loading="lazy"><figcaption>Practice</figcaption></figure>
@@ -709,13 +675,28 @@
   </script>
   <script src="/assets/sphere-gallery.js" defer></script>
   <script>
+    // "Try it live": the real app, running inside the phone, at phone size.
+    (function () {
+      var btn = document.getElementById('demoLive'), screen = document.querySelector('.demo-screen');
+      if (!btn || !screen) return;
+      var live = null;
+      function fit() { if (live) live.style.transform = 'scale(' + (screen.clientWidth / 390) + ')'; }
+      btn.addEventListener('click', function () {
+        var v = screen.querySelector('video');
+        if (live) { live.remove(); live = null; if (v) { v.style.display = ''; v.play().catch(function () {}); } btn.textContent = 'Try it live'; return; }
+        if (v) { v.pause(); v.style.display = 'none'; }
+        live = document.createElement('iframe'); live.src = '/moeai'; live.title = 'MoeAI, live'; live.setAttribute('loading', 'lazy');
+        screen.appendChild(live); fit(); btn.textContent = 'Back to the video';
+      });
+      window.addEventListener('resize', fit);
+    })();
     // The demo loads and plays only when it is on screen.
     (function () {
       var v = document.querySelector('.demo-video'); if (!v) return;
-      if (!('IntersectionObserver' in window)) { v.src = v.dataset.src; v.controls = true; return; }
+      if (!('IntersectionObserver' in window)) { v.src = (v.canPlayType('video/mp4; codecs="avc1.640028"') ? v.dataset.src : v.dataset.srcWebm); v.controls = true; return; }
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       new IntersectionObserver(function (es) { es.forEach(function (e) {
-        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (reduce) v.controls = true; else v.play().catch(function () {}); } else if (v.src) v.pause();
+        if (e.isIntersecting) { if (!v.src) v.src = (v.canPlayType('video/mp4; codecs="avc1.640028"') ? v.dataset.src : v.dataset.srcWebm); if (reduce) v.controls = true; else v.play().catch(function () {}); } else if (v.src) v.pause();
       }); }, { threshold: 0.35 }).observe(v);
     })();
   </script>
