@@ -39,9 +39,10 @@
     // Bigger by default on computers: the pages were designed small, and
     // everyone was zooming in by hand. Phones and tablets keep 100%.
     'html, body { overflow-x: clip; }',
-    '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } }',
-    '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } }',
-    '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } }',
+    // The top bar keeps its original size: it is zoomed back out by the same factor.
+    '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } html:not(.embed) .navbar { zoom: 0.90909; } }',
+    '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } html:not(.embed) .navbar { zoom: 0.83333; } }',
+    '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } html:not(.embed) .navbar { zoom: 0.8; } }',
     '.bottom-tab-bar { display: none !important; }',
     '.em-dock { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1200;',
     '  display: none; align-items: center; gap: 2px; padding: 6px; border-radius: 28px; width: min(calc(100% - 24px), 440px); box-sizing: border-box;',
@@ -59,7 +60,7 @@
     '.em-dock a.center span { display: none; }',
     '.em-dock a:active { transform: scale(0.95); }',
     '@media (max-width: 1024px) { .em-dock { display: flex; } body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; } }',
-    '@media (max-width: 700px) { .navbar .theme-dot, .navbar .custom-color-wrap, .navbar [class*="theme-switch"], .navbar .theme-dots { display: none !important; } .navbar { max-width: calc(100vw - 24px); box-sizing: border-box; } .hero { padding-left: 16px !important; padding-right: 16px !important; } h1, .hero h1 { overflow-wrap: anywhere; } }',
+    '@media (max-width: 700px) { .navbar :not(.theme-pop) > .theme-dot, .navbar :not(.theme-pop) > .custom-color-wrap, .navbar [class*="theme-switch"]:not(:has(.theme-trigger)), .navbar .theme-dots { display: none !important; } .navbar { max-width: calc(100vw - 24px); box-sizing: border-box; } .hero { padding-left: 16px !important; padding-right: 16px !important; } h1, .hero h1 { overflow-wrap: anywhere; } }',
     '@media (prefers-reduced-motion: reduce) { .bg-orb { animation: none !important; } }',
   ].join('\n');
   var style = document.createElement('style');

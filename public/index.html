@@ -200,7 +200,7 @@
     /* ─── NAVBAR ────────────────────────────────────────────────── */
     .navbar {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
-      width: calc(100% - 40px); max-width: 1360px; box-sizing: border-box;
+      width: calc(100% - 40px); max-width: 1270px; box-sizing: border-box;
       display: flex; align-items: center; gap: 12px;
       padding: 10px 20px;
       border: 1px solid var(--glass-border);
@@ -222,19 +222,28 @@
     .soon-badge { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 999px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; vertical-align: middle; margin-left: 2px; }
     .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; }
     .theme-switcher { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--tint); position: relative; }
-    /* One swatch in the bar; the colours open under it on hover, focus or tap. */
-    .theme-switcher { padding: 0; border: 0; background: none; }
-    .theme-trigger { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--glass-border2); cursor: pointer; flex-shrink: 0;
-      background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 45%, #fff), var(--accent) 60%); box-shadow: 0 0 0 3px var(--tint2); }
-    .theme-pop { position: absolute; top: calc(100% + 10px); right: -8px; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px;
-      border: 1px solid var(--glass-border); background: color-mix(in srgb, var(--bg2) 70%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-      opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .18s, transform .18s, visibility 0s .18s; z-index: 5; }
-    .theme-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 12px; }
-    .theme-switcher:hover .theme-pop, .theme-switcher:focus-within .theme-pop { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .18s; }
+    /* Desktop: the colour dots sit in the bar as before. Phones: a small palette
+       button opens the same dots under the bar (there is no room for them inline). */
+    .theme-trigger { display: none; }
+    .theme-pop { display: flex; align-items: center; gap: 6px; }
+    @media (max-width: 700px) {
+      .theme-switcher { padding: 0 !important; border: 0; background: none; }
+      .theme-trigger { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
+        border: 1px solid var(--glass-border); background: var(--tint2); color: var(--txt1); padding: 0; }
+      .theme-trigger svg { width: 17px; height: 17px; }
+      .nav-right, .theme-switcher { position: static !important; }
+      .theme-pop { position: absolute; top: calc(100% + 10px); left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - 8px); box-sizing: border-box; justify-content: center; gap: 10px; padding: 10px 14px; border-radius: 999px;
+        border: 1px solid var(--glass-border); background: color-mix(in srgb, var(--bg2) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+        opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .18s, transform .18s, visibility 0s .18s; z-index: 5; }
+      .theme-switcher.open .theme-pop, .theme-switcher:focus-within .theme-pop { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .18s; }
+      .theme-pop .theme-dot { width: 20px; height: 20px; }
+      .nav-cta { padding: 7px 14px !important; font-size: 13px !important; }
+    }
     .nav-btn-link { white-space: nowrap; }
     /* Zoomed laptops (see edumoe-shell.js) have less room: the footer already links these two. */
-    @media (min-width: 1025px) and (max-width: 1439px) { .nav-extra { display: none; } }
-    @media (min-width: 1025px) and (max-width: 1199px) { .nav-btn-link { padding: 8px 11px; } .nav-right { gap: 8px; } }
+    @media (min-width: 1025px) and (max-width: 1299px) { .nav-extra { display: none; } }
+    @media (min-width: 1025px) and (max-width: 1199px) { .nav-extra-2 { display: none; } }
+    @media (min-width: 1025px) and (max-width: 1149px) { .nav-btn-link { padding: 8px 11px; } .nav-right { gap: 8px; } }
     .theme-dot { width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; }
     .theme-dot:hover { transform: scale(1.2); }
     .theme-dot.active { transform: scale(1.15); box-shadow: 0 0 0 2px var(--bg1), 0 0 0 4px var(--txt1); }
@@ -615,12 +624,12 @@
       <a href="/quizzes" class="nav-btn-link">Quizzes</a>
       <a href="/ranked" class="nav-btn-link">Ranked</a>
       <a href="/moeai" class="nav-btn-link nav-moeai">MoeAI</a>
-      <a href="/showcase" class="nav-btn-link nav-extra">Why MoeAI</a>
+      <a href="/showcase" class="nav-btn-link nav-extra-2">Why MoeAI</a>
       <a href="/about" class="nav-btn-link nav-extra">About</a>
     </div>
     <div class="nav-right">
       <div class="theme-switcher" tabindex="-1">
-        <button class="theme-trigger" type="button" aria-label="Theme colour" title="Theme colour"></button>
+        <button class="theme-trigger" type="button" aria-label="Theme colour" title="Theme colour" onclick="this.parentNode.classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16a5 5 0 0 0 5-5C21 6.5 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.5" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
         <div class="theme-pop">
         <button class="theme-dot td-ruby active" id="td-ruby" onclick="setTheme('ruby', this)"></button>
         <button class="theme-dot td-lava" id="td-lava" onclick="setTheme('lava', this)"></button>
@@ -1643,6 +1652,8 @@
     // ============================================================
     //  LOADER & INIT
     // ============================================================
+    document.addEventListener('click', (e) => { const sw = document.querySelector('.theme-switcher.open'); if (sw && !sw.contains(e.target)) sw.classList.remove('open'); });
+
     // The demo video loads and plays only once it scrolls into view (3 MB).
     (function () {
       const v = document.querySelector('.see-video');
