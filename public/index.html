@@ -1292,10 +1292,7 @@
     (function() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
       const ctx = canvas.getContext('2d');
-
       const texts = [
         "V = IR", "P = VI", "ε = -dΦ/dt", "∮E·dA = Q/ε₀", "∑V = 0",
         "V = L·dI/dt", "F = qE", "F = ma", "U = kq₁q₂/r", "C = Q/V",
@@ -1314,68 +1311,86 @@
         "P(X=k)=e⁻ˡλᵏ/k!", "E[X] = μ", "Var(X) = σ²"
       ];
 
+      // Drawn at the screen's real resolution in the page's monospace font
+      // (a canvas cannot read CSS variables, so it used to fall back to a
+      // blurry 10px sans-serif). Each equation is rendered once to a small
+      // sprite and then only moved, which is far cheaper than fillText.
+      const root = document.documentElement;
+      const mono = (getComputedStyle(root).getPropertyValue('--font-mono') || 'monospace').trim();
+      let W = 0, H = 0, dpr = 1;
+      function size() {
+        const r = canvas.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = r.width; H = r.height;
+        canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+      }
+      size();
+
+      const sprites = new Map();
+      let spriteColor = '';
+      function colour() {
+        return root.getAttribute('data-theme') === 'terminal' ? 'rgb(79,255,143)' : (root.getAttribute('data-theme') === 'light' ? 'rgb(70,60,90)' : 'rgb(190,190,235)');
+      }
+      function sprite(text, px) {
+        const key = text + '|' + px;
+        if (sprites.has(key)) return sprites.get(key);
+        const c = document.createElement('canvas'), g = c.getContext('2d');
+        const font = `500 ${px}px ${mono}`;
+        g.font = font;
+        const w = Math.ceil(g.measureText(text).width) + 4, h = Math.ceil(px * 1.4);
+        c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr);
+        g.scale(dpr, dpr); g.font = font; g.textBaseline = 'middle'; g.fillStyle = spriteColor;
+        g.fillText(text, 2, h / 2);
+        const out = { c, w, h };
+        sprites.set(key, out);
+        return out;
+      }
+
       const particles = [];
-      const count = window.__perfLow ? 60 : 150;
+      const count = window.__perfLow ? 38 : 80;
       for (let i = 0; i < count; i++) {
+        const depth = Math.random();
         particles.push({
           text: texts[Math.floor(Math.random() * texts.length)],
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.12,
-          vy: (Math.random() - 0.5) * 0.08,
-          alpha: 0.16 + Math.random() * 0.18,
-          size: 12 + Math.random() * 14
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - 0.5) * (0.06 + depth * 0.12),
+          vy: (Math.random() - 0.5) * (0.04 + depth * 0.08),
+          alpha: 0.09 + depth * 0.15,
+          size: Math.round(11 + depth * 5)
         });
       }
 
-      let mouseX = 0,
-        mouseY = 0;
-      canvas.addEventListener('mousemove', (e) => { mouseX = e.clientX;
-        mouseY = e.clientY; });
-      canvas.addEventListener('mouseleave', () => { mouseX = -9999;
-        mouseY = -9999; });
+      let mouseX = -9999, mouseY = -9999;
+      window.addEventListener('pointermove', (e) => { const z = parseFloat(getComputedStyle(root).zoom) || 1; mouseX = e.clientX / z; mouseY = e.clientY / z; }, { passive: true });
 
       // Everything glassy blurs this canvas, so each redraw re-blurs every
-      // glass panel on screen. Phones and slower machines redraw at 20 fps
-      // (the drift is slow enough that nobody sees the difference), and
-      // nothing is drawn while the tab is hidden.
+      // glass panel on screen. Phones and slower machines redraw at 20 fps,
+      // and nothing is drawn while the tab is hidden.
       const frameGap = window.__perfLow ? 50 : 16;
       let lastDraw = 0;
       function draw(now) {
         requestAnimationFrame(draw);
         if (document.hidden || (now || 0) - lastDraw < frameGap) return;
         lastDraw = now || 0;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const isTerm = document.documentElement.getAttribute('data-theme') === 'terminal';
+        const c = colour();
+        if (c !== spriteColor) { spriteColor = c; sprites.clear(); }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, H);
         for (const p of particles) {
-          const dx = p.x - mouseX,
-            dy = p.y - mouseY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            const force = (120 - dist) / 120 * 0.8;
-            const angle = Math.atan2(dy, dx);
-            p.x += Math.cos(angle) * force;
-            p.y += Math.sin(angle) * force;
-          }
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < -50) p.x = canvas.width + 50;
-          if (p.x > canvas.width + 50) p.x = -50;
-          if (p.y < -50) p.y = canvas.height + 50;
-          if (p.y > canvas.height + 50) p.y = -50;
-          ctx.font = `${p.size}px var(--font-mono)`;
-          ctx.fillStyle = isTerm ?
-            `rgba(79, 255, 143, ${p.alpha * 1.4})` :
-            `rgba(150, 150, 205, ${p.alpha})`;
-          ctx.fillText(p.text, p.x, p.y);
+          const dx = p.x - mouseX, dy = p.y - mouseY, dist = Math.hypot(dx, dy);
+          if (dist < 120) { const f = (120 - dist) / 120 * 0.8; p.x += dx / (dist || 1) * f; p.y += dy / (dist || 1) * f; }
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < -200) p.x = W + 20; if (p.x > W + 20) p.x = -200;
+          if (p.y < -40) p.y = H + 20; if (p.y > H + 20) p.y = -40;
+          const sp = sprite(p.text, p.size);
+          ctx.globalAlpha = p.alpha;
+          ctx.drawImage(sp.c, Math.round(p.x * dpr) / dpr, Math.round(p.y * dpr) / dpr, sp.w, sp.h);
         }
+        ctx.globalAlpha = 1;
       }
       requestAnimationFrame(draw);
-
-      window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => sprites.clear());
+      window.addEventListener('resize', () => { size(); sprites.clear(); });
     })();
 
     // ============================================================

@@ -11,6 +11,8 @@
  *    pass, and the orbs behind it stop drifting: a backdrop blur over
  *    something that changes every frame is recomputed every frame.
  *
+ * 3. One even grid across the whole page background.
+ *
  * Not used inside the MoeAI app (embedded pages opt out with ?embed=1).
  */
 (function () {
@@ -43,6 +45,12 @@
     '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } html:not(.embed) .navbar { zoom: 0.90909; } }',
     '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } html:not(.embed) .navbar { zoom: 0.83333; } }',
     '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } html:not(.embed) .navbar { zoom: 0.8; } }',
+    // One even grid behind the whole site (it used to sit only behind the book).
+    '.em-grid { position: fixed; inset: 0; z-index: -1; pointer-events: none;',
+    '  background-image: linear-gradient(color-mix(in srgb, var(--accent, #e11d48) 17%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent, #e11d48) 17%, transparent) 1px, transparent 1px);',
+    '  background-size: 44px 44px; background-position: center top; }',
+    'html[data-theme="light"] .em-grid { opacity: .7; }',
+    '.sg-grid-bg { display: none !important; }',
     '.bottom-tab-bar { display: none !important; }',
     '.em-dock { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1200;',
     '  display: none; align-items: center; gap: 2px; padding: 6px; border-radius: 28px; width: min(calc(100% - 24px), 440px); box-sizing: border-box;',
@@ -82,7 +90,13 @@
     { href: '/ranked', label: 'Ranked', icon: 'ranked', match: /^\/(ranked|quizzes)/ },
   ];
 
+  function grid() {
+    if (document.querySelector('.em-grid')) return;
+    var g = document.createElement('div'); g.className = 'em-grid'; g.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(g, document.body.firstChild);
+  }
   function build() {
+    grid();
     if (document.querySelector('.em-dock')) return;
     var nav = document.createElement('nav');
     nav.className = 'em-dock';
