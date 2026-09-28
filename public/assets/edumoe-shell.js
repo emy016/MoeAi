@@ -91,13 +91,13 @@
   ];
 
   function grid() {
-    if (document.querySelector('.em-grid')) return;
+    if (document.querySelector('.em-grid') || document.getElementById('edumoe-static-system')) return; // that page draws its own grid
     var g = document.createElement('div'); g.className = 'em-grid'; g.setAttribute('aria-hidden', 'true');
     document.body.insertBefore(g, document.body.firstChild);
   }
   function build() {
     grid();
-    if (document.querySelector('.em-dock')) return;
+    if (document.querySelector('.em-dock') || document.body.classList.contains('no-dock')) return;
     var nav = document.createElement('nav');
     nav.className = 'em-dock';
     nav.setAttribute('aria-label', 'EduMoe');
