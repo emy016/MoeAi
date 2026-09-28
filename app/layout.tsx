@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://moe-ai-sable.vercel.app"),
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico", sizes: "48x48" }], apple: "/apple-touch-icon.png" },
+  manifest: "/manifest.webmanifest",
   openGraph: { images: ["/brand/moeai-logo.jpg"] },
   title: {
     default: "EduMoe — Computer Science, made clear",

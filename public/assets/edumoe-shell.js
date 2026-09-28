@@ -42,12 +42,13 @@
     // everyone was zooming in by hand. Phones and tablets keep 100%.
     'html, body { overflow-x: clip; }',
     // The top bar keeps its original size: it is zoomed back out by the same factor.
-    '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } html:not(.embed) .navbar { zoom: 0.90909; } }',
-    '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } html:not(.embed) .navbar { zoom: 0.83333; } }',
-    '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } html:not(.embed) .navbar { zoom: 0.8; } }',
+    // The top bar is zoomed back to just a little over its original size.
+    '@media (min-width: 1025px) { html:not(.embed) { zoom: 1.1; } html:not(.embed) .navbar { zoom: 0.95455; } }',
+    '@media (min-width: 1280px) { html:not(.embed) { zoom: 1.2; } html:not(.embed) .navbar { zoom: 0.9; } }',
+    '@media (min-width: 1600px) { html:not(.embed) { zoom: 1.25; } html:not(.embed) .navbar { zoom: 0.88; } }',
     // One even grid behind the whole site (it used to sit only behind the book).
     '.em-grid { position: fixed; inset: 0; z-index: -1; pointer-events: none;',
-    '  background-image: linear-gradient(color-mix(in srgb, var(--accent, #e11d48) 17%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent, #e11d48) 17%, transparent) 1px, transparent 1px);',
+    '  background-image: linear-gradient(color-mix(in srgb, var(--accent, #e11d48) 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent, #e11d48) 10%, transparent) 1px, transparent 1px);',
     '  background-size: 44px 44px; background-position: center top; }',
     'html[data-theme="light"] .em-grid { opacity: .7; }',
     '.sg-grid-bg { display: none !important; }',
@@ -112,4 +113,20 @@
     document.body.appendChild(nav);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
+
+  // On pages with a hero, the top bar spans exactly the hero's content: its
+  // left edge over the title, its right edge over the picture, centred.
+  function alignNav() {
+    var nav = document.querySelector('.navbar'), hero = document.querySelector('.hero');
+    if (!nav || !hero) return;
+    if (window.innerWidth <= 1024) { nav.style.width = ''; nav.style.maxWidth = ''; return; }
+    var cs = getComputedStyle(hero), hz = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    var r = hero.getBoundingClientRect(), inner = r.width - (parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)) * hz;
+    var nz = nav.currentCSSZoom || hz * (parseFloat(getComputedStyle(nav).zoom) || 1);
+    nav.style.maxWidth = 'none';
+    nav.style.width = Math.round(inner / nz) + 'px';
+  }
+  window.addEventListener('resize', alignNav);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', alignNav); else alignNav();
+  window.addEventListener('load', alignNav);
 })();

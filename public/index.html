@@ -242,8 +242,8 @@
     .nav-btn-link { white-space: nowrap; }
     /* Zoomed laptops (see edumoe-shell.js) have less room: the footer already links these two. */
     @media (min-width: 1025px) and (max-width: 1299px) { .nav-extra { display: none; } }
-    @media (min-width: 1025px) and (max-width: 1199px) { .nav-extra-2 { display: none; } }
-    @media (min-width: 1025px) and (max-width: 1149px) { .nav-btn-link { padding: 8px 11px; } .nav-right { gap: 8px; } }
+    @media (min-width: 1025px) and (max-width: 1199px) { .nav-extra-2 { display: none; } .nav-auth-btn span { display: none; } .theme-pop { gap: 4px; } }
+    @media (min-width: 1025px) and (max-width: 1439px) { .nav-btn-link { padding: 8px 11px; } .nav-right { gap: 8px; } }
     .theme-dot { width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; }
     .theme-dot:hover { transform: scale(1.2); }
     .theme-dot.active { transform: scale(1.15); box-shadow: 0 0 0 2px var(--bg1), 0 0 0 4px var(--txt1); }
@@ -287,6 +287,8 @@
     .chip-in { color: #4ade80; background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.25); }
     .chip-yt { color: #ff6b6b; background: rgba(255,80,80,.1); border-color: rgba(255,80,80,.28); }
     .chip-soon { color: var(--accent2); background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+    a.chip { text-decoration: none; transition: filter .2s, transform .2s; } a.chip:hover { filter: brightness(1.25); transform: translateY(-1px); }
+    .chip-tg { color: #5ec4ff; background: rgba(42,171,238,.1); border-color: rgba(42,171,238,.3); }
     .chip-none { color: var(--txt3); background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
     .subj-year { margin: 44px 0 18px; font-size: 20px; letter-spacing: -.01em; }
     .subj-year span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-left: 10px; }
@@ -304,7 +306,10 @@
     @media (max-width: 700px) { .see-phone { max-width: min(78vw, 300px); } }
 
     /* ─── HERO ──────────────────────────────────────────────────── */
-    .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; padding: 120px 24px 60px; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
+    /* Fixed tracks, and title lines that never wrap: the scramble's wider look-alike
+       letters can then overflow a little without reflowing the hero or moving the book. */
+    .hero-title .stx-line { white-space: nowrap; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 50px; align-items: center; padding: 120px 24px 60px; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
     .hero-title { margin-bottom: 24px; }
     @keyframes word-in { to { opacity: 1; transform: translateY(0); } }
 
@@ -597,6 +602,7 @@
     }
     @media (max-width: 700px) { .book-stage { display: none; } }
   </style>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 </head>
 <body>
 
@@ -727,55 +733,55 @@
       <div class="section-label">The courses</div>
       <h2 class="sf-title">Where each course stands</h2>
     </div>
-    <p class="subj-note">Mostly revisions and summaries, not full lecture series. Older revision videos are on the Telegram channel and moving to YouTube.</p>
+    <p class="subj-note">Revisions and summaries for most of first year, on Telegram and YouTube. Three courses are in MoeAI so far.</p>
     <div class="subjects-grid">
-      <a class="subj-card" href="https://www.youtube.com/@moemen.mp4" target="_blank" rel="noopener noreferrer">
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 2</div>
         <div class="subj-name">Differential Equations</div>
         <div class="subj-code">diff_equations.tex</div>
-        <div class="subj-status"><span class="chip chip-in">In MoeAI</span><span class="chip chip-yt">Final revision + summary on YouTube</span></div>
-      </a>
-      <a class="subj-card" href="/moeai">
+        <div class="subj-status"><a class="chip chip-yt" href="https://www.youtube.com/@moemen.mp4" target="_blank" rel="noopener noreferrer">Final revision + summary on YouTube ↗</a><a class="chip chip-in" href="/moeai">In MoeAI ↗</a></div>
+      </div>
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 2</div>
         <div class="subj-name">Logic Design</div>
         <div class="subj-code">logic_design.v</div>
-        <div class="subj-status"><span class="chip chip-in">In MoeAI</span><span class="chip chip-in">Simulators</span></div>
-      </a>
-      <div class="subj-card" onclick="showToast('Not covered yet.')">
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/1001" target="_blank" rel="noopener noreferrer">Video on Telegram ↗</a><a class="chip chip-in" href="/moeai">In MoeAI ↗</a></div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-term">Year 1 · Term 2</div>
+        <div class="subj-name">Probability &amp; Statistics</div>
+        <div class="subj-code">probability.tex</div>
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/788" target="_blank" rel="noopener noreferrer">Video on Telegram ↗</a></div>
+      </div>
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 2</div>
         <div class="subj-name">Structured Programming</div>
         <div class="subj-code">structured_programming.cpp</div>
         <div class="subj-status"><span class="chip chip-none">Not covered yet</span></div>
       </div>
-      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
-        <div class="subj-term">Year 1 · Term 2</div>
-        <div class="subj-name">Probability &amp; Statistics</div>
-        <div class="subj-code">probability.tex</div>
-        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
-      </div>
-      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Calculus</div>
         <div class="subj-code">calculus.tex</div>
-        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/304" target="_blank" rel="noopener noreferrer">Video on Telegram ↗</a></div>
       </div>
-      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Physics</div>
         <div class="subj-code">physics.tex</div>
-        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/82" target="_blank" rel="noopener noreferrer">Video on Telegram ↗</a></div>
       </div>
-      <div class="subj-card" onclick="showToast('Not covered yet.')">
-        <div class="subj-term">Year 1 · Term 1</div>
-        <div class="subj-name">Discrete Mathematics</div>
-        <div class="subj-code">discrete_math.tex</div>
-        <div class="subj-status"><span class="chip chip-none">Not covered yet</span></div>
-      </div>
-      <div class="subj-card" onclick="showToast('Not in MoeAI yet.')">
+      <div class="subj-card">
         <div class="subj-term">Year 1 · Term 1</div>
         <div class="subj-name">Computing Fundamentals</div>
         <div class="subj-code">computing_fund.c</div>
-        <div class="subj-status"><span class="chip chip-none">Not in MoeAI yet</span></div>
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/8" target="_blank" rel="noopener noreferrer">Video on Telegram ↗</a></div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-term">Year 1 · Term 1</div>
+        <div class="subj-name">Discrete Mathematics</div>
+        <div class="subj-code">discrete_math.tex</div>
+        <div class="subj-status"><a class="chip chip-tg" href="https://t.me/CS_Epic_Save/541" target="_blank" rel="noopener noreferrer">Materials on Telegram ↗</a></div>
       </div>
     </div>
     <h3 class="subj-year">Year 2 · Term 1 <span>coming very soon</span></h3>
@@ -804,18 +810,6 @@
         <div class="subj-code">adv_probability.tex</div>
         <div class="subj-status"><span class="chip chip-soon">Coming very soon</span></div>
       </div>
-    </div>
-  </div>
-
-  <!-- ─── STATS BAR ────────────────────────────────────────────── -->
-  <div class="wrap">
-    <div class="stats-bar lg lg-panel">
-      <div class="lg-effect"></div><div class="lg-tint"></div><div class="lg-shine"></div>
-      <div class="stat-item"><div class="stat-number">230+</div><div class="stat-label">Students on Telegram</div></div>
-      <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">Courses in MoeAI</div></div>
-      <div class="stat-item"><div class="stat-number">15+</div><div class="stat-label">Simulators in MoeAI</div></div>
-      <div class="stat-item"><div class="stat-number">2</div><div class="stat-label">Revisions on YouTube</div></div>
-      <div class="stat-item"><div class="stat-number">0 EGP</div><div class="stat-label">Always Free</div></div>
     </div>
   </div>
 
@@ -1073,23 +1067,6 @@
         });
       }
 
-      // Pin every letter to the width of its real glyph. The scramble swaps in
-      // wider or narrower look-alikes; without this the line reflows on every
-      // frame and pushes the whole hero (and the book beside it) around.
-      function lockWidths() {
-        // Measure the real letter even if a scrambled look-alike is showing.
-        const shown = chars.map((c) => c.el.textContent);
-        chars.forEach((c) => { c.el.style.width = ''; c.el.textContent = c.char; });
-        // Rects are in screen pixels; the page may be zoomed (edumoe-shell.js).
-        const z = (el.currentCSSZoom || parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
-        const widths = chars.map((c) => c.el.getBoundingClientRect().width / z);
-        chars.forEach((c, i) => { c.el.style.width = widths[i] + 'px'; c.el.textContent = shown[i]; });
-      }
-      lockWidths();
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockWidths);
-      let relock = null;
-      window.addEventListener('resize', () => { clearTimeout(relock); relock = setTimeout(lockWidths, 150); });
-
       // Measure each character's rendered row so 'multiLine' mode and
       // both hover modes can reason about "this line" even when the
       // browser — not an authored '\n' — decided where text wraps.
@@ -1244,7 +1221,7 @@
     // Hero: hand-set line breaks and two gradient words, exactly as
     // designed; diffusion hover mirrors the original single-line mode.
     createScrambleText(document.getElementById('heroTitle'), {
-      words: 'Learn\nComputer Science\nThe Cool Way',
+      words: 'Learn\nComputer\nScience\nThe Cool Way',
       gradientWords: ['Computer', 'Cool'],
       blockLines: true,
       mode: 'oneLine',

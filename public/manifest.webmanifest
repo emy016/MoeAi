@@ -1,0 +1,16 @@
+{
+  "name": "MoeAI",
+  "short_name": "MoeAI",
+  "description": "An AI tutor that answers from your own lectures.",
+  "start_url": "/moeai",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#16161c",
+  "theme_color": "#16161c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
