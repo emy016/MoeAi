@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const goal = String(body.goal ?? "").trim().slice(0, 500);
     if (goal.length < 6) return fail(400, "Describe what the skill should do.");
     try {
-      const { text } = await completeChat([{ role: "system", content: SKILL_BUILDER }, { role: "user", content: goal }], { maxTokens: 500 });
+      const { text } = await completeChat([{ role: "system", content: SKILL_BUILDER }, { role: "user", content: goal }], { maxTokens: 500, background: true });
       const draft = parseJsonBlock<{ name?: string; content?: string }>(text);
       if (!draft?.name || !draft?.content) return fail(502, "MoeAI could not draft that skill. Try describing it differently.");
       return Response.json({ name: String(draft.name).slice(0, 60), content: String(draft.content).slice(0, 3000) });

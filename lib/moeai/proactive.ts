@@ -88,7 +88,7 @@ async function writeLine(complete: Complete, trigger: Trigger, target: Target): 
 
 ${voiceCalibration(target)}
 Write it in ${describe(target)}.`;
-  const examples = "Examples of the feel: \"Hey wait! are you not gonna start studying with me? your first lecture is waiting\" / \"B2olk eh t7b tsm3 fun fact?\" / \"el assignment due kaman sa3ten 😭 yalla\".";
+  const examples = "Examples of the feel: \"Hey wait! are you not gonna start studying with me? your first lecture is waiting\" / \"B2olk eh t7b tsm3 fun fact?\" / \"el assignment due kaman sa3ten, yalla\". No emoji.";
   const text = await complete(system, `Reason to message: ${trigger.kind}. Facts: ${trigger.facts}\n${examples}`);
   return text.replace(/^["'\s]+|["'\s]+$/g, "").split("\n")[0].slice(0, 140);
 }

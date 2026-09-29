@@ -72,7 +72,7 @@ async function generate(courseId: string, title: string): Promise<void> {
   try {
     for await (const d of streamGemini({ system, contents: [{ role: "user", parts: [{ text: prompt }] }], temperature: 0.6, maxOutputTokens: 5000, json: true })) raw += d;
   } catch {
-    raw = (await completeChat([{ role: "system", content: system }, { role: "user", content: prompt }], { maxTokens: 4000 })).text;
+    raw = (await completeChat([{ role: "system", content: system }, { role: "user", content: prompt }], { maxTokens: 4000, background: true })).text;
   }
   const parsed = parseModelJson<{ questions?: { q?: string; choices?: string[]; correct?: number; exp?: string; diff?: string }[] }>(raw);
   const rows = (parsed?.questions ?? [])

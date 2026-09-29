@@ -21,7 +21,7 @@ const MODULE_WEIGHTS: Record<string, number> = {
   AI_POLICY: 0.12, SECURITY: 0.16, PERSONALITY: 0.24, TUTORING: 0.26, LANGUAGE: 0.14, MEMORY: 0.06, TOOLS: 0.06,
 };
 const SECTION_ORDER = ["AI_POLICY", "SECURITY", "PERSONALITY", "TUTORING", "MEMORY", "TOOLS", "LANGUAGE"] as const;
-type Section = (typeof SECTION_ORDER)[number];
+export type Section = (typeof SECTION_ORDER)[number];
 const HEADINGS: Record<Section, string> = {
   AI_POLICY: "# AI POLICY", SECURITY: "# SECURITY", PERSONALITY: "# PERSONALITY", TUTORING: "# TUTORING",
   MEMORY: "# MEMORY", TOOLS: "# TOOLS", LANGUAGE: "# LANGUAGE SPECIFICATION",
@@ -110,6 +110,14 @@ export type BuildOptions = {
    * language directive stay the last thing the model reads, as in the bot.
    */
   referenceContext?: string[];
+  /**
+   * Modules sent whole, outside the budget. The bot trims every file to fit
+   * Groq's 8,000 tokens a minute, which cost half of TUTORING on every turn.
+   * Where the model allows it, Eslam's personality and tutoring files go in
+   * complete; the policy, security, memory and tool files are still selected,
+   * because sending those whole is what made the voice generic.
+   */
+  fullModules?: Section[];
 };
 
 export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): BuiltPrompt {
@@ -135,8 +143,16 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
     if (!active.includes(name)) buckets[name].forEach((u) => trace.omitted.push(`${label(u)} (${name.toLowerCase()} not relevant)`));
   }
   const weightTotal = active.reduce((s, n) => s + (MODULE_WEIGHTS[n] ?? 0.05), 0) || 1;
+  const full = new Set(opts.fullModules ?? []);
   const chosen: Partial<Record<Section, Unit[]>> = {};
+  const whole: Partial<Record<Section, Unit[]>> = {};
   for (const name of active) {
+    if (full.has(name)) {
+      whole[name] = buckets[name];
+      buckets[name].forEach((u) => trace.selected.push(label(u)));
+      continue;
+    }
+    // Same share as before: sending the others whole must not buy more policy text.
     const share = Math.floor((available * (MODULE_WEIGHTS[name] ?? 0.05)) / weightTotal);
     chosen[name] = select(buckets[name], share, boosted, trace, CONDITIONAL.has(name));
   }
@@ -144,6 +160,7 @@ export function buildSystemPrompt(registry: SpecRegistry, opts: BuildOptions): B
   const specCost = Object.values(chosen).flat().reduce((s, u) => s + estimateTokens(u!.text), 0);
   const excess = fixedCost + specCost + ASSEMBLY_OVERHEAD_TOKENS - opts.budgetTokens;
   if (excess > 0) trace.overBudget = shed(chosen, excess, boosted, trace) > 0;
+  for (const [name, units] of Object.entries(whole) as [Section, Unit[]][]) chosen[name] = units;
 
   // The bot defined RESPONSE_STYLE_ACTIVATION and never sent it, which is why
   // long answers read like a textbook. It goes right after the personality.

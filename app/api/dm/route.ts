@@ -89,7 +89,7 @@ async function compact(sb: Awaited<ReturnType<typeof supabaseServer>>) {
   const { text } = await completeChat([
     { role: "system", content: "You keep the running summary of a long DM between a student and their AI tutor, MoeAI. Keep what matters later: what they study, what they struggled with and understood, plans, deadlines, preferences, jokes worth remembering, promises MoeAI made. Drop small talk. Third person, under 250 words, plain text." },
     { role: "user", content: `Current summary:\n${state?.summary || "(none yet)"}\n\nNew messages to fold in:\n${transcript}\n\nReturn the updated summary only.` },
-  ], { maxTokens: 500 });
+  ], { maxTokens: 500, background: true });
   const summary = text.trim().slice(0, 2400);
   if (!summary) return;
   await sb.from("dm_state").upsert({ summary, through_id: batch[batch.length - 1].id, updated_at: new Date().toISOString() });

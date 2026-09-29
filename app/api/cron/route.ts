@@ -14,7 +14,7 @@ import { runProactive } from "@/lib/moeai/proactive";
 
 /** One short model call for the jobs below (reflection, proactive lines). */
 const complete = async (system: string, prompt: string) =>
-  (await completeChat([{ role: "system", content: system }, { role: "user", content: prompt }], { maxTokens: 1200 })).text;
+  (await completeChat([{ role: "system", content: system }, { role: "user", content: prompt }], { maxTokens: 1200, background: true })).text;
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

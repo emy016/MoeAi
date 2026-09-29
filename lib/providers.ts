@@ -12,7 +12,8 @@ import { streamGemini, type GeminiContent } from "./ai/gemini";
  * When every key of a provider is cold or failing, we fall through to the next
  * provider. The student never sees which one served them.
  *
- * Deliberately no SDK. Three fetch() calls, two of which share a shape.
+ * Deliberately no SDK. Gemini's own API, plus one OpenAI-compatible call
+ * shared by Groq, OpenRouter and NVIDIA.
  */
 
 export interface ChatMessage {
@@ -213,7 +214,24 @@ const PROVIDERS: Record<string, Provider> = {
       },
       d,
     ),
+
+  // NVIDIA's hosted models (build.nvidia.com), OpenAI-compatible.
+  nvidia: (m, t, d) =>
+    callOpenAICompatible(
+      "nvidia",
+      "https://integrate.api.nvidia.com/v1/chat/completions",
+      "nvidia",
+      process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct",
+      m, t, {}, d,
+    ),
 };
+
+/**
+ * Background work (memory extraction, summaries, MoeAI's nightly review and
+ * proactive lines, the Arena question cache) runs on the other providers
+ * first, so Gemini's free quota is left for the chat students are watching.
+ */
+export const BACKGROUND_ORDER = (process.env.BACKGROUND_PROVIDER_ORDER || "groq,nvidia,openrouter,gemini");
 
 /**
  * Try each configured provider in order. Returns the first that starts
@@ -225,10 +243,10 @@ const PROVIDERS: Record<string, Provider> = {
  */
 export async function streamChat(
   messages: ChatMessage[],
-  opts: { maxTokens?: number; onDone?: (full: string) => void } = {},
+  opts: { maxTokens?: number; onDone?: (full: string) => void; order?: string } = {},
 ): Promise<StreamResult> {
   const maxTokens = opts.maxTokens ?? Number(process.env.MOEAI_MAX_OUTPUT_TOKENS ?? 1200);
-  const order = (process.env.AI_PROVIDER_ORDER || "gemini,groq,openrouter")
+  const order = (opts.order || process.env.AI_PROVIDER_ORDER || "gemini,groq,openrouter,nvidia")
     .split(",")
     .map((p) => p.trim())
     .filter((p) => p in PROVIDERS);
@@ -251,9 +269,9 @@ export async function streamChat(
  */
 export async function completeChat(
   messages: ChatMessage[],
-  opts: { maxTokens?: number } = {},
+  opts: { maxTokens?: number; background?: boolean } = {},
 ): Promise<{ text: string; provider: string; model: string }> {
-  const result = await streamChat(messages, { maxTokens: opts.maxTokens ?? 800 });
+  const result = await streamChat(messages, { maxTokens: opts.maxTokens ?? 800, order: opts.background ? BACKGROUND_ORDER : undefined });
   const reader = result.stream.getReader();
   const decoder = new TextDecoder();
   let text = "";

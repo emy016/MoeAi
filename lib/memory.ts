@@ -77,7 +77,7 @@ export async function extractMemory(
           content: `STUDENT:\n${userMessage.slice(0, 2000)}\n\nTUTOR:\n${assistantMessage.slice(0, 2000)}`,
         },
       ],
-      { maxTokens: 400 },
+      { maxTokens: 400, background: true },
     );
 
     const items = parseJsonBlock<Item[]>(text);

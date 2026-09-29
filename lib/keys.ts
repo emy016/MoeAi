@@ -17,6 +17,7 @@ const NAMES: Record<string, string[]> = {
   gemini: ["GEMINI_API_KEYS", "GEMINI_API_KEY", "GEMINI_BACKUP_API_KEY"],
   groq: ["GROQ_API_KEYS", "GROQ_API_KEY"],
   openrouter: ["OPENROUTER_API_KEYS", "OPENROUTER_API_KEY"],
+  nvidia: ["NVIDIA_API_KEYS", "NVIDIA_API_KEY"],
 };
 
 export type Provider = keyof typeof NAMES;
