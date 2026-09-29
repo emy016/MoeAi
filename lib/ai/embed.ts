@@ -47,22 +47,27 @@ export async function embed(texts: string[], task: "RETRIEVAL_DOCUMENT" | "RETRI
   const keys = providerKeys("gemini");
   if (!keys.length) throw new Error("No Gemini key is configured for embeddings.");
   const model = await embedModel();
+  // A student's question is waiting on this: fail fast and let the word match answer.
+  const query = task === "RETRIEVAL_QUERY";
+  const attempts = query ? Math.min(2, keys.length) : keys.length;
   const out: number[][] = [];
   for (let i = 0; i < texts.length; i += BATCH) {
     const batch = texts.slice(i, i + BATCH).map((t) => t.slice(0, 8000));
     let done = false;
     let lastError = "";
-    for (let attempt = 0; attempt < keys.length && !done; attempt++) {
+    for (let attempt = 0; attempt < attempts && !done; attempt++) {
       const key = keys[cursor++ % keys.length];
+      // A timeout is one key's problem, not the whole embedding's: try the next.
       const res = await fetch(`${BASE}/models/${model}:batchEmbedContents`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           requests: batch.map((text) => ({ model: `models/${model}`, content: { parts: [{ text }] }, taskType: task, outputDimensionality: EMBED_DIMENSIONS })),
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(query ? 5000 : 30000),
         cache: "no-store",
-      });
+      }).catch((err: unknown) => (lastError = `${model} ${err instanceof Error ? err.name : "network"}`, null));
+      if (!res) continue;
       if (!res.ok) { lastError = `${model} ${res.status}`; continue; }
       const body = (await res.json()) as { embeddings?: { values: number[] }[] };
       if (!body.embeddings || body.embeddings.length !== batch.length) { lastError = "embedding count mismatch"; continue; }

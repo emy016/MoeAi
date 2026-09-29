@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunkText } from "../chunk";
 import { embed, toVector } from "../ai/embed";
 import { extractPages, type Page } from "./extract";
+import { ocrPages, pageRanges, SPARSE_CHARS } from "./ocr";
 
 /**
  * One uploaded course file into retrievable, cited chunks.
@@ -52,10 +53,24 @@ export async function ingestMaterial(
     const { data: file, error } = await sb.storage.from("course-files").download(material.storage_path);
     if (error || !file) throw new Error(`Could not read the upload (${error?.message ?? "missing"}).`);
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const pages = await extractPages(bytes, material.storage_path, file.type);
+    let pages = await extractPages(bytes, material.storage_path, file.type);
+    let note: string | null = null;
+    const isPdf = material.storage_path.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+    const sparse = isPdf ? pages.filter((p) => p.text.replace(/\s+/g, "").length < SPARSE_CHARS).map((p) => p.page) : [];
+    if (sparse.length) {
+      // Scanned or handwritten pages: read them from the images.
+      const ocr = await ocrPages(bytes, sparse);
+      const read = new Map(ocr.pages.map((p) => [p.page, p.text]));
+      pages = pages.map((p) => (read.get(p.page)?.trim() ? { page: p.page, text: read.get(p.page)! } : p));
+      if (ocr.failed.length) {
+        note = `Pages ${pageRanges(ocr.failed)} could not be read (scanned). Upload them as a separate file to add them.`;
+      }
+    }
     const chars = pages.reduce((n, p) => n + p.text.length, 0);
     const chunks = chunkPages(pages);
-    if (!chunks.length) throw new Error("No text found. If this is a scanned PDF, upload a version with selectable text.");
+    if (!chunks.length) {
+      throw new Error(note ?? "No text found in this file.");
+    }
 
     const vectors = await embed(chunks.map((c) => `${material.title}${c.heading ? ` — ${c.heading}` : ""}\n\n${c.content}`));
 
@@ -76,7 +91,7 @@ export async function ingestMaterial(
 
     const result = { pages: pages.length, chars, chunks: rows.length };
     await sb.from("course_materials").update({
-      status: "ready", pages: result.pages, char_count: chars, chunk_count: result.chunks, updated_at: new Date().toISOString(),
+      status: "ready", error: note, pages: result.pages, char_count: chars, chunk_count: result.chunks, updated_at: new Date().toISOString(),
     }).eq("id", material.id);
     return result;
   } catch (err) {

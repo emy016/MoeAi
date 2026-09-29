@@ -345,7 +345,7 @@ export default function Client() {
                   onDrop={(e) => { e.preventDefault(); setOver(false); if (e.dataTransfer.files.length) void upload(e.dataTransfer.files); }}
                 >
                   <strong style={{ color: "var(--text)" }}>Drop lecture files here</strong> or click to choose
-                  <div style={{ marginTop: 4 }}>PDF, PowerPoint (.pptx, speaker notes included), Word (.docx), text · up to 50 MB each</div>
+                  <div style={{ marginTop: 4 }}>PDF (scanned and handwritten too), PowerPoint (.pptx, speaker notes included), Word (.docx), text · up to 50 MB each</div>
                   <input ref={input} type="file" multiple hidden accept=".pdf,.pptx,.docx,.txt,.md,.csv,.srt,.vtt" onChange={(e) => { if (e.target.files?.length) void upload(e.target.files); e.target.value = ""; }} />
                 </div>
                 <div className="org-row">
