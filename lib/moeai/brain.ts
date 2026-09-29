@@ -58,7 +58,11 @@ export type Turn = {
   appContext?: string[];
   images?: AttachedImage[];
   signal: AbortSignal;
+  /** Filled in as the reply streams: who answered and what it cost, for the usage log. */
+  served?: Served;
 };
+
+export type Served = { provider: string; model: string; promptTokens: number | null; completionTokens: number | null };
 
 /** The reply language for this turn, with the conversation's language as continuity, as the bot tracks it. */
 export function resolveLanguage(messages: ChatMessage[], hint?: string): LanguageDecision {
@@ -186,6 +190,16 @@ export async function* streamReply(turn: Turn, decision = resolveLanguage(turn.m
       system: systemFor(turn, decision, GEMINI_BUDGET_TOKENS),
       contents: geminiContents(turn.messages, images),
       signal: turn.signal,
+      onEvent: turn.served ? (event) => {
+        // Google reports the model that answered and the real token counts.
+        const usage = event.usageMetadata as { promptTokenCount?: number; candidatesTokenCount?: number } | undefined;
+        Object.assign(turn.served!, {
+          provider: "gemini",
+          model: typeof event.modelVersion === "string" ? event.modelVersion : turn.served!.model,
+          promptTokens: usage?.promptTokenCount ?? turn.served!.promptTokens,
+          completionTokens: usage?.candidatesTokenCount ?? turn.served!.completionTokens,
+        });
+      } : undefined,
     })) { delivered = true; yield delta; }
     return;
   } catch (error) {
@@ -194,7 +208,13 @@ export async function* streamReply(turn: Turn, decision = resolveLanguage(turn.m
   }
   for (const cfg of fallbackOrder()) {
     try {
-      yield* streamCompatible(cfg, systemFor(turn, decision, cfg.budget, !cfg.whole, cfg.whole), turn.messages, images, turn.signal);
+      const system = systemFor(turn, decision, cfg.budget, !cfg.whole, cfg.whole);
+      if (turn.served) {
+        // These APIs don't report usage mid-stream; about four characters a token.
+        const chars = system.length + turn.messages.reduce((n, m) => n + m.content.length, 0);
+        Object.assign(turn.served, { provider: cfg.name, model: cfg.model(), promptTokens: Math.ceil(chars / 4), completionTokens: null });
+      }
+      yield* streamCompatible(cfg, system, turn.messages, images, turn.signal);
       return;
     } catch (error) {
       if (!(error instanceof ProvidersUnavailable)) throw error;

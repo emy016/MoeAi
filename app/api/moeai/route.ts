@@ -19,7 +19,7 @@
  * Failures before the stream starts are a normal JSON body with a 4xx/5xx.
  */
 import { NextRequest, after } from "next/server";
-import { resolveLanguage, streamReply, voiceLanguage } from "@/lib/moeai/brain";
+import { resolveLanguage, streamReply, voiceLanguage, type Served } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { surfaceGuide } from "@/lib/moeai/surface";
@@ -274,13 +274,14 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
   let answer = "";
 
+  const served: Served = { provider: "none", model: "none", promptTokens: null, completionTokens: null };
   const stream = new ReadableStream<Uint8Array>({
     async start(ctrl) {
       try {
         // Citations lead, so the workspace can show what it is reading from
         // while the answer is still arriving.
         if (citations.length) ctrl.enqueue(encoder.encode(JSON.stringify({ citations }) + "\n"));
-        for await (const delta of streamReply({ messages, context, appContext: extra, images: attached.images, signal: controller.signal }, language)) {
+        for await (const delta of streamReply({ messages, context, appContext: extra, images: attached.images, signal: controller.signal, served }, language)) {
           answer += delta;
           ctrl.enqueue(encoder.encode(JSON.stringify({ delta }) + "\n"));
         }
@@ -319,11 +320,11 @@ export async function POST(req: NextRequest) {
         if (userId) {
           void sb!
             .rpc("log_ai_call", {
-              p_provider: "moeai",
-              p_model: process.env.GEMINI_MODELS || "gemini-auto",
+              p_provider: served.provider,
+              p_model: served.model,
               p_latency_ms: Date.now() - started,
-              p_prompt_tokens: null,
-              p_completion_tokens: Math.ceil(answer.length / 4),
+              p_prompt_tokens: served.promptTokens,
+              p_completion_tokens: served.completionTokens ?? Math.ceil(answer.length / 4),
               p_status: answer ? "ok" : "all_failed",
               p_error: answer ? null : "no content delivered",
             })
