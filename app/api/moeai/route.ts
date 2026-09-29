@@ -23,7 +23,7 @@ import { resolveLanguage, streamReply, voiceLanguage } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
 import { surfaceGuide } from "@/lib/moeai/surface";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseAdmin, supabaseServer } from "@/lib/supabase-server";
 import { checkDailyLimit, checkGuestLimit, checkRateLimit, dailyLimitMessage } from "@/lib/ratelimit";
 import { isConfigured } from "@/lib/env";
 import { extractMemory, shouldExtract } from "@/lib/memory";
@@ -179,9 +179,13 @@ export async function POST(req: NextRequest) {
         }
         extra.push(courseBlock(course, passages, brain));
         // Finish the course's vector index a few passages at a time, after the
-        // reply has gone out, with the student's own (RLS-limited) session.
-        const client = sb;
-        after(() => backfillEmbeddings(client, courseId).catch(() => undefined));
+        // reply has gone out. Writing vectors is the server's job (a student's
+        // session may not write them, or anyone could bend retrieval), so this
+        // runs with the service key when it is set; staff can always reindex
+        // from the Tutor page.
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+          after(() => backfillEmbeddings(supabaseAdmin(), courseId).catch(() => undefined));
+        }
       }
     } catch {
       // Retrieval is an enhancement; without it MoeAI still teaches, just ungrounded.

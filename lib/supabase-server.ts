@@ -30,9 +30,10 @@ export async function supabaseServer() {
 }
 
 /**
- * Service-role client. BYPASSES RLS. Only the daily cron (/api/cron) and room
- * joins still use it; rate limits, AI logs, memory and embeddings run as the
- * student through SECURITY DEFINER functions that check auth.uid().
+ * Service-role client. BYPASSES RLS. Used by the daily cron (/api/cron), room
+ * joins, the Arena question cache and background embedding. Rate limits, AI
+ * logs and memory run as the student through SECURITY DEFINER functions that
+ * check auth.uid().
  */
 export function supabaseAdmin() {
   return createClient(URL, process.env.SUPABASE_SERVICE_ROLE_KEY ?? PLACEHOLDER_KEY, {
