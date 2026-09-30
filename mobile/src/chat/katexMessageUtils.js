@@ -1,6 +1,7 @@
 /** Safe CommonMark + KaTeX rendering shared by native and web chat bubbles. */
 import katex from 'katex';
 import MarkdownIt from 'markdown-it';
+import { autoMath } from './autoMath.js';
 
 const isEscaped = (value, index) => {
   let slashCount = 0;
@@ -147,14 +148,14 @@ markdown.renderer.rules.link_open = (tokens, index, options, env, renderer) => {
 const PLAIN_BLOCK_TOKENS = new Set(['paragraph_open', 'paragraph_close', 'inline']);
 const PLAIN_INLINE_TOKENS = new Set(['text', 'softbreak', 'hardbreak']);
 export const hasMarkdownContent = (value) => {
-  const source = String(value || '');
+  const source = autoMath(value || '');
   if (hasMathContent(source)) return true;
   return markdown.parse(source, {}).some((token) => (
     !PLAIN_BLOCK_TOKENS.has(token.type)
     || (token.type === 'inline' && token.children?.some((child) => !PLAIN_INLINE_TOKENS.has(child.type)))
   ));
 };
-export const renderMarkdownMarkup = (value) => markdown.render(String(value || '')).trim();
+export const renderMarkdownMarkup = (value) => markdown.render(autoMath(value || '')).trim();
 
 // Scoped styles keep every Markdown structure inside the measured bubble width.
 export const CHAT_MARKDOWN_CSS = `

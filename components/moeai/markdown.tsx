@@ -8,6 +8,8 @@ import rehypeHighlight from "rehype-highlight";
 import { Check, Copy, Download, Terminal } from "lucide-react";
 import { downloadText } from "@/lib/moeai/workspace";
 import { Diagram } from "./diagram";
+// @ts-expect-error plain JS module shared with the app
+import { autoMath } from "@/lib/auto-math.js";
 
 /** Arabic, Hebrew, Persian — anything that would legitimately want an RTL table. */
 const RTL_TEXT = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
@@ -22,7 +24,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   return <div className="mx-code"><div className="mx-code-bar"><span><Terminal size={13}/>{language}</span><div><button aria-label="Copy code" onClick={async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { setCopied(false); } }}>{copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? "Copied" : "Copy"}</button><button aria-label="Download code" onClick={() => downloadText(`snippet.${({javascript:"js",typescript:"ts",python:"py",cpp:"cpp"} as Record<string,string>)[language] || "txt"}`, text, "text/plain")}><Download size={14}/></button></div></div><pre>{children}</pre></div>;
 }
 export const Markdown = memo(function Markdown({ text }: { text: string }) {
-  const normalized = text.replace(/\\\[([\s\S]*?)\\\]/g, (_, math) => `\n$$\n${math}\n$$\n`).replace(/\\\(([\s\S]*?)\\\)/g, (_, math) => `$${math}$`);
+  const normalized = (autoMath(text) as string).replace(/\\\[([\s\S]*?)\\\]/g, (_, math) => `\n$$\n${math}\n$$\n`).replace(/\\\(([\s\S]*?)\\\)/g, (_, math) => `$${math}$`);
   return <div className="mx-markdown" dir="auto"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeKatex, { throwOnError: false, trust: false, strict: "ignore", maxExpand: 200 }], [rehypeHighlight, { detect: false }]]} components={{ pre: CodeBlock,
       // A truth table inside an Arabic explanation is still a truth table: its
       // columns read A, B, F. Without this the paragraph's RTL direction is

@@ -79,6 +79,67 @@ export function SigmaGlyph({ size = 24, color = '#fff' }) {
   );
 }
 
+/** Two overlapping sets: discrete mathematics (sets, logic, relations). */
+export function VennGlyph({ size = 24, color = '#fff' }) {
+  const s = stroke(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx="9" cy="12" r="6.2" {...s} />
+      <Circle cx="15" cy="12" r="6.2" {...s} />
+      <Path d="M12 6.8a6.2 6.2 0 0 1 0 10.4a6.2 6.2 0 0 1 0-10.4z" fill={color} opacity={0.45} />
+    </Svg>
+  );
+}
+
+/** A histogram under a bell curve: probability and statistics. */
+export function DistributionGlyph({ size = 24, color = '#fff' }) {
+  const s = stroke(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x="4" y="15" width="3" height="5" rx="0.6" fill={color} opacity={0.55} />
+      <Rect x="8" y="10" width="3" height="10" rx="0.6" fill={color} opacity={0.55} />
+      <Rect x="12" y="8" width="3" height="12" rx="0.6" fill={color} opacity={0.55} />
+      <Rect x="16" y="13" width="3" height="7" rx="0.6" fill={color} opacity={0.55} />
+      <Path d="M2 19c3 0 4-12 9.5-12S19 19 22 19" {...s} />
+      <Line x1="2" y1="21" x2="22" y2="21" {...s} />
+    </Svg>
+  );
+}
+
+/** Two dice: advanced probability. */
+export function DiceGlyph({ size = 24, color = '#fff' }) {
+  const s = stroke(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x="2" y="7" width="11" height="11" rx="2.4" {...s} />
+      <Circle cx="5.2" cy="10.2" r="1" fill={color} />
+      <Circle cx="7.5" cy="12.5" r="1" fill={color} />
+      <Circle cx="9.8" cy="14.8" r="1" fill={color} />
+      <Rect x="13.5" y="3" width="8.5" height="8.5" rx="2" {...s} transform="rotate(14 17.75 7.25)" />
+      <Circle cx="16.3" cy="5.9" r="0.9" fill={color} />
+      <Circle cx="19.2" cy="8.6" r="0.9" fill={color} />
+    </Svg>
+  );
+}
+
+/** Hosts around a router: computer networks. */
+export function NetworkGlyph({ size = 24, color = '#fff' }) {
+  const s = stroke(color);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Line x1="12" y1="12" x2="4" y2="5" {...s} />
+      <Line x1="12" y1="12" x2="20" y2="5" {...s} />
+      <Line x1="12" y1="12" x2="4" y2="19" {...s} />
+      <Line x1="12" y1="12" x2="20" y2="19" {...s} />
+      <Rect x="9" y="9" width="6" height="6" rx="1.5" fill={color} />
+      <Circle cx="4" cy="5" r="2" {...s} />
+      <Circle cx="20" cy="5" r="2" {...s} />
+      <Circle cx="4" cy="19" r="2" {...s} />
+      <Circle cx="20" cy="19" r="2" {...s} />
+    </Svg>
+  );
+}
+
 /** A small tree of nodes: data structures and algorithms. */
 export function TreeGlyph({ size = 24, color = '#fff' }) {
   const s = stroke(color);
@@ -115,7 +176,10 @@ const RULES = [
   [/differential equation|\bodes?\b|\bpdes?\b|dynamical system/, DerivativeGlyph],
   [/linear algebra|matri(x|ces)|vector space/, MatrixGlyph],
   [/calculus|integral|analysis i/, IntegralGlyph],
-  [/discrete|probability|statistic|combinator/, SigmaGlyph],
+  [/advanced probability|stochastic|random process/, DiceGlyph],
+  [/probability|statistic/, DistributionGlyph],
+  [/discrete|combinator|set theory/, VennGlyph],
+  [/network/, NetworkGlyph],
   [/data structure|algorithm/, TreeGlyph],
   [/circuit|electronic/, CircuitGlyph],
 ];

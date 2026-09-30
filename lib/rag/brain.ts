@@ -53,7 +53,7 @@ type Digest = {
 const ORGANIZER = [
   "You are the MoeAI Organizer. A university lecturer uploaded their course files; you turn them into the knowledge base a tutor will teach from.",
   "Stay faithful to the lecturer's material: their notation, terminology, order and level. Do not invent syllabus content.",
-  "Output ONLY valid JSON. Put formulas in LaTeX without $ delimiters, and double every backslash inside JSON strings (\\\\frac, \\\\int).",
+  "Output ONLY valid JSON. The \"latex\" field of a formula is bare LaTeX without $ delimiters. Every other field (questions, answers, definitions, mistakes) is Markdown text where every piece of math, even a single symbol, is wrapped in $...$ (display math in $$...$$). Double every backslash inside JSON strings (\\\\frac, \\\\int).",
 ].join("\n");
 
 /** One call, JSON back, LaTeX-safe parsing; falls back to the other providers when Gemini is busy. */

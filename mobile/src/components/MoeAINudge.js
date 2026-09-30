@@ -6,6 +6,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { SparklesIcon } from 'react-native-heroicons/solid';
 import ElasticPressable from './ElasticPressable';
+import KaTeXMessage from '../chat/KaTeXMessage';
 import { Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 
@@ -28,7 +29,7 @@ export default function MoeAINudge({ nudge, onAccept, onDismiss }) {
         <View style={[styles.avatar, { backgroundColor: colors.accent }]}><SparklesIcon size={15} color="#fff" /></View>
         <Text style={[{ color: colors.textMuted }, type(11, 'bold', 14)]}>MoeAI</Text>
       </View>
-      <Text style={[{ color: colors.textPrimary, textAlign: isRTL ? 'right' : 'left' }, type(14, 'regular', 20)]}>{nudge.body}</Text>
+      <KaTeXMessage text={nudge.body} color={colors.textPrimary} textAlign={isRTL ? 'right' : 'left'} style={type(14, 'regular', 20)} />
       <View style={[styles.actions, row]}>
         <ElasticPressable shape="pill" onPress={() => onAccept(nudge)} accessibilityRole="button">
           <View style={[styles.button, { backgroundColor: colors.accent }]}><Text style={[{ color: '#fff' }, type(12, 'bold', 16)]}>{['dm', 'deadline', 'start', 'fun', 'night', 'dormant'].includes(nudge.kind) ? t('nudgeReply') : t('nudgeGo')}</Text></View>

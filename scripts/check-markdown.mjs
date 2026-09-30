@@ -25,6 +25,16 @@ function check(name, actual, expected) {
 }
 const html = (text) => renderMarkdownMarkup(text);
 
+// Math the model wrote without $ delimiters still renders (organizer practice, nudges).
+const { readFileSync } = await import("node:fs");
+const { autoMath } = await import("../mobile/src/chat/autoMath.js");
+check("app and site share one auto-math", readFileSync("mobile/src/chat/autoMath.js", "utf8") === readFileSync("lib/auto-math.js", "utf8"), true);
+check("bare \\frac is wrapped", autoMath("Solve \\frac{dy}{dx} = 2xy^2"), "Solve $\\frac{dy}{dx} = 2xy^2$");
+check("bare pmatrix is wrapped", autoMath("where A = \\begin{pmatrix} 2 & 1 \\\\ 3 & 0 \\end{pmatrix}."), "where $A = \\begin{pmatrix} 2 & 1 \\\\ 3 & 0 \\end{pmatrix}$.");
+check("delimited math is untouched", autoMath("already $x^2$ fine"), "already $x^2$ fine");
+check("snake_case and links are untouched", autoMath("see https://a.io/x_y and my_var_name"), "see https://a.io/x_y and my_var_name");
+check("bare math renders with KaTeX", html("Solve y'' + y = \\sec x").includes('class="katex'), true);
+
 check("a plain sentence stays plain text", hasMarkdownContent("Pointers hold addresses."), false);
 check("arabic prose stays plain text", hasMarkdownContent("الـ pointer بيخزن عنوان"), false);
 check("bold is formatting", hasMarkdownContent("use **malloc**"), true);
