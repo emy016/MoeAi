@@ -80,10 +80,11 @@ const ICONS = {
 // truth for tab order — insertion order of ICONS above).
 export const TAB_ORDER = Object.keys(ICONS);
 
-function CustomTabBar({ index: tabIndex, onSelect }) {
+function CustomTabBar({ index: tabIndex, onSelect, tabs = ICONS }) {
+  const order = Object.keys(tabs);
   const insets = useSafeAreaInsets();
   const { colors, t, motion, fontScale, fontSize } = usePreferences();
-  const communityActive = TAB_ORDER[tabIndex] === 'Community';
+  const communityActive = order[tabIndex] === 'Community';
   const largeCommunity = communityActive && (fontSize === 'large' || fontSize === 'extraLarge');
   const expandedMargin = fontSize === 'extraLarge' ? 0 : 4;
   const dockExpansion = useRef(new Animated.Value(largeCommunity ? 1 : 0)).current;
@@ -191,9 +192,9 @@ function CustomTabBar({ index: tabIndex, onSelect }) {
       <Animated.View style={[styles.pill, { backgroundColor: colors.navbar, shadowColor: colors.black, marginLeft:animatedDockMargin, marginRight:animatedDockMargin }]}> 
         {/* ---- Tab buttons -------------------------------------------- */}
         <View style={styles.row}>
-          {TAB_ORDER.map((routeName, index) => {
+          {order.map((routeName, index) => {
             const isFocused = tabIndex === index;
-            const config = ICONS[routeName];
+            const config = tabs[routeName];
 
             // Inner tabs (Practice, Simulators) travel further than outer
             // tabs so they clear the FAB popping in between them. Falls
@@ -210,7 +211,7 @@ function CustomTabBar({ index: tabIndex, onSelect }) {
             const roomyShift = [-roomyOuterShift, -roomyInnerShift, roomyInnerShift + 2, roomyOuterShift];
             const shiftAmount = largeCommunity
               ? roomyShift[index]
-              : (SHIFT[index] ?? (index - (TAB_ORDER.length - 1) / 2) * TabBar.SHIFT_OUTER) * spread;
+              : (SHIFT[index] ?? (index - (order.length - 1) / 2) * TabBar.SHIFT_OUTER) * spread;
             const translateX = fabProgress.interpolate({
               inputRange: [0, 1],
               outputRange: [0, shiftAmount],

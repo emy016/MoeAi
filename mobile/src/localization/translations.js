@@ -303,3 +303,7 @@ Object.assign(ar, {
   tintTitle: 'لوّن بلون التمييز', tintDesc: 'خلي لون التمييز يبان خفيف على كل الأسطح.',
   pink: 'فوشيا', teal: 'سماوي', amber: 'دهبي', slate: 'رمادي', mocha: 'موكا', indigo: 'نيلي', lime: 'ليموني', sky: 'سماوي', coral: 'مرجاني', crimson: 'قرمزي',
 });
+
+// Tutor mode (university staff).
+Object.assign(en,{courses:'Courses',calendar:'Calendar',people:'People',tutorMode:'Tutor mode',studentView:'Student view',upcomingTitle:'Coming up',assignmentsEmpty:'No assignments on the calendar. When your course staff add them, they show here with the time left.',quizzesEmpty:'No quizzes or exams on the calendar yet. When your course staff add them, they show here.',askMoeAIPrepare:'Prepare with MoeAI'});
+Object.assign(ar,{courses:'المواد',calendar:'التقويم',people:'الأشخاص',tutorMode:'وضع المعلم',studentView:'عرض الطالب',upcomingTitle:'القادم',assignmentsEmpty:'لا توجد واجبات في التقويم. عندما يضيفها فريق المادة تظهر هنا مع الوقت المتبقي.',quizzesEmpty:'لا توجد اختبارات في التقويم بعد. عندما يضيفها فريق المادة تظهر هنا.',askMoeAIPrepare:'استعد مع MoeAI'});

@@ -57,7 +57,7 @@ const SubjectCard = React.memo(function SubjectCard({ subject, active, onPress, 
   );
 });
 
-export default function SubjectDashboard({ subjects, active, onOpenSubject, onCreateSubject, onLongPressSubject }) {
+export default function SubjectDashboard({ subjects, active, onOpenSubject, onCreateSubject, onLongPressSubject, onOpenAssignments, onOpenQuizzes, assignmentCount = 0, quizCount = 0 }) {
   const { colors, type, t, isRTL } = usePreferences();
   const totals = combinedSubjectStats(subjects);
   const actionDirection = { flexDirection: isRTL ? 'row-reverse' : 'row' };
@@ -67,11 +67,11 @@ export default function SubjectDashboard({ subjects, active, onOpenSubject, onCr
         <Text style={[styles.progressLabel, { color: colors.textMuted }, type(12, 'bold', 16)]}>{t('totalProgress')}</Text>
         <ProgressRing completed={totals.completed} total={totals.total} active={active} />
         <View style={[styles.quickActions, actionDirection]}>
-          <ElasticPressable shape="pill" style={styles.quickAction} pressableStyle={styles.quickActionHit} accessibilityRole="button">
-            <View style={[styles.quickActionInner, actionDirection, { backgroundColor: colors.cardButton }]}><FolderIcon size={19} color={colors.accent} /><Text numberOfLines={1} adjustsFontSizeToFit style={[{ color: colors.accent }, type(13, 'bold', 17)]}>{t('assignments')}</Text></View>
+          <ElasticPressable shape="pill" style={styles.quickAction} pressableStyle={styles.quickActionHit} onPress={onOpenAssignments} accessibilityRole="button">
+            <View style={[styles.quickActionInner, actionDirection, { backgroundColor: colors.cardButton }]}><FolderIcon size={19} color={colors.accent} /><Text numberOfLines={1} adjustsFontSizeToFit style={[{ color: colors.accent }, type(13, 'bold', 17)]}>{t('assignments')}</Text>{assignmentCount ? <View style={[styles.badge, { backgroundColor: colors.accent }]}><Text style={[{ color: '#fff' }, type(11, 'bold', 14)]}>{assignmentCount}</Text></View> : null}</View>
           </ElasticPressable>
-          <ElasticPressable shape="pill" style={styles.quickAction} pressableStyle={styles.quickActionHit} accessibilityRole="button">
-            <View style={[styles.quickActionInner, actionDirection, { backgroundColor: colors.cardButton }]}><AcademicCapIcon size={20} color={colors.accent} /><Text numberOfLines={1} adjustsFontSizeToFit style={[{ color: colors.accent }, type(13, 'bold', 17)]}>{t('quizzes')}</Text></View>
+          <ElasticPressable shape="pill" style={styles.quickAction} pressableStyle={styles.quickActionHit} onPress={onOpenQuizzes} accessibilityRole="button">
+            <View style={[styles.quickActionInner, actionDirection, { backgroundColor: colors.cardButton }]}><AcademicCapIcon size={20} color={colors.accent} /><Text numberOfLines={1} adjustsFontSizeToFit style={[{ color: colors.accent }, type(13, 'bold', 17)]}>{t('quizzes')}</Text>{quizCount ? <View style={[styles.badge, { backgroundColor: colors.accent }]}><Text style={[{ color: '#fff' }, type(11, 'bold', 14)]}>{quizCount}</Text></View> : null}</View>
           </ElasticPressable>
         </View>
       </Card>
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   quickActions: { width: '100%', gap: Spacing.sm, marginTop: Spacing.lg },
   quickAction: { flex: 1 },
   quickActionHit: { borderRadius: Radius.pill },
+  badge: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 5, alignItems: 'center', justifyContent: 'center' },
   quickActionInner: { minHeight: 46, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center', gap: 7, paddingHorizontal: Spacing.sm },
   subjectGrid: { flexWrap: 'wrap', justifyContent: 'space-between', columnGap: Spacing.sm },
   subjectSlot: { width: '48.5%', marginBottom: Spacing.md },

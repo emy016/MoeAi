@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProfileMenu as M, ProfilePill as P, Radius, Spacing } from '../constants/layout';
 import { usePreferences } from '../context/AppPreferences';
 
-const OPTIONS=[{id:'profile',key:'profile',Icon:UserIcon},{id:'memory',key:'memoryMenu',Icon:LightBulbIcon},{id:'settings',key:'settings',Icon:Cog6ToothIcon}];
+export const OPTIONS=[{id:'profile',key:'profile',Icon:UserIcon},{id:'memory',key:'memoryMenu',Icon:LightBulbIcon},{id:'settings',key:'settings',Icon:Cog6ToothIcon}];
 const PILL_HEIGHT=P.AVATAR_SIZE+P.PILL_PADDING_VERTICAL*2;
 
 function MenuItem({ Icon, label, onPress }) {
@@ -22,12 +22,12 @@ function MenuItem({ Icon, label, onPress }) {
   </Pressable>;
 }
 
-function ProfileMenu({visible,onClose,onSelect,placement='below',positionStyle}){
+function ProfileMenu({visible,onClose,onSelect,placement='below',positionStyle,options=OPTIONS}){
  const insets=useSafeAreaInsets(); const {colors,type,t,isRTL,motion}=usePreferences(); const anim=useRef(new Animated.Value(0)).current; const [mounted,setMounted]=useState(false);
  useEffect(()=>{anim.stopAnimation();if(visible){setMounted(true);anim.setValue(motion?0:1);Animated.timing(anim,{toValue:1,duration:motion?M.ANIMATION_DURATION_MS:0,easing:Easing.out(Easing.back(2)),useNativeDriver:true,isInteraction:false}).start();}else if(mounted){Animated.timing(anim,{toValue:0,duration:motion?M.ANIMATION_DURATION_MS:0,easing:Easing.out(Easing.back(2)),useNativeDriver:true,isInteraction:false}).start(({finished})=>finished&&setMounted(false));}},[visible,motion,anim]);
  if(!mounted&&!visible)return null;
  const resolvedPosition=positionStyle||(isRTL?{left:insets.left+Spacing.md}:{right:insets.right+Spacing.md});
- return <><Pressable pointerEvents={visible?'auto':'none'} style={s.backdrop} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('closeMenu')}/><Animated.View pointerEvents={visible?'auto':'none'} accessibilityRole="menu" style={[s.menu,placement==='above'?{bottom:insets.bottom+Spacing.sm+PILL_HEIGHT+M.GAP}:{top:insets.top+Spacing.sm+PILL_HEIGHT+M.GAP},resolvedPosition,{backgroundColor:colors.card,shadowColor:colors.black,opacity:anim,transform:[{translateY:anim.interpolate({inputRange:[0,1],outputRange:[placement==='above'?-M.POP_TRANSLATE_Y:M.POP_TRANSLATE_Y,0]})},{scale:anim.interpolate({inputRange:[0,1],outputRange:[M.POP_SCALE_FROM,1]})}]}]}>{OPTIONS.map(({id,key,Icon},index)=><React.Fragment key={id}>{index>0?<View style={[s.divider,{backgroundColor:colors.border}]}/>:null}<MenuItem Icon={Icon} label={t(key)} onPress={()=>{onSelect?.(id);onClose?.();}} /></React.Fragment>)}</Animated.View></>;
+ return <><Pressable pointerEvents={visible?'auto':'none'} style={s.backdrop} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('closeMenu')}/><Animated.View pointerEvents={visible?'auto':'none'} accessibilityRole="menu" style={[s.menu,placement==='above'?{bottom:insets.bottom+Spacing.sm+PILL_HEIGHT+M.GAP}:{top:insets.top+Spacing.sm+PILL_HEIGHT+M.GAP},resolvedPosition,{backgroundColor:colors.card,shadowColor:colors.black,opacity:anim,transform:[{translateY:anim.interpolate({inputRange:[0,1],outputRange:[placement==='above'?-M.POP_TRANSLATE_Y:M.POP_TRANSLATE_Y,0]})},{scale:anim.interpolate({inputRange:[0,1],outputRange:[M.POP_SCALE_FROM,1]})}]}]}>{options.map(({id,key,Icon},index)=><React.Fragment key={id}>{index>0?<View style={[s.divider,{backgroundColor:colors.border}]}/>:null}<MenuItem Icon={Icon} label={t(key)} onPress={()=>{onSelect?.(id);onClose?.();}} /></React.Fragment>)}</Animated.View></>;
 }
 
 export default React.memo(ProfileMenu);

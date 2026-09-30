@@ -19,6 +19,7 @@
  * Failures before the stream starts are a normal JSON body with a 4xx/5xx.
  */
 import { NextRequest, after } from "next/server";
+import { awarenessBlock } from "@/lib/awareness";
 import { resolveLanguage, streamReply, voiceLanguage, type Served } from "@/lib/moeai/brain";
 import { parseContext } from "@/lib/moeai/context";
 import { learningContext, parseAttachments } from "@/lib/moeai/attachments";
@@ -255,6 +256,12 @@ export async function POST(req: NextRequest) {
   // practice, simulators), so every chat is the same MoeAI.
   const awareness = { ...((raw as { awareness?: Awareness })?.awareness ?? {}), surface: learning ? "a lecture chat" : "the chat" };
   extra.push(...await aliveBlocks(userId ? sb : null, userId, awareness).catch(() => []));
+  // The course staff's calendar: quizzes, assignments, exams and classes, with today's date.
+  if (userId && sb) {
+    const tz = Number(awareness.tzOffsetMinutes);
+    const calendar = await awarenessBlock(sb, Number.isFinite(tz) ? tz : -180).catch(() => null);
+    if (calendar) extra.push(calendar);
+  }
 
   // ── What the chat can render ────────────────────────────────────────────
   // The MoeAI app draws diagrams, charts and interactive visualizers and runs

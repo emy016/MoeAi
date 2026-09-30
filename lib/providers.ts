@@ -269,9 +269,9 @@ export async function streamChat(
  */
 export async function completeChat(
   messages: ChatMessage[],
-  opts: { maxTokens?: number; background?: boolean } = {},
+  opts: { maxTokens?: number; background?: boolean; order?: string } = {},
 ): Promise<{ text: string; provider: string; model: string }> {
-  const result = await streamChat(messages, { maxTokens: opts.maxTokens ?? 800, order: opts.background ? BACKGROUND_ORDER : undefined });
+  const result = await streamChat(messages, { maxTokens: opts.maxTokens ?? 800, order: opts.order ?? (opts.background ? BACKGROUND_ORDER : undefined) });
   const reader = result.stream.getReader();
   const decoder = new TextDecoder();
   let text = "";

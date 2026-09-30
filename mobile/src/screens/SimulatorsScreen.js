@@ -30,6 +30,8 @@ import { onStorageWrite, readStoredValue, storageKey } from '../storage/persiste
 import { baseSubjects } from '../subjects/subjectExamples';
 import { useAccount } from '../account/AccountContext';
 import { LIBRARY, STARTER_IDS, simulatorsForSubjects } from '../simulators/catalog';
+import { groupRows } from '../simulators/courseSims';
+import { API_BASE_URL } from '../ai/client';
 
 const SUBJECTS_KEY = storageKey('user-subjects-v1');
 
@@ -79,7 +81,7 @@ function SimTile({ sim, onOpen }) {
   );
 }
 
-function SimulatorView({ sim, onClose }) {
+export function SimulatorView({ sim, onClose }) {
   const { colors, effectiveTheme, type, language } = usePreferences();
   const external = sim.kind === 'phet' ? phetUrl(parsePhet(sim.code)?.sim, language) : sim.kind === 'frame' ? sim.url : null;
   const insets = useSafeAreaInsets();
@@ -112,10 +114,36 @@ function SimulatorView({ sim, onClose }) {
   );
 }
 
-export default function SimulatorsScreen() {
+/**
+ * A university course's simulators are the ones MoeAI built for it from the
+ * course map (tutor mode), not a keyword match. A student's own subjects,
+ * which have no course map, still get the closest built-in ones.
+ */
+function useCourseSims(active) {
+  const { account } = useAccount();
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    if (!active || account.status !== 'signedIn' || !account.org) return undefined;
+    let alive = true;
+    fetch(`${API_BASE_URL}/api/sims`, { credentials: 'include', headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : { sims: [] })).then((d) => { if (alive) setRows(d.sims || []); }).catch(() => {});
+    return () => { alive = false; };
+  }, [active, account.status, account.org]);
+  return useMemo(() => groupRows(rows), [rows]);
+}
+
+export default function SimulatorsScreen({ active = true }) {
   const { colors, type, t, isRTL } = usePreferences();
   const courses = useCourseList();
-  const groups = useMemo(() => simulatorsForSubjects(courses), [courses]);
+  const built = useCourseSims(active);
+  const groups = useMemo(() => {
+    const own = simulatorsForSubjects(courses.filter((c) => !c.orgCourseId));
+    const uni = courses.filter((c) => c.orgCourseId).map((subject) => {
+      const sims = built.get(subject.orgCourseId) || [];
+      return { subject, sims, pending: !sims.length };
+    });
+    return [...uni, ...own];
+  }, [built, courses]);
   const starters = useMemo(() => LIBRARY.filter((sim) => STARTER_IDS.includes(sim.id)), []);
   const [open, setOpen] = useState(null);
   const openSim = useCallback((sim, subject) => {
@@ -124,7 +152,7 @@ export default function SimulatorsScreen() {
     setOpen(sim);
   }, []);
   const align = { textAlign: isRTL ? 'right' : 'left' };
-  const shown = groups.some((g) => g.sims.length) ? groups : [...groups, { subject: { id: 'starter', name: t('simulatorsStarter') }, sims: starters }];
+  const shown = groups.some((g) => g.sims.length || g.subject.orgCourseId) ? groups : [...groups, { subject: { id: 'starter', name: t('simulatorsStarter') }, sims: starters }];
 
   return (
     <ScreenContainer>
@@ -137,7 +165,7 @@ export default function SimulatorsScreen() {
               {sims.length ? <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>{sims.length}</Text> : null}
             </View>
             {pending ? (
-              <Card><Text style={[{ color: colors.textMuted }, align, type(13, 'regular', 19)]}>No lecture material yet, so no simulators. They appear once your course staff upload lectures.</Text></Card>
+              <Card><Text style={[{ color: colors.textMuted }, align, type(13, 'regular', 19)]}>MoeAI has not built simulators for this course yet. They appear once your course staff upload lectures and organize the course.</Text></Card>
             ) : (
               <View style={styles.tiles}>{sims.map((sim) => <SimTile key={sim.id} sim={sim} onOpen={(s) => openSim(s, subject)} />)}</View>
             )}

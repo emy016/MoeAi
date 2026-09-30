@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, BackHandler, PanResponder, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Header from '../components/Header';
-import ProfileMenu from '../components/ProfileMenu';
+import ProfileMenu, { OPTIONS as MENU_OPTIONS } from '../components/ProfileMenu';
+import { ArrowsRightLeftIcon } from 'react-native-heroicons/outline';
+import TutorNavigator from '../tutor/TutorNavigator';
 import CommunityScreen from '../screens/CommunityScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PracticeScreen from '../screens/PracticeScreen';
@@ -19,7 +21,7 @@ const TITLE_KEYS={Home:'home',Practice:'practice',Simulators:'simulators',Commun
 const LAST_INDEX=TAB_ORDER.length-1;
 const horizontal=({dx,dy})=>Math.abs(dx)>Pager.SWIPE_MIN_DX&&Math.abs(dx)>Math.abs(dy)*Pager.SWIPE_DIRECTION_LOCK;
 
-export default function RootNavigator(){
+function StudentNavigator({ onTutorMode }){
  const {width}=useWindowDimensions(); const {colors,t,motion}=usePreferences(); const [tabIndex,setTabIndex]=useState(0); const [direction,setDirection]=useState(1); const [menuOpen,setMenuOpen]=useState(false); const [route,setRoute]=useState('tabs');
  const [practiceInner,setPracticeInner]=useState('Studying'); const [arenaStats,setArenaStats]=useState(null);
  const progress=useRef(new Animated.Value(0)).current; const dragStart=useRef(0); const homeResetRef=useRef(null);
@@ -37,7 +39,19 @@ export default function RootNavigator(){
  const toggleMenu=useCallback(()=>setMenuOpen(open=>!open),[]);
  const closeMenu=useCallback(()=>setMenuOpen(false),[]);
  const {openAccount}=useAccount(); const {openPanel}=usePersonal();
- const selectMenuItem=useCallback((id)=>{if(id==='settings')openSettings();else if(id==='profile')openAccount();else if(id==='memory')openPanel('memory');},[openAccount,openPanel,openSettings]);
- return <View style={[s.root,{backgroundColor:colors.background}]}><Header title={settings?t('settings'):t(TITLE_KEYS[TAB_ORDER[tabIndex]])} subtitle={!settings&&TAB_ORDER[tabIndex]==='Practice'?practiceInner:null} arenaStats={arenaStats} direction={direction} menuOpen={menuOpen} settings={settings} onBack={closeSettings} onPillPress={toggleMenu}/><View pointerEvents={settings?'none':'auto'} style={[s.viewport,settings&&s.hidden]} {...swipe.panHandlers}><Animated.View style={[s.strip,{width:width*TAB_ORDER.length,transform:[{translateX}]}]}>{TAB_ORDER.map((name,index)=>{const Screen=COMPONENTS[name];return <View key={name} style={[s.page,{width}]}><Screen active={!settings&&index===tabIndex} registerCurrentWeekReset={name==='Home'?registerHomeReset:undefined} onOpenSettings={name==='Home'?openSettings:undefined} onInnerTabChange={name==='Practice'?setPracticeInner:undefined} onArenaStats={name==='Practice'?setArenaStats:undefined}/></View>;})}</Animated.View></View>{settings?<View style={s.viewport}><SettingsScreen/></View>:<CustomTabBar index={tabIndex} onSelect={select}/>}<ProfileMenu visible={menuOpen&&!settings} onClose={closeMenu} onSelect={selectMenuItem}/></View>;
+ const selectMenuItem=useCallback((id)=>{if(id==='settings')openSettings();else if(id==='profile')openAccount();else if(id==='memory')openPanel('memory');else if(id==='tutorMode'){setMenuOpen(false);onTutorMode?.();}},[openAccount,openPanel,openSettings,onTutorMode]);
+ const menuOptions=useMemo(()=>onTutorMode?[{id:'tutorMode',key:'tutorMode',Icon:ArrowsRightLeftIcon},...MENU_OPTIONS]:MENU_OPTIONS,[onTutorMode]);
+ return <View style={[s.root,{backgroundColor:colors.background}]}><Header title={settings?t('settings'):t(TITLE_KEYS[TAB_ORDER[tabIndex]])} subtitle={!settings&&TAB_ORDER[tabIndex]==='Practice'?practiceInner:null} arenaStats={arenaStats} direction={direction} menuOpen={menuOpen} settings={settings} onBack={closeSettings} onPillPress={toggleMenu}/><View pointerEvents={settings?'none':'auto'} style={[s.viewport,settings&&s.hidden]} {...swipe.panHandlers}><Animated.View style={[s.strip,{width:width*TAB_ORDER.length,transform:[{translateX}]}]}>{TAB_ORDER.map((name,index)=>{const Screen=COMPONENTS[name];return <View key={name} style={[s.page,{width}]}><Screen active={!settings&&index===tabIndex} registerCurrentWeekReset={name==='Home'?registerHomeReset:undefined} onOpenSettings={name==='Home'?openSettings:undefined} onInnerTabChange={name==='Practice'?setPracticeInner:undefined} onArenaStats={name==='Practice'?setArenaStats:undefined}/></View>;})}</Animated.View></View>{settings?<View style={s.viewport}><SettingsScreen/></View>:<CustomTabBar index={tabIndex} onSelect={select}/>}<ProfileMenu visible={menuOpen&&!settings} onClose={closeMenu} onSelect={selectMenuItem} options={menuOptions}/></View>;
+}
+/**
+ * University staff (teachers and the university's managers) open tutor mode;
+ * everyone else the student app. Staff can switch to the student view and back.
+ */
+export default function RootNavigator(){
+ const {account}=useAccount();
+ const staff=account.status==='signedIn'&&['teacher','owner'].includes(account.org?.role);
+ const [studentView,setStudentView]=useState(false);
+ if(staff&&!studentView)return <TutorNavigator onStudentView={()=>setStudentView(true)}/>;
+ return <StudentNavigator onTutorMode={staff?()=>setStudentView(false):undefined}/>;
 }
 const s=StyleSheet.create({root:{flex:1},viewport:{flex:1,overflow:'hidden'},hidden:{display:'none'},strip:{flex:1,flexDirection:'row'},page:{flex:1}});

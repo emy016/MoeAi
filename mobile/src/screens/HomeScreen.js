@@ -23,6 +23,8 @@ import MoeAINudge from '../components/MoeAINudge';
 import ModelBanner from '../components/ModelBanner';
 import { useNudges } from '../nudges/useNudges';
 import { DM_KINDS, openDM } from '../dm/dmBus';
+import CourseDeadlinesSheet from '../components/CourseDeadlinesSheet';
+import { ASSIGNMENT_KINDS, QUIZ_KINDS, toCalendarObject, useCourseCalendar } from '../calendar/courseEvents';
 
 export default function HomeScreen({ registerCurrentWeekReset, active = false, onOpenSettings }) {
   const { t } = usePreferences();
@@ -40,7 +42,15 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
   const { events: userEvents, addEvent, removeEvent } = useUserCalendarEvents();
   const { subjects, addSubject, renameSubject, removeSubject, addLecture, removeLecture, toggleLectureComplete } = useSubjectStore();
   const { chats, startChat, sendMessage, stopReply, regenerateReply, editAndResend, setFeedback, renameChat, togglePinChat, removeChat, removeLectureChats, removeSubjectChats } = useLectureChatStore();
-  const objects = userEvents;
+  // The course staff's calendar (tutor mode) sits next to the student's own events.
+  const { occurrences } = useCourseCalendar(active);
+  const objects = useMemo(() => [...userEvents, ...occurrences.map(toCalendarObject)], [userEvents, occurrences]);
+  const [deadlines, setDeadlines] = useState(null);
+  const upcoming = useMemo(() => {
+    const now = Date.now();
+    const soon = occurrences.filter((o) => new Date(o.end || o.at).getTime() > now);
+    return { assignments: soon.filter((o) => ASSIGNMENT_KINDS.includes(o.kind)).length, quizzes: soon.filter((o) => QUIZ_KINDS.includes(o.kind)).length };
+  }, [occurrences]);
   const selectedSubject = useMemo(() => subjects.find((subject) => subject.id === selectedSubjectId) || null, [selectedSubjectId, subjects]);
   const chatSubject = useMemo(() => subjects.find((subject) => subject.id === chatTarget?.subjectId) || null, [chatTarget?.subjectId, subjects]);
   const chatLecture = useMemo(() => chatSubject?.lectures.find((lecture) => lecture.id === chatTarget?.lectureId) || null, [chatSubject, chatTarget?.lectureId]);
@@ -159,7 +169,11 @@ export default function HomeScreen({ registerCurrentWeekReset, active = false, o
         <CalendarStrip registerReset={registerCurrentWeekReset} objects={objects} onSelectDay={openTimeline} onOpenMonth={openFullCalendar} />
       </View>
       <MoeAINudge nudge={nudge} onAccept={acceptNudge} onDismiss={dismissNudge} />
-      <SubjectDashboard subjects={subjects} active={active} onOpenSubject={openSubject} onCreateSubject={startCreateSubject} onLongPressSubject={longPressSubject} />
+      <SubjectDashboard subjects={subjects} active={active} onOpenSubject={openSubject} onCreateSubject={startCreateSubject} onLongPressSubject={longPressSubject}
+        onOpenAssignments={() => setDeadlines('assignments')} onOpenQuizzes={() => setDeadlines('quizzes')} assignmentCount={upcoming.assignments} quizCount={upcoming.quizzes} />
+      <CourseDeadlinesSheet visible={!!deadlines} title={deadlines === 'quizzes' ? t('quizzes') : t('assignments')} emptyText={deadlines === 'quizzes' ? t('quizzesEmpty') : t('assignmentsEmpty')}
+        occurrences={occurrences} kinds={deadlines === 'quizzes' ? QUIZ_KINDS : ASSIGNMENT_KINDS} onClose={() => setDeadlines(null)}
+        onOpenCourse={(courseId) => { const subject = subjects.find((x) => x.orgCourseId === courseId); setDeadlines(null); if (subject) setSelectedSubjectId(subject.id); }} />
 
       <FullCalendarScreen visible={fullCalendarOpen} objects={objects} onClose={closeFullCalendar} onSelectDay={openTimeline} onCreateEvent={openEditor} onDeleteEvent={requestCalendarDelete} />
       <DayTimelineModal visible={!!timelineTarget} date={timelineTarget?.date} focusTime={timelineTarget?.focusTime} objects={objects} onClose={closeTimeline} onOpenMonth={openMonthFromTimeline} onCreateEvent={openEditor} onDeleteEvent={requestCalendarDelete} />
