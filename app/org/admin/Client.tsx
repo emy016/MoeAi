@@ -68,7 +68,7 @@ export default function Client() {
                 {data.orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
               </select>
             ) : null}
-            <Link className="org-btn ghost small" href="/organizer">Organizer</Link>
+            <Link className="org-btn ghost small" href="/moeai">Tutor mode</Link>
             <Link className="org-btn ghost small" href="/account">Account</Link>
           </div>
         </div>

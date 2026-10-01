@@ -37,8 +37,8 @@ const LIVE = new Set(["active", "trialing", "past_due"]);
 
 export function nextStep(f: OnboardingFacts): { step: Step; home: string } {
   const owner = f.memberships.find((m) => m.role === "owner" && m.status === "active");
-  const staff = f.memberships.find((m) => (m.role === "teacher" || m.role === "owner") && m.status === "active") || (f.university && f.university.role !== "student");
-  const home = owner ? "/org/admin" : staff ? "/organizer" : "/moeai";
+  // University accounts (students and staff) live in the app; staff get tutor mode there.
+  const home = owner && !f.university ? "/org/admin" : "/moeai";
 
   // University (demo SSO) accounts were provisioned by their university.
   if (f.university) return { step: "done", home };

@@ -1,15 +1,9 @@
-import type { Metadata } from "next";
-import Client from "./Client";
-import "katex/dist/katex.min.css";
-import "@/components/brand/logo.css";
-import "../org.css";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "MoeAI Tutor page",
-  description: "Tutor mode for course staff: upload a course once and MoeAI organizes it into the knowledge its students learn from.",
-  robots: { index: false },
-};
-
+/**
+ * Tutor mode lives in the MoeAI app now: a staff account opens it there, in the
+ * same design as the student app. Old links and bookmarks land in the app.
+ */
 export default function Page() {
-  return <Client />;
+  redirect("/moeai");
 }

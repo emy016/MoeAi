@@ -31,7 +31,8 @@ export default function Client({ org, next }: { org: Org; next: string }) {
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "Sign-in failed. Try again.");
       // Staff go to the Organizer unless they were sent somewhere specific.
-      window.location.href = body.role === "teacher" || body.role === "admin" ? (next === "/moeai" ? "/organizer" : next) : next;
+      // Staff land in the app too: it opens tutor mode for them.
+      window.location.href = next;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed. Try again.");
       setBusy(false);

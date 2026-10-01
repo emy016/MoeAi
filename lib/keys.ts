@@ -18,6 +18,8 @@ const NAMES: Record<string, string[]> = {
   groq: ["GROQ_API_KEYS", "GROQ_API_KEY"],
   openrouter: ["OPENROUTER_API_KEYS", "OPENROUTER_API_KEY"],
   nvidia: ["NVIDIA_API_KEYS", "NVIDIA_API_KEY"],
+  // Cheaper Inference (cheaperinference.com): a paid, OpenAI-compatible reseller, the last resort.
+  cheaper: ["CHEAPER_INFERENCE_API_KEYS", "CHEAPER_INFERENCE_API_KEY"],
 };
 
 export type Provider = keyof typeof NAMES;

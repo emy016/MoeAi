@@ -43,6 +43,86 @@ function UsageChart({ usage }) {
   );
 }
 
+const SOURCE_TONE = { student: 'accent', system: 'muted', account: 'warn' };
+const SOURCE_LABEL = { student: 'Study', system: 'AI', account: 'Account' };
+const when = (iso) => {
+  const d = new Date(iso);
+  const today = new Date().toDateString() === d.toDateString();
+  return today ? d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+};
+
+/** One line of the log: what happened, who, when. Never the words of a chat. */
+function ActivityRow({ item, showWho = true }) {
+  const { colors, type } = usePreferences();
+  const failed = item.source === 'system' && item.kind !== 'ok';
+  return (
+    <View style={[s.logRow, { backgroundColor: colors.card }]}>
+      <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+        <View style={s.chips}>
+          <Chip label={failed ? 'AI failed' : SOURCE_LABEL[item.source] || item.source} tone={failed ? 'bad' : SOURCE_TONE[item.source]} />
+          {showWho ? <Text numberOfLines={1} style={[{ color: colors.textSecondary, flexShrink: 1 }, type(12, 'bold', 16)]}>{item.who}</Text> : null}
+        </View>
+        <Text numberOfLines={2} style={[{ color: colors.textPrimary }, type(13, 'semiBold', 18)]}>{item.label}</Text>
+      </View>
+      <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 14)]}>{when(item.at)}</Text>
+    </View>
+  );
+}
+
+function ActivityView({ active }) {
+  const { colors, type } = usePreferences();
+  const [data, setData] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const [error, setError] = useState('');
+  const load = useCallback(async () => {
+    try { setData(await tutorApi('/api/tutor?view=activity')); setError(''); } catch (e) { setError(e.message); }
+  }, []);
+  useEffect(() => { if (active) load(); }, [active, load]);
+  const rows = (data?.activity || []).filter((a) => filter === 'all' || a.source === filter || (filter === 'failed' && a.source === 'system' && a.kind !== 'ok'));
+  const health = data?.health || [];
+  const total = health.reduce((n, h) => n + h.answers, 0);
+  const failed = health.reduce((n, h) => n + h.failed, 0);
+  return (
+    <>
+      <Banner message={error} onClose={() => setError('')} />
+      <Text style={[{ color: colors.textMuted }, type(12.5, 'regular', 18)]}>What students did and when, how MoeAI performed, and account changes. Chats show only the course and lecture, never what was written.</Text>
+      {health.length ? (
+        <View style={[s.card, { backgroundColor: colors.card }]}>
+          <View style={s.rowBetween}>
+            <Text style={[{ color: colors.textPrimary }, type(14, 'bold', 19)]}>MoeAI health</Text>
+            <Text style={[{ color: colors.textMuted }, type(11.5, 'semiBold', 15)]}>last 7 days</Text>
+          </View>
+          <View style={s.stats}>
+            <Stat value={total} label="Answers" />
+            <Stat value={total ? `${Math.round(((total - failed) / total) * 100)}%` : '-'} label="Succeeded" tone={failed / Math.max(total, 1) > 0.1 ? 'bad' : 'good'} />
+          </View>
+          {health.map((h) => (
+            <View key={h.provider} style={s.rowBetween}>
+              <Text style={[{ color: colors.textSecondary }, type(12.5, 'bold', 17)]}>{h.provider}</Text>
+              <Text style={[{ color: colors.textMuted }, type(12, 'semiBold', 16)]}>{`${h.answers} answers · ${h.failed} failed${h.avg_seconds != null ? ` · ${h.avg_seconds} s avg` : ''}`}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+      <Segmented options={[{ id: 'all', label: 'All' }, { id: 'student', label: 'Study' }, { id: 'failed', label: 'AI failures' }, { id: 'account', label: 'Accounts' }]} value={filter} onChange={setFilter} />
+      {data && !rows.length ? <Empty title="Nothing logged" body="Activity appears here as students use MoeAI." /> : null}
+      {rows.map((a, i) => <ActivityRow key={`${a.at}-${i}`} item={a} />)}
+    </>
+  );
+}
+
+function PersonActivity({ userId }) {
+  const [items, setItems] = useState(null);
+  useEffect(() => { tutorApi(`/api/tutor?view=activity&user=${userId}`).then((d) => setItems((d.activity || []).slice(0, 12))).catch(() => setItems([])); }, [userId]);
+  if (!items?.length) return null;
+  return (
+    <>
+      <SectionTitle title="Recent activity" />
+      {items.map((a, i) => <ActivityRow key={`${a.at}-${i}`} item={a} showWho={false} />)}
+    </>
+  );
+}
+
 function PersonSheet({ person, courses, onClose, onChanged }) {
   const { colors, type } = usePreferences();
   const [picked, setPicked] = useState(() => new Set(person.course_ids || []));
@@ -66,6 +146,7 @@ function PersonSheet({ person, courses, onClose, onChanged }) {
         <Stat value={person.messages_7d} label="7 days" />
         <Stat value={person.messages_total} label="All time" />
       </View>
+      <PersonActivity userId={person.user_id} />
       {owner ? <Text style={[{ color: colors.textMuted }, type(13, 'regular', 19)]}>A manager of this university. Managers cannot be changed from the app.</Text> : (
         <>
           <SectionTitle title="Role" />
@@ -145,6 +226,7 @@ export default function TutorPeopleScreen({ active }) {
   const [error, setError] = useState('');
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('students');
+  const [tab, setTab] = useState('people');
   const [open, setOpen] = useState(null);
   const load = useCallback(async () => {
     try { setData(await tutorApi('/api/tutor?view=people')); setError(''); } catch (e) { setError(e.message); }
@@ -168,6 +250,8 @@ export default function TutorPeopleScreen({ active }) {
   return (
     <ScreenContainer>
       <View style={{ gap: Spacing.md }}>
+        <Segmented options={[{ id: 'people', label: 'People' }, { id: 'activity', label: 'Activity log' }]} value={tab} onChange={setTab} />
+        {tab === 'activity' ? <ActivityView active={active} /> : (<>
         <Banner message={error} onClose={() => setError('')} />
         <View style={s.stats}>
           <Stat value={students.length} label="Students" tone="accent" />
@@ -198,6 +282,7 @@ export default function TutorPeopleScreen({ active }) {
           </Pressable>
         ))}
         {data ? <JoinLinks codes={data.codes || []} onChanged={load} /> : null}
+        </>)}
       </View>
       {current ? <PersonSheet key={current.user_id + current.role + current.status + (current.course_ids || []).length} person={current} courses={data?.courses || []} onClose={() => setOpen(null)} onChanged={load} /> : null}
     </ScreenContainer>
@@ -206,6 +291,7 @@ export default function TutorPeopleScreen({ active }) {
 
 const s = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  logRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: Radius.md, paddingHorizontal: 14, paddingVertical: 10 },
   card: { borderRadius: Radius.md, padding: Spacing.md, gap: 10 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   chart: { height: 120, flexDirection: 'row', alignItems: 'flex-end', gap: 4 },

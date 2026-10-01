@@ -113,7 +113,7 @@ function geminiContents(messages: ChatMessage[], images: AttachedImage[]): Gemin
 }
 
 /** OpenAI-compatible chat providers tried after Gemini, in CHAT_FALLBACK_ORDER. */
-type Compatible = { name: "groq" | "nvidia" | "openrouter"; url: string; model: () => string; headers?: () => Record<string, string>; budget: number; whole: boolean };
+type Compatible = { name: "groq" | "nvidia" | "openrouter" | "cheaper"; url: string; model: () => string; headers?: () => Record<string, string>; budget: number; whole: boolean };
 const COMPATIBLE: Record<Compatible["name"], Compatible> = {
   // Groq's free tier counts ~8,000 tokens a minute: the bot's own trimmed prompt.
   groq: { name: "groq", url: "https://api.groq.com/openai/v1/chat/completions", model: () => process.env.GROQ_MODEL || "openai/gpt-oss-120b", budget: GROQ_BUDGET_TOKENS, whole: false },
@@ -124,9 +124,11 @@ const COMPATIBLE: Record<Compatible["name"], Compatible> = {
     headers: () => ({ "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://moe-ai-sable.vercel.app", "X-Title": "MoeAI" }),
     budget: GEMINI_BUDGET_TOKENS, whole: true,
   },
+  // Paid per token: only reached when every free provider has failed.
+  cheaper: { name: "cheaper", url: "https://api.cheaperinference.com/v1/chat/completions", model: () => process.env.CHEAPER_INFERENCE_MODEL || "gpt-5.4-mini", budget: GEMINI_BUDGET_TOKENS, whole: true },
 };
 function fallbackOrder(): Compatible[] {
-  return (process.env.CHAT_FALLBACK_ORDER || "groq,nvidia,openrouter").split(",")
+  return (process.env.CHAT_FALLBACK_ORDER || "groq,nvidia,openrouter,cheaper").split(",")
     .map((n) => COMPATIBLE[n.trim() as Compatible["name"]]).filter((c) => c && providerKeys(c.name).length);
 }
 

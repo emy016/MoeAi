@@ -92,6 +92,17 @@ export async function GET(req: NextRequest) {
       codes: (codes.data ?? []).map((c) => ({ ...c, link: `${origin}/join/${c.code}` })),
     }, { headers: { "cache-control": "no-store" } });
   }
+  if (view === "activity") {
+    // What happened and when, never what a student wrote (org_activity hides chat text).
+    if (ctx.role !== "owner") return fail(403, "Only the university's managers can see activity.");
+    const user = req.nextUrl.searchParams.get("user");
+    const [activity, health] = await Promise.all([
+      ctx.sb.rpc("org_activity", { p_org: ctx.org.id, p_user: user && UUID.test(user) ? user : null, p_limit: 200 }),
+      user ? Promise.resolve({ data: [] }) : ctx.sb.rpc("org_ai_health", { p_org: ctx.org.id }),
+    ]);
+    if (activity.error) return fail(500, activity.error.message);
+    return Response.json({ activity: activity.data ?? [], health: health.data ?? [] }, { headers: { "cache-control": "no-store" } });
+  }
   return fail(400, "Unknown view.");
 }
 

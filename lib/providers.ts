@@ -224,6 +224,16 @@ const PROVIDERS: Record<string, Provider> = {
       process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct",
       m, t, {}, d,
     ),
+
+  // Cheaper Inference: paid, OpenAI-compatible; last in every order.
+  cheaper: (m, t, d) =>
+    callOpenAICompatible(
+      "cheaper",
+      "https://api.cheaperinference.com/v1/chat/completions",
+      "cheaper",
+      process.env.CHEAPER_INFERENCE_MODEL || "gpt-5.4-mini",
+      m, t, {}, d,
+    ),
 };
 
 /**
@@ -231,7 +241,7 @@ const PROVIDERS: Record<string, Provider> = {
  * proactive lines, the Arena question cache) runs on the other providers
  * first, so Gemini's free quota is left for the chat students are watching.
  */
-export const BACKGROUND_ORDER = (process.env.BACKGROUND_PROVIDER_ORDER || "groq,nvidia,openrouter,gemini");
+export const BACKGROUND_ORDER = (process.env.BACKGROUND_PROVIDER_ORDER || "groq,nvidia,openrouter,gemini,cheaper");
 
 /**
  * Try each configured provider in order. Returns the first that starts
@@ -246,7 +256,7 @@ export async function streamChat(
   opts: { maxTokens?: number; onDone?: (full: string) => void; order?: string } = {},
 ): Promise<StreamResult> {
   const maxTokens = opts.maxTokens ?? Number(process.env.MOEAI_MAX_OUTPUT_TOKENS ?? 1200);
-  const order = (opts.order || process.env.AI_PROVIDER_ORDER || "gemini,groq,openrouter,nvidia")
+  const order = (opts.order || process.env.AI_PROVIDER_ORDER || "gemini,groq,openrouter,nvidia,cheaper")
     .split(",")
     .map((p) => p.trim())
     .filter((p) => p in PROVIDERS);

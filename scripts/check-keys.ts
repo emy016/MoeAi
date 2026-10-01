@@ -32,7 +32,7 @@ check("nothing configured is an empty list, not a crash",
 check("providers do not see each other's keys",
   providerKeys("groq", { GEMINI_API_KEY: "a" }), []);
 check("counts report how many, never which",
-  keyCounts({ GEMINI_API_KEYS: "a,b", GROQ_API_KEY: "c" }), { gemini: 2, groq: 1, openrouter: 0, nvidia: 0 });
+  keyCounts({ GEMINI_API_KEYS: "a,b", GROQ_API_KEY: "c" }), { gemini: 2, groq: 1, openrouter: 0, nvidia: 0, cheaper: 0 });
 check("every provider accepts a plural and a singular name",
   PROVIDER_NAMES.every(p => acceptedNames(p).some(n => n.endsWith("_API_KEYS")) && acceptedNames(p).some(n => n.endsWith("_API_KEY"))), true);
 

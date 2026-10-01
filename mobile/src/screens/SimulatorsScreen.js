@@ -129,7 +129,7 @@ function useCourseSims(active) {
       .then((r) => (r.ok ? r.json() : { sims: [] })).then((d) => { if (alive) setRows(d.sims || []); }).catch(() => {});
     return () => { alive = false; };
   }, [active, account.status, account.org]);
-  return useMemo(() => groupRows(rows), [rows]);
+  return useMemo(() => ({ loaded: rows !== null, map: groupRows(rows) }), [rows]);
 }
 
 export default function SimulatorsScreen({ active = true }) {
@@ -138,9 +138,12 @@ export default function SimulatorsScreen({ active = true }) {
   const built = useCourseSims(active);
   const groups = useMemo(() => {
     const own = simulatorsForSubjects(courses.filter((c) => !c.orgCourseId));
+    // A course staff have not set simulators for yet gets the closest built-in ones, as before.
     const uni = courses.filter((c) => c.orgCourseId).map((subject) => {
-      const sims = built.get(subject.orgCourseId) || [];
-      return { subject, sims, pending: !sims.length };
+      const chosen = built.map.get(subject.orgCourseId);
+      if (chosen?.length) return { subject, sims: chosen };
+      const matched = built.loaded ? (simulatorsForSubjects([subject])[0]?.sims || []) : [];
+      return { subject, sims: matched, pending: !matched.length };
     });
     return [...uni, ...own];
   }, [built, courses]);
@@ -165,7 +168,7 @@ export default function SimulatorsScreen({ active = true }) {
               {sims.length ? <Text style={[{ color: colors.textMuted }, type(11, 'semiBold', 15)]}>{sims.length}</Text> : null}
             </View>
             {pending ? (
-              <Card><Text style={[{ color: colors.textMuted }, align, type(13, 'regular', 19)]}>MoeAI has not built simulators for this course yet. They appear once your course staff upload lectures and organize the course.</Text></Card>
+              <Card><Text style={[{ color: colors.textMuted }, align, type(13, 'regular', 19)]}>No simulators for this course yet. They appear once its lectures are in MoeAI.</Text></Card>
             ) : (
               <View style={styles.tiles}>{sims.map((sim) => <SimTile key={sim.id} sim={sim} onOpen={(s) => openSim(s, subject)} />)}</View>
             )}
