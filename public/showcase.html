@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MoeAI — the AI that lives digitally in your university | NetWatch</title>
-  <meta name="description" content="MoeAI lives inside your university: it reads your lectures, knows your calendar, answers in Arabic, Franco or English, and builds the simulation, graph or practice exam you need. Made by NetWatch." />
+  <meta name="description" content="MoeAI lives inside your university: it reads your lectures, knows your calendar, and builds the simulation, graph or practice exam you need. Made by NetWatch." />
   <link rel="canonical" href="https://moe-ai-sable.vercel.app/showcase" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="MoeAI — the AI that lives digitally in your university" />
-  <meta property="og:description" content="Your lectures, your calendar, your language. Made by NetWatch: Moemen, Youssef and Eslam." />
+  <meta property="og:description" content="Your lectures, your calendar, your progress. Made by NetWatch." />
   <meta property="og:url" content="https://moe-ai-sable.vercel.app/showcase" />
   <meta property="og:image" content="https://moe-ai-sable.vercel.app/brand/moeai-logo.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -24,7 +24,7 @@
    "applicationCategory":"EducationalApplication","operatingSystem":"Web, Android",
    "url":"https://moe-ai-sable.vercel.app/moeai",
    "author":{"@type":"Organization","name":"NetWatch"},
-   "description":"An AI that lives inside the university: it answers from the course's own lectures in Egyptian Arabic, Franco-Arabic or English, knows the course calendar, and gives course staff a tutor mode.",
+   "description":"An AI that lives inside the university: it answers from the course's own lectures, knows the course calendar, and gives course staff a tutor mode.",
    "offers":{"@type":"Offer","price":"0","priceCurrency":"EGP"}}
   </script>
 
@@ -113,7 +113,7 @@
     .btn-primary:hover { background: #ef7884; }
 
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 46px auto 0; max-width: 900px; }
-    @media (min-width: 760px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 760px) { .stats { grid-template-columns: repeat(3, 1fr); max-width: 720px; } }
     .stat { background: var(--card); border-radius: var(--r-md); padding: 18px 16px; text-align: left; }
     .stat b { display: block; font-size: 1.9rem; font-weight: 900; letter-spacing: -0.02em; color: var(--text); }
     .stat b i { font-style: normal; color: var(--red); }
@@ -309,7 +309,7 @@
   <nav class="nav" aria-label="Main">
     <a class="brand" href="#top"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#moe-ink" fill="#0e0404"/><use href="#moe-red" fill="#EA4349"/></svg>MoeAI<small>by NetWatch</small></a>
     <div class="nav-mid">
-      <a href="#inside">Inside the app</a><a href="#language">Languages</a><a href="#generative">What it makes</a><a href="#universities">For universities</a><a href="#team">Team</a>
+      <a href="#inside">Inside the app</a><a href="#generative">What it makes</a><a href="#universities">For universities</a>
     </div>
     <a class="cta-sm" href="/moeai">Open MoeAI</a>
   </nav>
@@ -324,8 +324,8 @@
     <h1>The AI that lives<br>digitally in <em>your university</em>.</h1>
     <div class="made-by">Made by students for <b>Universities</b></div>
     <p class="lede">
-      MoeAI reads your lecturers' slides, knows when your next quiz is, and answers in Egyptian Arabic,
-      Franco or English. Ask it something and it can answer with a simulation, a graph or a practice exam.
+      MoeAI reads your lecturers' slides, knows when your next quiz is, and remembers what you struggle with.
+      Ask it something and it can answer with a simulation, a graph or a practice exam.
     </p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="/moeai">Open MoeAI <span aria-hidden="true">→</span></a>
@@ -334,8 +334,7 @@
     <div class="stats">
       <div class="stat"><b>230<i>+</i></b><span>students in our study community</span></div>
       <div class="stat"><b>12</b><span>Computer Science courses set up at FUE</span></div>
-      <div class="stat"><b>191</b><span>lecture pages it can quote, with the page number</span></div>
-      <div class="stat"><b>3</b><span>ways to ask: Egyptian Arabic, Franco or English</span></div>
+      <div class="stat"><b>1</b><span>app for students and course staff</span></div>
     </div>
   </header>
 
@@ -351,8 +350,8 @@
   <!-- ─── INSIDE THE APP ────────────────────────────────────── -->
   <section class="wrap band" id="inside" aria-label="Inside the app">
     <div class="center"><span class="eyebrow">Inside the app</span><h2>Inside the app.</h2>
-      <p class="sub">Sign in with your university, ask in chat, practise, make it yours. Forty seconds, recorded in the real app.</p></div>
-    <figure class="demo-phone"><div class="demo-screen"><video class="demo-video" data-src="/assets/video/moeai-demo.mp4" data-src-webm="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A recording of the MoeAI app: university sign-in, a chat that answers with a simulation, chart and quiz, practice questions, and the customization settings"></video></div></figure>
+      <p class="sub">Make it yours, open a lecture, ask, practise. Recorded in the real app.</p></div>
+    <figure class="demo-phone"><div class="demo-screen"><video class="demo-video" data-src="/assets/video/moeai-demo.mp4" data-src-webm="/assets/video/moeai-demo.webm" poster="/assets/video/moeai-demo-poster.webp" muted loop playsinline preload="none" aria-label="A recording of the MoeAI app: picking a pure black theme, a lecture chat about C++ functions that answers with code, a live visualizer, a quiz and steps, then a practice question"></video></div></figure>
     <div class="demo-toggle"><button type="button" class="btn" id="demoLive">Try it live</button></div>
     <div class="gallery">
       <div class="gallery-track" id="galleryTrack" tabindex="0" aria-label="Screens from the app">
@@ -378,49 +377,26 @@
       <div>
         <span class="eyebrow">The problem</span>
         <h2>A general chatbot knows the subject. It doesn't know <em>your course.</em></h2>
-        <p>It answers from the internet, in formal English, with a method your lecturer never used, and it has no idea your quiz is on Sunday.</p>
+        <p>It answers from the internet, with a method your lecturer never used, and it has no idea your quiz is on Sunday.</p>
       </div>
       <div class="compare">
         <div class="col bad"><span class="tag">General AI</span>
-          <p>Answers from the internet</p><p>Defaults to English</p><p>Forgets you every chat</p><p>Doesn't know your schedule</p></div>
+          <p>Answers from the internet</p><p>Invents examples from other courses</p><p>Forgets you every chat</p><p>Doesn't know your schedule</p></div>
         <div class="col good"><span class="tag">MoeAI</span>
-          <p>Answers from your lectures</p><p>Replies in the language you used</p><p>Remembers what you struggle with</p><p>Knows your quizzes and deadlines</p></div>
+          <p>Answers from your lectures</p><p>Uses your lecturer's own examples</p><p>Remembers what you struggle with</p><p>Knows your quizzes and deadlines</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ─── LANGUAGE ──────────────────────────────────────────── -->
-  <section class="wrap band" id="language">
-    <div class="center"><span class="eyebrow">Languages</span><h2>Ask the way you actually talk.</h2>
-      <p class="sub">Write in Franco, Arabic or English and it answers in the same one, message by message.</p></div>
-    <div class="grid g3">
-      <div class="chat">
-        <span class="chip">Franco</span>
-        <div class="bubble me">msh fahem el recursion</div>
-        <div class="bubble ai">Recursion ya3ni el function bet-call nafsaha 3ala goz2 as8ar mn el moshkela, l7ad ma tewsal lel base case fa tewa2af.</div>
-      </div>
-      <div class="chat">
-        <span class="chip">عربي</span>
-        <div class="bubble me" dir="rtl">مش فاهم الـ pointers</div>
-        <div class="bubble ai" dir="rtl">الـ pointer بيخزن عنوان المتغير، مش قيمته. تعالى نشوفها على الذاكرة خطوة خطوة.</div>
-      </div>
-      <div class="chat">
-        <span class="chip">English</span>
-        <div class="bubble me">why do we even need pointers</div>
-        <div class="bubble ai">So a function can change your variable instead of a copy of it. Here's the difference on one example.</div>
-      </div>
-    </div>
-    <p class="terms">Technical terms stay in English, the way your lecturer writes them.</p>
-  </section>
 
   <!-- ─── GENERATIVE ────────────────────────────────────────── -->
   <section class="wrap band" id="generative">
     <div class="center"><span class="eyebrow">What it makes</span><h2>It makes the thing that makes it click.</h2>
-      <p class="sub">Ask about projectile motion and you get a simulation you can drag. Ask how a matrix transforms space and you get the animation.</p></div>
+      <p class="sub">Ask how a K-map groups its ones and you get one you can click. Ask how a matrix transforms space and you get the animation.</p></div>
     <div class="grid g4">
       <div class="tile"><div class="ic"><svg><use href="#i-play"/></svg></div><h3>Interactive visualizers</h3><p>Sliders and live math, written for your question</p></div>
       <div class="tile"><div class="ic"><svg><use href="#i-chart"/></svg></div><h3>Charts and graphs</h3><p>Plots any function or dataset it is explaining</p></div>
-      <div class="tile"><div class="ic"><svg><use href="#i-cube"/></svg></div><h3>3D scenes</h3><p>Rotate the surface, the vector field, the molecule</p></div>
+      <div class="tile"><div class="ic"><svg><use href="#i-cube"/></svg></div><h3>3D scenes</h3><p>Rotate the surface, the vector field, the 3D plot</p></div>
       <div class="tile"><div class="ic"><svg><use href="#i-slides"/></svg></div><h3>Step animations</h3><p>Math that moves one step at a time</p></div>
       <div class="tile"><div class="ic"><svg><use href="#i-chip"/></svg></div><h3>Course simulators</h3><p>Picked for each course, with a task from MoeAI</p></div>
       <div class="tile"><div class="ic"><svg><use href="#i-tree"/></svg></div><h3>Diagrams and mind maps</h3><p>Flowcharts, state machines, trees, course maps</p></div>
@@ -439,7 +415,7 @@
   <!-- ─── IN THE APP NOW ────────────────────────────────────── -->
   <section class="wrap band" id="whats-new">
     <div class="center"><span class="eyebrow">New this term</span><h2>MoeAI for Computer Science at FUE.</h2>
-      <p class="sub">Sign in with your university and your courses are already there, from Calculus and Physics in year one to OOP and Networks in year two.</p></div>
+      <p class="sub">Sign in with your university and your courses are already there, from Calculus and Logic Design in year one to OOP in Java and Networks in year two.</p></div>
     <div class="grid g4">
       <div class="tile"><div class="ic"><svg><use href="#i-book"/></svg></div><h3>Answers from the open lecture</h3><p>Open a lecture and its pages lead every answer</p></div>
       <div class="tile"><div class="ic"><svg><use href="#i-quote"/></svg></div><h3>Page citations</h3><p>Tap one to read the exact passage it used</p></div>
@@ -513,23 +489,6 @@
     </div>
   </section>
 
-  <!-- ─── TEAM ──────────────────────────────────────────────── -->
-  <section class="wrap" id="team">
-    <div class="close">
-      <span class="eyebrow">NetWatch</span>
-      <h2>Started in a Telegram channel. Built by NetWatch.</h2>
-      <p>CS Epic Save began as a study channel for first-year Computer Science; about 230 students use it now. MoeAI grew out of it, built by three students.</p>
-      <div class="team">
-        <div class="person"><div class="av">M</div><h3>Moemen</h3><p>MoeAI's brain: the AI, the search over your lectures, the backend and this website.</p></div>
-        <div class="person"><div class="av">Y</div><h3>Youssef</h3><p>The MoeAI app and its whole interface, tutor mode included.</p></div>
-        <div class="person"><div class="av">E</div><h3>Eslam</h3><p>MoeAI's character and voice, testing, and bringing the hackathon together.</p></div>
-      </div>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="/start?next=/moeai">Get started <span aria-hidden="true">→</span></a>
-        <a class="btn" href="https://t.me/CS_Epic_Save" target="_blank" rel="noopener noreferrer">The Telegram channel</a>
-      </div>
-    </div>
-  </section>
 
   <footer class="foot">
     <span class="brand"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#moe-ink" fill="#0e0404"/><use href="#moe-red" fill="#EA4349"/></svg>MoeAI<small>by NetWatch</small></span>

@@ -333,11 +333,11 @@ void main() { gl_FragColor = vec4(uColor.rgb * uColor.a, uColor.a); }`;
         { t: 'MA101 · Calculus', l: ['lim(x→0) sin x / x = 1', '∫ x² dx = x³/3 + C', "d/dx eˣ = eˣ"] },
         { t: 'MA103 · Differential Equations', l: ["y'' + 2y' + 5y = 0", 'y = e⁻ˣ(A cos 2x + B sin 2x)'] },
         { t: 'MA102 · Discrete Mathematics', l: ['|A∪B| = |A| + |B| − |A∩B|', '¬(p ∧ q) ≡ ¬p ∨ ¬q'] },
-        { t: 'CS102 · Structured Programming', m: 1, l: ['int factorial(int n) {', '  if (n <= 1) return 1;', '  return n * factorial(n - 1);', '}'] },
+        { t: 'CS102 · Structured Programming', m: 1, l: ['int add(int a, int b) {', '  return a + b;', '}', 'cout << add(2, 3) << endl;'] },
         { t: 'CS103 · Logic Design', l: ['Sum = A ⊕ B ⊕ Cin', 'Cout = AB + Cin(A ⊕ B)'] },
         { t: 'MA104 · Probability', l: ['z = (x − μ) / σ', 'P(μ ± 2σ) ≈ 95%'] },
         { t: 'MA201 · Advanced Probability', l: ['P(A|B) = P(B|A)·P(A) / P(B)', 'Poisson: λᵏe⁻λ / k!'] },
-        { t: 'PH101 · Physics', l: ['v = u + at', 's = ut + ½at²', 'F = ma'] },
+        { t: 'PH101 · Physics', l: ['V = I · R', 'Kirchhoff: ΣI_in = ΣI_out', 'Lenz: ε = −dΦ/dt'] },
         { t: 'MA105 · Linear Algebra', l: ['Ax = b  ⇒  x = A⁻¹b', 'det(A − λI) = 0'] },
         { t: 'CS101 · Computing Fundamentals', l: ['1010₂ = 8 + 0 + 2 + 0 = 10₁₀', '0xFF = 255'] },
         { t: 'CS201 · Object-Oriented Programming', m: 1, l: ['class Circle extends Shape {', '  private double r;', '  double area() {', '    return Math.PI * r * r; }', '}'] },
@@ -402,7 +402,7 @@ void main() { gl_FragColor = vec4(uColor.rgb * uColor.a, uColor.a); }`;
         direction: 'clockwise',
         hover: 108,
         rounded: 44,
-        core: { coreSize: 41, coreColor: '#E11D4866', lineColor: '#E11D4855' }
+        core: { coreSize: 41, coreColor: '#9E0F1648', lineColor: '#B3122540' }
       };
 
       // One branch per card: nothing repeats.
