@@ -5,7 +5,7 @@
    pill buttons. */
 .org-page {
   --app-bg: #181920; --app-card: #23252c; --app-button: #2e3036; --app-button-press: #3a3d44;
-  --app-text: #F5F4F2; --app-muted: #8d8f95; --app-secondary: #B9B9BE; --app-accent: #8766EB; --app-danger: #EB6674; --app-track: #55575f;
+  --app-text: #F5F4F2; --app-muted: #8d8f95; --app-secondary: #B9B9BE; --app-accent: #EB6674; --app-danger: #EB6674; --app-track: #55575f;
   --line: transparent; --line-bright: transparent; --surface-strong: var(--app-card); --text: var(--app-text); --muted: var(--app-muted); --ruby-soft: var(--app-accent);
   background: var(--app-bg); color: var(--app-text);
   font-family: "Nunito Sans", -apple-system, system-ui, sans-serif;
@@ -13,7 +13,7 @@
 @media (prefers-color-scheme: light) {
   .org-page {
     --app-bg: #F4F1F8; --app-card: #FFFFFF; --app-button: #ECE8F1; --app-button-press: #DED8E7;
-    --app-text: #24212A; --app-muted: #817A89; --app-secondary: #595461; --app-accent: #6841C6; --app-danger: #B84252; --app-track: #C9C2D0;
+    --app-text: #24212A; --app-muted: #817A89; --app-secondary: #595461; --app-accent: #C53F51; --app-danger: #B84252; --app-track: #C9C2D0;
   }
 }
 .org-page { min-height: 100svh; display: grid; place-items: start center; padding: 40px 16px 64px; }

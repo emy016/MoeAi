@@ -22,7 +22,7 @@
     { date: 'March 2026', text: 'The channel passes 140 students before the second semester of first year.', img: '/assets/showcase/tg-video.webp' },
     { date: 'Late April 2026', text: 'MoeAI is born: an AI that knows our Computer Science curriculum.', img: '/assets/showcase/tg-bot.webp' },
     { date: 'September 2026', text: 'The MoeAI app, built in React Native, opens to every university and organization.', img: '/assets/showcase/home-orange.webp' },
-    { date: 'Late September 2026', text: 'Lecturers can upload their courses. Logic Design, Differential Equations and Linear Algebra are in MoeAI so far.', img: '/assets/showcase/tutor-crop.webp' },
+    { date: 'Late September 2026', text: 'Tutor mode arrives in the app: course staff upload lectures, run the calendar MoeAI is aware of, see their students and build simulators.', img: '/assets/showcase/tutor-app-light.webp' },
     { date: 'October 2026', text: 'MoeAI is pitched at the GenAI Hackathon 2026.', img: '/assets/showcase/hackathon.webp' },
   ];
   var CDN = 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/';
