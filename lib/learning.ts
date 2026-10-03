@@ -79,17 +79,6 @@ export function readLocalAttempts(userId: string | null = null): Attempt[] {
     return [];
   }
 }
-export function saveLocalAttempt(
-  attempt: Attempt,
-  userId: string | null = null,
-) {
-  try {
-    localStorage.setItem(
-      userId ? `edumoe-attempts:${userId}` : "edumoe-attempts",
-      JSON.stringify([attempt, ...readLocalAttempts(userId)].slice(0, 100)),
-    );
-  } catch {}
-}
 export function shuffle<T>(items: readonly T[]): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {

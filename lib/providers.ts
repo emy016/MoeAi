@@ -53,6 +53,8 @@ function markCold(key: string) {
 /** Turn an SSE byte stream into a plain text stream of content deltas. */
 function sseToText(
   upstream: ReadableStream<Uint8Array>,
+  // Each provider streams its own JSON shape; the extractor knows which.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extract: (json: any) => string | undefined,
   onDone?: (full: string) => void,
 ): ReadableStream<Uint8Array> {

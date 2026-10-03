@@ -20,9 +20,10 @@
 // makes importing this from a client component a BUILD error rather than a
 // silent leak of those keys into the browser bundle.
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { completeChat, parseJsonBlock } from "./providers";
 
-type Admin = { from: (t: string) => any };
+type Admin = Pick<SupabaseClient, "from">;
 
 interface Item {
   kind: "fact" | "preference" | "misconception" | "goal";

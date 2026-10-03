@@ -27,21 +27,23 @@ The liquid-glass design already exists as hand-tuned CSS across ~15,000 lines of
 prototype HTML. Porting it to Tailwind means rewriting the design system, not
 migrating it. `styled-jsx` scopes component styles; `globals.css` holds tokens.
 
-## Postgres FTS before pgvector
+## Hybrid search: pgvector beside full-text
 
-`search_lessons()` uses a `tsvector` column and a GIN index. First-year CS
-lectures are keyword-dense — "pointer", "Kirchhoff", "truth table" — which is
-exactly where lexical search is strong and embeddings add cost and latency.
-
-**Revisit** when students ask conceptually ("the thing where memory addresses
-point at other memory") and FTS misses. Then add pgvector *beside* FTS, hybrid,
-not instead of it.
+Started with Postgres full-text only, because first-year lectures are
+keyword-dense ("Kirchhoff", "truth table", "K-map"). Students also ask
+conceptually, so `course_chunks` now carries a 768-dimension embedding (HNSW
+index) next to its `tsvector`, and `match_course_chunks` runs both and fuses the
+rankings with reciprocal-rank fusion. A loose any-word pass catches short
+follow-ups ("solve this example"), and the lecture the student has open wins
+ties. Questions are embedded with a 5-second timeout: if that fails, the word
+match still answers.
 
 ## Direct `fetch`, no AI SDK
 
-Two of three providers speak the OpenAI shape, so the whole chain is one shared
-function plus one Gemini-specific one. An SDK would add a dependency, a version
-surface, and an abstraction over three endpoints we already understand.
+Every provider except Gemini speaks the OpenAI chat shape (Groq, NVIDIA,
+OpenRouter, Cheaper Inference), so the chain is one shared function plus one
+Gemini-specific one. An SDK would add a dependency, a version surface, and an
+abstraction over endpoints we already understand.
 
 ## Multi-key rotation
 
@@ -76,15 +78,14 @@ detector in `lib/language.ts` is deterministic, testable, and was tuned against
 real Egyptian students on the prototype. `validateOutput` catches drift after
 generation so the caller can retry.
 
-## No tests, with one exception
+## Small checks instead of a test suite
 
-No Playwright, no component tests. 230 students are better testers than a
-suite we would not maintain.
-
-The exception is `lib/language.ts`. It is pure, it is the differentiator, and a
-regression there is invisible until a student gets answered in the wrong
-language. `scripts/check-language.ts` holds its cases; run `npm run check:language`.
-Add a case every time a real student's message is misread.
+No component tests. What a regression would hide gets a script instead:
+language detection (`check:language`), prompt assembly and voice (`check:emy`),
+logic and math tools, the calendar, markdown rendering, mobile strings, key
+names and the app bundle. `npm run verify` runs them all with typecheck, lint
+and a production build. Add a case every time a real student's message is
+misread.
 
 ## Prompts as files, not as a database
 
@@ -92,8 +93,10 @@ Add a case every time a real student's message is misread.
 behaviour changes are reviewable and revertable in git. No versioning scheme
 beyond that until more than one person edits them.
 
-## The 3D book is last
+## The app is the Expo export, not a second web app
 
-It is a brand element, not decoration — but it is also the only item on the
-roadmap whose absence cannot break the pitch. It ships lazy-loaded, after
-everything that can.
+`/moeai` used to be a separate React workspace. It is now Youssef's React
+Native app exported to static web (`npm run build:app` into `public/_expo`),
+so the web and Android are one codebase. The old workspace still builds at
+`/workspace` but is not linked.
+

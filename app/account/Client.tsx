@@ -208,7 +208,7 @@ export default function Client() {
               <p className="org-muted" style={{ margin: 0 }}>Scan this with your authenticator app, then enter the 6-digit code.</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={enroll.qr} alt="Authenticator QR code" width={180} height={180} style={{ background: "#fff", borderRadius: 12, padding: 8 }} />
-              <p className="st-hint">Can't scan? Enter this key: <code className="org-mono">{enroll.secret}</code></p>
+              <p className="st-hint">Can&apos;t scan? Enter this key: <code className="org-mono">{enroll.secret}</code></p>
               <input className="org-input" inputMode="numeric" maxLength={6} value={enroll.code} onChange={(e) => setEnroll((s) => (s ? { ...s, code: e.target.value.replace(/\D/g, "") } : s))} aria-label="6-digit code" />
               <button className="org-btn small" type="submit" style={{ justifySelf: "start" }}>Turn on</button>
             </form>

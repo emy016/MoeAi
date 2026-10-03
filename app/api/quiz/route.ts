@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const sourceText = (passages as any[])
+  const sourceText = (passages as { title: string; content: string }[])
     .map((p) => `## ${p.title}\n${p.content}`)
     .join("\n\n")
     .slice(0, 12_000);

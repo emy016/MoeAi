@@ -41,15 +41,15 @@ function partition(registry: SpecRegistry, decision: LanguageDecision): Record<S
   const buckets = Object.fromEntries(SECTION_ORDER.map((s) => [s, [] as Unit[]])) as Record<Section, Unit[]>;
   const franco = FRANCO_TARGETS.has(decision.target);
   const bidi = ARABIC_SCRIPT_TARGETS.has(decision.target) || MIXED_TARGETS.has(decision.target);
-  for (const module of MODULE_ORDER) {
-    for (const unit of registry[module].units) {
+  for (const name of MODULE_ORDER) {
+    for (const unit of registry[name].units) {
       if (unit.priority === Priority.EXCLUDED) continue;
       if (unit.tags.has("language")) {
         if (unit.tags.has("franco") && !franco) continue;
         if (unit.tags.has("bidi") && !bidi) continue;
         buckets.LANGUAGE.push(unit);
       } else {
-        buckets[module].push(unit);
+        buckets[name].push(unit);
       }
     }
   }

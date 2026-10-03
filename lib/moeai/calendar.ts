@@ -144,6 +144,3 @@ export function formatTime(value: string | number | Date, locale?: string) {
   return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
 }
 
-export function formatDayLabel(value: string | number | Date, locale?: string) {
-  return new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short" }).format(new Date(value));
-}

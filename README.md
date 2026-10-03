@@ -1,59 +1,82 @@
-# EduMoe · MoeAI
+# MoeAI · by NetWatch
 
-**EduMoe** is a free learning platform for Egyptian university students.
-**MoeAI** is its tutor: curriculum-aware, multilingual, and persistent.
+**MoeAI** is the AI that lives digitally in your university: it reads the
+course staff's own lectures, knows the course calendar, remembers each student,
+and answers with simulations, graphs and practice exams. Course staff run it
+from tutor mode in the same app.
 
-- Live: https://moe-ai-sable.vercel.app
-- Users today: ~230 first-year CS students, via `t.me/CS_Epic_Save`
+**EduMoe** is the website around it (the plain HTML pages under `public/`).
+
+- Live: https://moe-ai-sable.vercel.app (the app is `/moeai`, the showcase `/showcase`)
+- Team: Moemen (AI, backend, website), Youssef (the app and its interface),
+  Eslam (MoeAI's character, testing)
 
 ---
 
 ## How it is put together
 
-Two halves, deliberately built differently, because they are different things.
+| Part | What it is | Where |
+| --- | --- | --- |
+| The app | Youssef's React Native app (Expo), exported to static web and served at `/moeai`; the same code ships to Android | `mobile/`, built into `public/_expo` |
+| The API | Next.js 16 route handlers on Vercel: chat, course search, tutor mode, calendar, simulators, practice | `app/api/` |
+| The data | Supabase: Postgres with row-level security on every table, pgvector, storage, cron | `supabase/migrations/` |
+| The website | Plain HTML pages (home, courses, showcase), no framework on the page | `public/*.html` |
 
-**The EduMoe pages are plain HTML.** `public/*.html` — no React, no hydration,
-no framework on the page at all. They load instantly and the liquid-glass blur
-stays smooth because nothing is fighting the compositor for the main thread.
-Each page carries its own `<style>` and `<script>`. That is the point; do not
-"modernise" them into components.
+Next.js hosts all of it. Clean URLs for the HTML pages and the `/moeai`
+rewrite are declared in `next.config.ts`.
 
-**MoeAI is a React app.** `/moeai` is a real workspace: conversations, a
-library you can drop PDFs into, a study planner, a tool panel, modes, and
-per-device settings. It needs state, so it gets a framework.
+### How a question is answered (`POST /api/moeai`)
 
-Next.js hosts both. Clean URLs for the HTML are declared in `next.config.ts`
-rather than left to Vercel's `cleanUrls`, so `npm run start` behaves exactly
-like production and `/` resolves without an `app/page.tsx`.
+1. The student's session decides what they can read (RLS), plus hourly and
+   daily limits in Postgres.
+2. **Course search (RAG):** the question is embedded (Gemini, 768 dims) and
+   matched by meaning and by words at once; `match_course_chunks` fuses both
+   rankings (reciprocal-rank fusion) and the lecture the student has open wins
+   ties. The top passages and the course map go into the prompt with page
+   numbers to cite.
+3. **Awareness:** upcoming lectures, quizzes and assignments from the course
+   calendar (`lib/awareness.ts`), and what the student did recently.
+4. **The student:** their memory (they can read, edit or delete it), skills and
+   custom instructions.
+5. **Voice:** `prompts/` (Eslam's PERSONALITY and TUTORING, plus policy and
+   security) assembled by `lib/emy/prompt.ts`; the reply language is detected
+   per message (`lib/emy/language.ts`).
+6. **Providers:** Gemini first (several keys, rotated), then Groq, NVIDIA,
+   OpenRouter and Cheaper Inference (paid, last). The answer streams back as
+   NDJSON and the call is logged in `ai_logs` with real token counts.
+
+### Tutor mode
+
+Staff accounts open the app in tutor mode: Courses (upload, OCR of scanned
+pages, indexing, course map, passages), Calendar (events MoeAI is aware of;
+paste a schedule and MoeAI drafts the events), People (roles, course access,
+an activity log that never shows what a student wrote), Simulators (built-in
+engines or ones MoeAI writes, only when staff ask).
 
 ---
 
 ## Where things live
 
 ```
-public/*.html            The EduMoe pages. The design. Edit these directly.
-public/vendor/           pdf.js worker, for library imports
-app/moeai/               The MoeAI workspace route
-components/moeai/        Its UI: workspace, library, planner, tools, markdown
-lib/moeai/
-  personality.md         MoeAI's voice — 36 sections, tuned on real students
-  brain.ts               Prompt assembly, provider fallback, streaming
-  context.ts             Modes and the user-controlled context block
-  workspace.ts           Client-side workspace types and storage
+mobile/                  The app (Expo). npm run build:app exports it to public/_expo
+  src/tutor/             Tutor mode screens
+  src/simulators/        Built-in simulator library and per-course loading
+app/api/                 moeai, tutor, calendar, sims, practice, quiz, memory, personal,
+                         org, sso, organizer, cron, health, ...
 lib/
-  language.ts            Arabic / Franco / English detection, per message
-  chunk.ts               Paragraph-aligned chunking, PDF + subtitle extraction
-  memory.ts              Durable notes about a student, on a cadence
-  providers.ts           Non-streaming provider chain, key rotation
-  ratelimit.ts           Per-user hourly cap, in Postgres
-  supabase-browser.ts    Browser client (RLS)
-  supabase-server.ts     Server + service-role clients (server-only)
-prompts/                 Behaviour specs. SECURITY.md is loaded at runtime.
-app/api/                 moeai, library, quiz, memory, state, ranked,
-                         dashboard, auth, conversations, cron
-supabase/schema.sql      Every table, every RLS policy, one file
-scripts/                 relink-nav, extract-lessons, check-language
-docs/                    ARCHITECTURE, DEPLOY, PITCH, LAUNCH-CHECKLIST
+  rag/                   Extract, OCR, chunk, embed, retrieve, course map (brain)
+  ai/embed.ts            Embeddings, with a fast path for questions
+  emy/                   Prompt assembly, language detection, voice samples
+  moeai/brain.ts         Provider chain and streaming
+  providers.ts           Non-streaming chain for background jobs
+  keys.ts                One place that knows every API key name
+  awareness.ts           Calendar events into the prompt
+  sims.ts                Plans and writes simulators on request
+prompts/                 Behaviour specs, shipped with the deploy
+supabase/migrations/     Every schema change, applied in order
+public/*.html            The EduMoe pages and the showcase
+scripts/                 Checks (language, emy, logic, calendar, markdown, keys, app bundle)
+docs/                    ARCHITECTURE, DEPLOY, SECRETS, ACCOUNTS, PITCH
 ```
 
 ---
@@ -62,59 +85,29 @@ docs/                    ARCHITECTURE, DEPLOY, PITCH, LAUNCH-CHECKLIST
 
 ```bash
 npm install
-cp .env.example .env.local     # fill in the values
+cp .env.example .env.local     # fill in the values (docs/SECRETS.md)
 npm run dev
 ```
 
-Checks worth running before you push:
+Before you push:
 
 ```bash
-npm run build            # strict TypeScript
-npm run check:language   # the language detector's regression cases
+npm run verify     # typecheck, lint, every check script, then a production build
 ```
 
----
+After changing anything under `mobile/`, rebuild the web export and commit it:
 
-## How a question is answered
-
-1. `POST /api/moeai` — same-origin only, since this endpoint spends money.
-2. Signing in is **optional**. The workspace is designed to work on one device
-   with nothing stored server-side. Signing in adds what needs an account.
-3. Limits: an hourly counter in Postgres when signed in, a per-IP bucket when
-   not.
-4. `search_material()` retrieves from the shared curriculum *and* the student's
-   own library, in one RLS-scoped query. Their workspace uploads already
-   arrived in the request.
-5. `student_memory` — what past work showed, above all the misconceptions
-   quizzes recorded.
-6. `detectLanguage` picks the reply language from *this* message.
-7. `streamReply` walks the providers, never concatenating two of their answers,
-   and streams NDJSON the workspace parses.
-8. On close: the call is logged, and every fourth substantial exchange is mined
-   for durable notes.
+```bash
+npm run build:app
+```
 
 ---
 
 ## Security posture
 
-- RLS on every table. A student cannot read another student's anything.
-- Provider keys are read only inside `app/api/`, never shipped to the browser.
-- Retrieved material and stored memory are fenced in the prompt as *data*.
-- `prompts/SECURITY.md` is loaded into the system prompt at runtime.
-- Same-origin check, per-user and per-IP limits.
-
----
-
-## Status
-
-**Working:** the HTML platform, the MoeAI workspace, streaming answers with
-curriculum grounding, Library Mode, quizzes that feed misconceptions back,
-cross-device state, a shared ranked ladder, auth, legal pages, SEO surface.
-
-**Untested end to end:** everything downstream of a live model call and every
-signed-in HTTP path — the development sandbox blocks outbound calls to both the
-AI providers and `*.supabase.co`. Walk step 5 of `docs/DEPLOY.md` after
-deploying.
-
-**Not built:** lecture videos (the courses page has no player yet), simulators,
-the rotating 3D book, the mobile client.
+- RLS on every table; staff-only data goes through `SECURITY DEFINER` functions
+  that check the caller's role.
+- Provider keys and the service-role key are read only on the server.
+- Retrieved material and stored memory are fenced in the prompt as data.
+- Tutors see that a student asked MoeAI something, never what they asked.
+- Same-origin check on paid endpoints, per-user and per-IP limits.

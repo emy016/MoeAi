@@ -514,7 +514,7 @@ function Verify({ me, query, proceed, withNext }: ScreenProps) {
         <p className="org-muted" style={{ margin: 0 }}>Open it on this device to continue. The link works once. Check spam if it is not there in a minute.</p>
         {note ? <p className="st-status" role="status">{note}</p> : null}
         <button className="org-btn ghost" type="button" onClick={resend} disabled={cooldown > 0}>{cooldown ? `Send again in ${cooldown}s` : "Send the link again"}</button>
-        <button className="org-btn" type="button" onClick={() => proceed()}>I've confirmed it</button>
+        <button className="org-btn" type="button" onClick={() => proceed()}>I&apos;ve confirmed it</button>
         <Link className="org-muted" href={withNext("/start/signin")} style={{ textAlign: "center", textDecoration: "underline" }}>Use a different account</Link>
       </div>
     </Card>
@@ -928,7 +928,7 @@ function Invite({ me, query, proceed }: ScreenProps) {
   return (
     <Card title="Accept your invitation" subtitle={`Signed in as ${me.email ?? "you"}.`}>
       <div className="org-form">
-        {state === "done" ? <p className="st-status ok" role="status"><Check size={14} aria-hidden="true" /> You're a member now.</p> : null}
+        {state === "done" ? <p className="st-status ok" role="status"><Check size={14} aria-hidden="true" /> You&apos;re a member now.</p> : null}
         {error ? <p className="st-status bad" role="alert">{error}</p> : null}
         {state === "done"
           ? <button className="org-btn" onClick={() => proceed()}>Continue</button>
