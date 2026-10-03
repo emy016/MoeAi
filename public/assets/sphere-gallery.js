@@ -402,7 +402,7 @@ void main() { gl_FragColor = vec4(uColor.rgb * uColor.a, uColor.a); }`;
         direction: 'clockwise',
         hover: 108,
         rounded: 44,
-        core: { coreSize: 41, coreColor: '#EB667466', lineColor: '#EB667455' }
+        core: { coreSize: 41, coreColor: '#E11D4866', lineColor: '#E11D4855' }
       };
 
       // One branch per card: nothing repeats.

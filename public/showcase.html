@@ -13,7 +13,7 @@
   <meta property="og:url" content="https://moe-ai-sable.vercel.app/showcase" />
   <meta property="og:image" content="https://moe-ai-sable.vercel.app/brand/moeai-logo.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="theme-color" content="#181920" />
+  <meta name="theme-color" content="#07070b" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,22 +32,23 @@
     /* The MoeAI app's own tokens (mobile/src/constants/colors.js): the same
        surfaces, text greys, red accent, radii and Nunito Sans, so this page
        looks like the app it describes. */
+    /* The showcase's own theme: near-black, ruby red, liquid glass. The layout
+       follows the app; the colours are the page's original ones. */
     :root {
-      --bg: #181920; --card: #23252c; --button: #2e3036; --button-press: #3a3d44; --track: #55575f;
-      --text: #F5F4F2; --text2: #B9B9BE; --muted: #8d8f95;
-      --red: #EB6674; --red-deep: #C53F51; --red-soft: rgba(235, 102, 116, 0.14);
-      --green: #66C98D; --blue: #668CEB; --amber: #EDC645;
+      --bg: #07070b; --card: rgba(255,255,255,.035); --button: rgba(225,29,72,.08); --button-press: rgba(225,29,72,.16); --track: rgba(225,29,72,.3);
+      --text: #fff0f5; --text2: rgba(255,200,214,.82); --muted: rgba(206,152,168,.66);
+      --red: #f43f5e; --red-deep: #e11d48; --red-soft: rgba(225,29,72,.14);
+      --green: #6ee7a8; --blue: #668CEB; --amber: #fcd34d;
       --r-sm: 14px; --r-md: 20px; --r-lg: 28px;
       --font: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --mono: 'Fira Code', ui-monospace, monospace;
       --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-      /* Names the shared scripts (timeline, site shell) read. */
-      --accent: var(--red); --accent2: #f08592; --accent3: #f5a3ad; --accent-glow: rgba(235,102,116,.35);
-      --bg1: var(--bg); --bg2: var(--card); --bg3: var(--button);
+      --accent: #e11d48; --accent2: #f43f5e; --accent3: #fb7185; --accent-glow: rgba(225,29,72,.35);
+      --bg1: #07070b; --bg2: #0e0e16; --bg3: #16161f;
       --txt1: var(--text); --txt2: var(--text2); --txt3: var(--muted);
-      --glass-border: rgba(255,255,255,.06); --glass-border2: rgba(235,102,116,.35);
-      --tint: rgba(255,255,255,.03); --tint2: rgba(255,255,255,.06); --tint3: rgba(235,102,116,.16);
-      --glow: rgba(235,102,116,.22); --glow2: rgba(235,102,116,.10);
+      --glass-border: rgba(225,29,72,.18); --glass-border2: rgba(225,29,72,.32);
+      --tint: rgba(225,29,72,.05); --tint2: rgba(225,29,72,.10); --tint3: rgba(225,29,72,.18);
+      --glow: rgba(225,29,72,.28); --glow2: rgba(225,29,72,.12);
       color-scheme: dark;
     }
     *, *::before, *::after { box-sizing: border-box; }
@@ -223,6 +224,47 @@
       .hero-mark .red { fill: #EA4349; stroke-dashoffset: 0; } .hero-mark .ink { opacity: 1; }
       .reveal { opacity: 1; transform: none; }
     }
+
+    /* ── Liquid glass ─────────────────────────────────────── */
+    .orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; opacity: .6; display: block; }
+    .o1 { width: 760px; height: 760px; background: radial-gradient(circle, var(--glow) 0%, transparent 68%); top: -300px; left: -240px; }
+    .o2 { width: 640px; height: 640px; background: radial-gradient(circle, var(--glow2) 0%, transparent 68%); top: 34%; right: -250px; }
+    .o3 { width: 600px; height: 600px; background: radial-gradient(circle, var(--glow2) 0%, transparent 68%); bottom: -230px; left: 26%; }
+    .glow { background: radial-gradient(closest-side, rgba(225,29,72,.22), rgba(225,29,72,.07) 55%, transparent 75%); }
+    em { background: linear-gradient(120deg, var(--accent2), var(--accent3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .tile, .chat, .stat, .col, .panel, .close, .person, .made-by, .nav, .round, .row, .mark-stage::before {
+      background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+      border: 1px solid var(--glass-border);
+      -webkit-backdrop-filter: blur(14px) saturate(190%); backdrop-filter: blur(14px) saturate(190%);
+      box-shadow: 0 8px 32px rgba(0,0,0,.3), inset 1.5px 2px 0 -1px rgba(255,255,255,.22), inset -1.5px -1.5px 0 -1px rgba(255,255,255,.1), inset 0 -8px 18px -12px rgba(0,0,0,.5);
+    }
+    .row { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(255,255,255,.03); box-shadow: inset 1px 1.5px 0 -.5px rgba(255,255,255,.14); }
+    .row:hover { background: var(--tint2); }
+    .nav { background: linear-gradient(135deg, rgba(20,10,14,.6), rgba(10,8,12,.45)); }
+    .mark-stage::before { background: radial-gradient(circle, rgba(225,29,72,.16), rgba(14,14,22,.7) 70%); box-shadow: 0 0 0 10px rgba(225,29,72,.05), 0 30px 80px rgba(225,29,72,.25), inset 1.5px 2px 0 -1px rgba(255,255,255,.22); }
+    .tile:hover { background: linear-gradient(135deg, rgba(225,29,72,.10), rgba(255,255,255,.02)); border-color: var(--glass-border2); box-shadow: 0 18px 44px rgba(0,0,0,.4), 0 0 50px -18px rgba(225,29,72,.6), inset 1.5px 2px 0 -1px rgba(255,255,255,.26); }
+    .tile:hover::after { box-shadow: none; }
+    .col.good { background: var(--tint2); border-color: var(--glass-border2); }
+    .col.good .tag { color: var(--accent3); }
+    .person { background: rgba(255,255,255,.03); }
+    .person .av, .bubble.me { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .bubble.ai { background: rgba(255,255,255,.04); border: 1px solid var(--glass-border); }
+    .bubble.me { box-shadow: 0 6px 18px rgba(225,29,72,.25); }
+    .chip { background: var(--tint2); border: 1px solid var(--glass-border); color: var(--accent3); }
+    .btn { background: var(--tint); border: 1px solid var(--glass-border2); }
+    .btn:hover { background: var(--tint2); }
+    .btn-primary, .cta-sm { border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 10px 30px var(--accent-glow); }
+    .btn-primary:hover, .cta-sm:hover { background: linear-gradient(135deg, #f0315a, #fb5a73); }
+    .tile .ic, .row .ic { background: var(--tint2); color: var(--accent3); }
+    .tile:hover .ic { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .eyebrow { color: var(--accent3); }
+    .stat b i { color: var(--accent3); }
+    .demo-phone { box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 70px rgba(0,0,0,.45), 0 0 120px -30px rgba(225,29,72,.45); }
+    .demo-screen { background: #16161c; }
+    .gallery img { background: var(--bg2); }
+    .foot { border-top-color: var(--glass-border); }
+    html.perf-low .tile, html.perf-low .chat, html.perf-low .stat, html.perf-low .col, html.perf-low .panel, html.perf-low .close { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
   </style>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
@@ -261,6 +303,7 @@
     <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
   </svg>
 
+  <div class="orbs" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i></div>
   <div class="glow" aria-hidden="true"></div>
 
   <nav class="nav" aria-label="Main">
